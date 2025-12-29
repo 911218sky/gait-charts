@@ -8,7 +8,7 @@ publish_to: 'none'
 # On Android, this maps to versionName
 # On iOS, this maps to CFBundleShortVersionString
 # On Windows, this maps to the product version
-version: 1.0.15
+version: 1.0.16
 
 environment:
   sdk: ^3.10.0-162.1.beta
