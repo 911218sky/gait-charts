@@ -17,15 +17,15 @@
 
 .EXAMPLE
   # Rebuild and replace assets in the latest GitHub Release (auto-detect latest v* tag)
-  powershell -File scripts\release\trigger_build.ps1
+  powershell -File scripts\github\trigger_build.ps1
 
 .EXAMPLE
   # Rebuild and replace assets for a specific release tag
-  powershell -File scripts\release\trigger_build.ps1 -ReleaseTag v1.0.10
+  powershell -File scripts\github\trigger_build.ps1 -ReleaseTag v1.0.10
 
 .EXAMPLE
   # Build only (no release)
-  powershell -File scripts\release\trigger_build.ps1 -BuildOnly
+  powershell -File scripts\github\trigger_build.ps1 -BuildOnly
 #>
 
 param(

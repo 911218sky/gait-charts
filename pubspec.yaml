@@ -68,21 +68,4 @@ flutter_launcher_icons:
     generate: true
     image_path: "assets/icon/app_icon.png"
 
-# Windows MSIX packaging configuration
-# Usage:
-# - Output location: build_tools/out/msix
-# - Uses self-signed test certificate, no pfx file needed
-# - Run via CLI: build_tools/build_msix.ps1
-msix_config:
-  display_name: Gait Charts
-  publisher_display_name: NYCU
-  identity_name: edu.nycu.gait-charts
-  msix_version: 1.0.15.0
-  logo_path: assets/icon/app_icon.png
-  capabilities: internetClient
-  output_path: build_tools/out/msix
-  output_name: gait_charts
-  release: true
-  build_windows: true
-  windows_build_args: --obfuscate --split-debug-info=build/symbols
-  install_certificate: false
+
