@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-  Windows release build（PowerShell）
+  Windows release build (PowerShell)
 
 .DESCRIPTION
   - flutter build windows --release --split-debug-info=build/symbols --obfuscate

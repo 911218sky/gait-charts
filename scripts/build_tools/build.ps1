@@ -1,15 +1,15 @@
 ﻿<#
 .SYNOPSIS
-  一鍵 release build（Windows + Web）（PowerShell）
+  One-click release build (Windows + Web) (PowerShell)
 
 .DESCRIPTION
-  這支是「組合腳本」：一次跑 Windows + Web 的 release build。
-  預設會依序執行：
-  - Windows：scripts\build_tools\build_win.ps1
-  - Web：scripts\build_tools\build_web.ps1
+  This is a "composite script" that runs Windows + Web release builds in one go.
+  By default, it executes in sequence:
+  - Windows: scripts\build_tools\build_win.ps1
+  - Web: scripts\build_tools\build_web.ps1
 
-  若你只想跑其中一個，可用 -SkipWindows / -SkipWeb。
-  Web 部署在子路徑時可用 -BaseHref。
+  If you only want to run one of them, use -SkipWindows / -SkipWeb.
+  When deploying Web to a sub-path, use -BaseHref.
 
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build_tools\build.ps1

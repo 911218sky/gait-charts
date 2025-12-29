@@ -1,34 +1,34 @@
 <#
 .SYNOPSIS
-  Flutter Web release build（PowerShell）
+  Flutter Web release build (PowerShell)
 
 .DESCRIPTION
-  - 只負責 `flutter build web` 產出 build/web
+  - Only responsible for `flutter build web` output to build/web
 
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build_tools\build_web.ps1
 
 .EXAMPLE
-  # 關閉 WASM（避免需要 COOP/COEP headers；部署在一般靜態主機時比較不會踩雷）
+  # Disable WASM (avoid needing COOP/COEP headers; deployment on regular static hosts is less prone to issues)
   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build_tools\build_web.ps1 -NoWasm
 
 .EXAMPLE
-  # 產出 source maps（DevTools 警告會少很多，但檔案會變大；是否上線請自行評估）
+  # Generate source maps (fewer DevTools warnings, but larger files; evaluate whether to deploy)
   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build_tools\build_web.ps1 -SourceMaps
 #>
 
 [CmdletBinding()]
 param(
-  # Wasm：預設關閉（部署環境若沒設定 COOP/COEP，Chrome 會對 SharedArrayBuffer 類型功能提出警告/限制）
-  # 如需強制開啟可用 -Wasm；關閉用 -NoWasm
+  # WASM: disabled by default (if deployment environment doesn't set COOP/COEP, Chrome will issue warnings/restrictions for SharedArrayBuffer-type features)
+  # Use -Wasm to force enable; use -NoWasm to disable
   [switch]$Wasm,
   [switch]$NoWasm,
 
-  # Source maps：預設關閉；需要減少 DevTools 的 "Missing source maps" 類警告時可用 -SourceMaps
+  # Source maps: disabled by default; use -SourceMaps to reduce "Missing source maps" warnings in DevTools
   [switch]$SourceMaps,
   [switch]$NoSourceMaps,
 
-  # 預設會啟用 icon tree-shaking（減少字型檔體積）；如需關閉可用 -NoTreeShakeIcons
+  # By default, icon tree-shaking is enabled (reduces font file size); use -NoTreeShakeIcons to disable
   [switch]$NoTreeShakeIcons,
   # Legacy style (compatible with old .bat):
   #   scripts\build_web.bat wasm
@@ -46,10 +46,10 @@ Set-Location $root
 $tokens = @()
 if ($LegacyArgs) { $tokens += $LegacyArgs }
 
-# 預設開啟 WASM
+# WASM enabled by default
 $wasmEnabled = $true
 
-# 預設關閉 source maps
+# Source maps disabled by default
 $sourceMapsEnabled = $false
 
 foreach ($t in $tokens) {
@@ -65,7 +65,7 @@ foreach ($t in $tokens) {
   }
 }
 
-# CLI flags 覆寫 token/預設
+# CLI flags override token/default
 if ($Wasm) { $wasmEnabled = $true }
 if ($NoWasm) { $wasmEnabled = $false }
 if ($SourceMaps) { $sourceMapsEnabled = $true }

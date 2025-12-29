@@ -1,10 +1,10 @@
 ﻿<#
 .SYNOPSIS
-  還原/重抓 Flutter 專案依賴（PowerShell）
+  Restore/re-fetch Flutter project dependencies (PowerShell)
 
 .DESCRIPTION
   - flutter pub get
-  - (可選) flutter pub cache repair
+  - (optional) flutter pub cache repair
 
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\env\restore_env.ps1
@@ -36,10 +36,11 @@ if ($RepairCache) {
   Invoke-Flutter -Args @('pub', 'cache', 'repair')
   Write-Host ''
 } else {
-  Write-Host '[2/2] (skip) flutter pub cache repair（如需修復 Pub cache，請加 -RepairCache）'
+  Write-Host '[2/2] (skip) flutter pub cache repair (add -RepairCache to repair Pub cache)'
   Write-Host ''
 }
 
 Write-Host 'Environment restored successfully.'
+
 
 

@@ -1,11 +1,11 @@
 ﻿<#
 .SYNOPSIS
-  一鍵更新 Flutter / Dart 依賴套件（PowerShell）
+  Update Flutter / Dart dependencies (PowerShell)
 
 .DESCRIPTION
-  - 顯示可更新套件：flutter pub outdated（失敗不會中止）
-  - 更新依賴：flutter pub upgrade [--major-versions]
-  - 重新抓取：flutter pub get
+  - Show available updates: flutter pub outdated (failure won't stop)
+  - Update dependencies: flutter pub upgrade [--major-versions]
+  - Re-fetch: flutter pub get
 
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\env\update_deps.ps1
@@ -14,7 +14,7 @@
   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\env\update_deps.ps1 -Major
 
 .EXAMPLE
-  # Legacy token（對齊舊 bat 用法）：--major
+  # Legacy token (compatible with old .bat): --major
   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\env\update_deps.ps1 --major
 #>
 
@@ -35,30 +35,31 @@ if ($LegacyArgs -and ($LegacyArgs | Where-Object { $_ -ieq '--major' } | Select-
   $Major = $true
 }
 
-Write-Section '依賴更新'
+Write-Section 'Update dependencies'
 Write-Host "Project path: $root"
 Write-Host ''
 
-Write-Host '[1/3] 檢查可更新的套件（僅顯示）：flutter pub outdated'
+Write-Host '[1/3] Check available updates (display only): flutter pub outdated'
 Invoke-Flutter -Args @('pub', 'outdated') -IgnoreExitCode
 if ($LASTEXITCODE -ne 0) {
-  Write-Host '[WARN] flutter pub outdated 失敗（可能是離線/代理/憑證問題），將繼續嘗試更新。'
+  Write-Host '[WARN] flutter pub outdated failed (may be offline/proxy/certificate issue), will continue trying to update.'
 }
 Write-Host ''
 
 $upgrade = @('pub', 'upgrade')
 if ($Major) { $upgrade += '--major-versions' }
 
-Write-Host "[2/3] 更新依賴：flutter $($upgrade -join ' ')"
+Write-Host "[2/3] Update dependencies: flutter $($upgrade -join ' ')"
 Invoke-Flutter -Args $upgrade
 Write-Host ''
 
-Write-Host '[3/3] 重新抓取依賴：flutter pub get'
+Write-Host '[3/3] Re-fetch dependencies: flutter pub get'
 Invoke-Flutter -Args @('pub', 'get')
 Write-Host ''
 
-Write-Host '依賴更新完成！'
+Write-Host 'Dependencies updated!'
 Write-Host '- Possible changed files: pubspec.yaml / pubspec.lock'
-Write-Host '- 建議：跑一次 flutter test 或 build 確認相容性'
+Write-Host '- Recommended: run flutter test or build to verify compatibility'
+
 
 

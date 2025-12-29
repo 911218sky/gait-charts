@@ -1,14 +1,14 @@
 ﻿<#
 .SYNOPSIS
-  Gait Charts scripts 共用工具函式（PowerShell）
+  Gait Charts scripts common utility functions (PowerShell)
 
 .DESCRIPTION
-  提供 scripts 下各分類腳本共用的工具：
-  - 取得專案根目錄（由 scripts/ 反推）
-  - 解析 flutter / python 命令並統一呼叫方式
-  - 統一輸出格式、錯誤處理
-  - 開啟瀏覽器（優先 Chrome，找不到則 Edge / 預設瀏覽器）
-  - Gradle daemon stop / transforms cache 清理（修復 metadata.bin 讀取錯誤）
+  Provides shared utilities for scripts:
+  - Get project root directory (inferred from scripts/ location)
+  - Resolve and invoke flutter / python commands uniformly
+  - Unified output formatting and error handling
+  - Open browser (prefer Chrome, fallback to Edge / default browser)
+  - Gradle daemon stop / transforms cache cleanup (fixes metadata.bin read errors)
 #>
 
 Set-StrictMode -Version Latest
@@ -17,10 +17,10 @@ $ErrorActionPreference = "Stop"
 function Get-ProjectRoot {
   <#
   .SYNOPSIS
-    取得專案根目錄（scripts/ 的上一層）
+    Get project root directory (parent of scripts/)
   #>
-  # 檔案位置：scripts\_lib\common.ps1
-  # 專案根目錄 = common.ps1 的目錄往上兩層
+  # File location: scripts\_lib\common.ps1
+  # Project root = two levels up from common.ps1 directory
   return (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 }
 
@@ -34,7 +34,7 @@ function Write-Section([string]$Title) {
 function Resolve-FlutterCommand {
   <#
   .SYNOPSIS
-    解析 Flutter 命令（在 Windows 優先 flutter.bat）
+    Resolve Flutter command (prefer flutter.bat on Windows)
   #>
   $cmd = Get-Command flutter.bat -ErrorAction SilentlyContinue
   if ($cmd) { return $cmd.Source }
@@ -42,13 +42,13 @@ function Resolve-FlutterCommand {
   $cmd = Get-Command flutter -ErrorAction SilentlyContinue
   if ($cmd) { return $cmd.Source }
 
-  throw "[ERROR] 找不到 Flutter。請確認 Flutter SDK 已安裝並將 Flutter SDK bin 加入 PATH。"
+  throw "[ERROR] Flutter not found. Please ensure Flutter SDK is installed and Flutter SDK bin is added to PATH."
 }
 
 function Invoke-Flutter {
   <#
   .SYNOPSIS
-    呼叫 flutter（統一入口，避免 PATH/副檔名解析差異）
+    Invoke flutter (unified entry point, avoids PATH/extension resolution differences)
   #>
   param(
     [Parameter(Mandatory = $true)]
@@ -61,7 +61,7 @@ function Invoke-Flutter {
   $code = $LASTEXITCODE
   if (-not $IgnoreExitCode -and $code -ne 0) {
     $joined = ($Args -join " ")
-    throw "[ERROR] flutter 失敗（exit=$code）：$flutter $joined"
+    throw "[ERROR] flutter failed (exit=$code): $flutter $joined"
   }
   return $code
 }
@@ -69,7 +69,7 @@ function Invoke-Flutter {
 function Resolve-PythonCommand {
   <#
   .SYNOPSIS
-    解析 Python 命令：優先 python，其次 py -3
+    Resolve Python command (prefer python, fallback to py -3)
   #>
   $py = Get-Command python -ErrorAction SilentlyContinue
   if ($py) {
@@ -87,13 +87,13 @@ function Resolve-PythonCommand {
     }
   }
 
-  throw "[ERROR] 找不到 Python（python / py）。請安裝 Python，或將其加入 PATH。"
+  throw "[ERROR] Python not found (python / py). Please install Python or add it to PATH."
 }
 
 function Open-Url {
   <#
   .SYNOPSIS
-    開啟 URL（優先 Chrome，否則 Edge，最後用預設瀏覽器）
+    Open URL (prefer Chrome, fallback to Edge, then default browser)
   #>
   param([Parameter(Mandatory = $true)][string]$Url)
 
@@ -150,7 +150,7 @@ function Get-GradleWrapperVersion {
 function Clear-GradleTransformsCache {
   <#
   .SYNOPSIS
-    清理 Gradle transforms cache（用於修復 metadata.bin 讀取錯誤）
+    Clear Gradle transforms cache (fixes metadata.bin read errors)
   #>
   param([Parameter(Mandatory = $true)][string]$ProjectRoot)
 

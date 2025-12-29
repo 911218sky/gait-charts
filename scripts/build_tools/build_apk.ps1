@@ -1,11 +1,11 @@
 ﻿<#
 .SYNOPSIS
-  打包 Android APK / AAB（PowerShell）
+  Package Android APK / AAB (PowerShell)
 
 .DESCRIPTION
-  預設：Release APK + split per ABI（檔案較小）。
-  亦支援：Debug APK、Release 不 split、Google Play 用 AAB、
-  以及 FixGradle（修復 Gradle transforms cache 的 metadata.bin 讀取錯誤）。
+  Default: Release APK + split per ABI (smaller file size).
+  Also supports: Debug APK, Release without split, AAB for Google Play,
+  and FixGradle (fixes Gradle transforms cache metadata.bin read errors).
 
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build_tools\build_apk.ps1
@@ -23,7 +23,7 @@
   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build_tools\build_apk.ps1 -FixGradle
 
 .EXAMPLE
-  # Legacy tokens（對齊舊 bat 用法）：release fixgradle nosplit / aab
+  # Legacy tokens (compatible with old .bat usage): release fixgradle nosplit / aab
   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build_tools\build_apk.ps1 release fixgradle
 #>
 

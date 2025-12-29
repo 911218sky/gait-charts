@@ -1,15 +1,15 @@
 ﻿<#
 .SYNOPSIS
-  清理 Flutter 專案環境（PowerShell）
+  Clean Flutter project environment (PowerShell)
 
 .DESCRIPTION
-  預設做「安全的本機清理」：
+  Default: safe local cleanup
   - flutter clean
-  - 移除：build / .dart_tool / .packages / pubspec.lock / android\.gradle（若存在）
+  - Remove: build / .dart_tool / .packages / pubspec.lock / android\.gradle (if exists)
 
-  若加上 -Deep，會做「重度清理」（⚠️ 會刪全域 Pub cache，套件會被重新下載）：
-  - 移除：%LOCALAPPDATA%\Pub\Cache（或 %APPDATA%\Pub\Cache）
-  - iOS Pods/.symlinks（若存在）
+  With -Deep: aggressive cleanup (WARNING: deletes global Pub cache, packages will be re-downloaded)
+  - Remove: %LOCALAPPDATA%\Pub\Cache (or %APPDATA%\Pub\Cache)
+  - iOS Pods/.symlinks (if exists)
 
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\env\clean_env.ps1
@@ -54,15 +54,15 @@ Write-Host ''
 
 Write-Host '[3/3] Deep clean (optional)'
 if (-not $Deep) {
-  Write-Host '  - (skip) 如需刪除全域 Pub cache / iOS Pods，請加 -Deep'
+  Write-Host '  - (skip) To delete global Pub cache / iOS Pods, add -Deep'
   Write-Host ''
   Write-Host 'Clean completed.'
   exit 0
 }
 
 if (-not $Force) {
-  Write-Host '  ⚠️ Deep clean 會刪除全域 Pub cache（套件會重新下載）。'
-  $ans = Read-Host '  仍要繼續嗎？(y/N)'
+  Write-Host '  WARNING: Deep clean will delete global Pub cache (packages will be re-downloaded).'
+  $ans = Read-Host '  Continue? (y/N)'
   if ($ans -notin @('y', 'Y')) {
     Write-Host '  Cancelled.'
     exit 1
@@ -82,5 +82,6 @@ if ($env:PUB_CACHE -and (Test-Path $env:PUB_CACHE)) {
 
 Write-Host ''
 Write-Host 'Deep clean completed.'
+
 
 
