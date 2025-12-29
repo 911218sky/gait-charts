@@ -1,0 +1,33 @@
+# Cursor indexing ignore list - generated/derived artifacts
+.git/
+.dart_tool/
+.pub/
+.pub-cache/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+
+# Build outputs
+build/
+coverage/
+android/app/build/
+android/.gradle/
+
+# iOS/macOS generated files
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/ephemeral/
+macos/Pods/
+macos/Flutter/ephemeral/
+
+# Linux/Windows generated files
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
+
+# IDE/OS metadata
+.idea/
+.vscode/
+*.iml
+.DS_Store
+*.log
+

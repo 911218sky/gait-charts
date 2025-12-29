@@ -1,0 +1,34 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="115" fill="#0A0A0A"/>
+  
+  <!-- Grid Lines -->
+  <path d="M60 128H452" stroke="#262626" stroke-width="4"/>
+  <path d="M60 256H452" stroke="#262626" stroke-width="4"/>
+  <path d="M60 384H452" stroke="#262626" stroke-width="4"/>
+  <path d="M128 60V452" stroke="#262626" stroke-width="4"/>
+  <path d="M256 60V452" stroke="#262626" stroke-width="4"/>
+  <path d="M384 60V452" stroke="#262626" stroke-width="4"/>
+
+  <!-- Gait Cycle Curve (M-shape / vGRF style) -->
+  <!-- Start low, Rise to P1, Dip, Rise to P2, End low -->
+  <path d="M60 380 
+           C 100 380, 120 150, 180 150 
+           C 220 150, 230 280, 256 280 
+           C 282 280, 292 150, 332 150 
+           C 392 150, 412 380, 452 380" 
+        stroke="url(#viridis_gradient)" 
+        stroke-width="48" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+
+  <!-- Gradient Definition -->
+  <defs>
+    <linearGradient id="viridis_gradient" x1="60" y1="256" x2="452" y2="256" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#440154"/>   <!-- Purple -->
+      <stop offset="25%" stop-color="#31688E"/>
+      <stop offset="50%" stop-color="#35B779"/>  <!-- Green -->
+      <stop offset="75%" stop-color="#FDE725"/>  <!-- Yellow -->
+    </linearGradient>
+  </defs>
+</svg>
+

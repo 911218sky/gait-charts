@@ -1,0 +1,130 @@
+import 'package:flutter/material.dart';
+import 'package:gait_charts/app/theme.dart';
+import 'package:gait_charts/features/dashboard/domain/models/realsense_session.dart';
+import 'package:gait_charts/features/dashboard/domain/models/user_profile.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+
+/// 一個通用的 Session 卡片元件，用於 Grid 顯示。
+///
+/// 支援 [RealsenseSessionItem] (Session Browser) 與 [UserSessionItem] (User Preview)。
+class SessionGridCard extends StatelessWidget {
+  const SessionGridCard({
+    required this.sessionName,
+    required this.bagPath,
+    required this.date,
+    super.key,
+    this.onTap,
+  });
+
+  factory SessionGridCard.fromRealsenseSession({
+    required RealsenseSessionItem item,
+    VoidCallback? onTap,
+  }) {
+    return SessionGridCard(
+      sessionName: item.sessionName,
+      bagPath: item.bagPath,
+      date: item.createdAt,
+      onTap: onTap,
+    );
+  }
+
+  factory SessionGridCard.fromUserSession({
+    required UserSessionItem item,
+    VoidCallback? onTap,
+  }) {
+    return SessionGridCard(
+      sessionName: item.sessionName,
+      bagPath: item.bagPath,
+      date: item.createdAt,
+      onTap: onTap,
+    );
+  }
+
+  final String sessionName;
+  final String bagPath;
+  final DateTime? date;
+  final VoidCallback? onTap;
+
+  String _formatDate(DateTime? d) {
+    if (d == null) return '—';
+    return DateFormat('yyyy/MM/dd HH:mm').format(d.toLocal());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colorScheme;
+    final isDark = context.isDark;
+
+    return Material(
+      color: isDark ? const Color(0xFF111111) : colors.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: colors.outlineVariant),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        hoverColor: colors.onSurface.withValues(alpha: 0.05),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            // 讓卡片在未受高度限制（例如預覽區的 SingleChildScrollView）時依內容自適應，避免 RenderBox not laid out。
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Icon
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF222222) : colors.surfaceContainerHighest.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.description_outlined,
+                  size: 18,
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Title
+              Text(
+                sessionName,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: colors.onSurface,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              // Path
+              Text(
+                bagPath,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: colors.onSurfaceVariant,
+                  height: 1.4,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 8),
+              // Date
+              Text(
+                _formatDate(date),
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  color: colors.onSurfaceVariant.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
