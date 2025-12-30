@@ -587,7 +587,7 @@ class _SessionCardState extends State<_SessionCard> {
               ),
               const Spacer(),
               Text(
-                widget.item.bagPath,
+                widget.item.bagFilename,
                 style: context.textTheme.bodySmall?.copyWith(
                   color: colors.onSurfaceVariant.withValues(alpha: 0.7),
                   fontFamily: 'monospace',
@@ -899,18 +899,20 @@ class _VideoSessionCardState extends State<_VideoSessionCard> {
         : 'Unknown Date';
 
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      cursor: SystemMouseCursors.click,
+      onEnter: widget.hasVideo ? (_) => setState(() => _isHovered = true) : null,
+      onExit: widget.hasVideo ? (_) => setState(() => _isHovered = false) : null,
+      cursor: widget.hasVideo ? SystemMouseCursors.click : SystemMouseCursors.forbidden,
       child: GestureDetector(
-        onTap: widget.onSelect,
+        onTap: widget.hasVideo ? widget.onSelect : null,
         child: Stack(
           children: [
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: widget.backgroundColor,
+                color: widget.hasVideo 
+                    ? widget.backgroundColor 
+                    : widget.backgroundColor.withValues(alpha: 0.5),
                 border: Border.all(
                   color: _isHovered
                       ? (widget.hasVideo ? colors.primary : colors.outline)

@@ -8,7 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 /// 綁定 session(bag) 時的定位方式。
-enum UserSessionLinkMode { sessionName, bagHash }
+enum UserSessionLinkMode { sessionName, bagFilename }
 
 /// 顯示使用者已綁定的 sessions/bag，並提供「新增綁定」的操作區。
 class UserSessionsCard extends StatelessWidget {
@@ -19,7 +19,7 @@ class UserSessionsCard extends StatelessWidget {
     required this.linkMode,
     required this.onLinkModeChanged,
     required this.sessionController,
-    required this.bagHashController,
+    required this.bagFilenameController,
     required this.onLink,
     required this.onUnlink,
     required this.onUnlinkAll,
@@ -36,7 +36,7 @@ class UserSessionsCard extends StatelessWidget {
   final ValueChanged<UserSessionLinkMode> onLinkModeChanged;
 
   final TextEditingController sessionController;
-  final TextEditingController bagHashController;
+  final TextEditingController bagFilenameController;
 
   final VoidCallback onLink;
   final Future<void> Function(UserSessionItem session) onUnlink;
@@ -133,13 +133,13 @@ class UserSessionsCard extends StatelessWidget {
                         },
                 ),
                 ChoiceChip(
-                  label: const Text('以 bag_hash'),
-                  selected: linkMode == UserSessionLinkMode.bagHash,
+                  label: const Text('以 bag_filename'),
+                  selected: linkMode == UserSessionLinkMode.bagFilename,
                   onSelected: isBusy
                       ? null
                       : (selected) {
                           if (selected) {
-                            onLinkModeChanged(UserSessionLinkMode.bagHash);
+                            onLinkModeChanged(UserSessionLinkMode.bagFilename);
                           }
                         },
                 ),
@@ -178,14 +178,14 @@ class UserSessionsCard extends StatelessWidget {
               )
             else
               TextField(
-                controller: bagHashController,
+                controller: bagFilenameController,
                 enabled: !isBusy,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => onLink(),
                 decoration: const InputDecoration(
-                  labelText: 'Bag Hash',
-                  hintText: '輸入 bag_hash',
-                  prefixIcon: Icon(Icons.tag_outlined),
+                  labelText: 'Bag Filename',
+                  hintText: '輸入 bag_filename（例如：1_1_607.bag）',
+                  prefixIcon: Icon(Icons.insert_drive_file_outlined),
                 ),
               ),
             const SizedBox(height: 12),
@@ -314,36 +314,17 @@ class _UserSessionTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
+                // 顯示 bag 檔案名稱
                 Text(
-                  item.bagPath,
+                  item.bagFilename,
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     color: colors.onSurfaceVariant,
                     height: 1.4,
                   ),
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                if ((item.bagHash ?? '').isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(Icons.tag, size: 12, color: colors.onSurfaceVariant.withValues(alpha: 0.7)),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          item.bagHash!,
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            color: colors.onSurfaceVariant.withValues(alpha: 0.7),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
                 const SizedBox(height: 4),
                 Text(
                   _formatDate(item.createdAt),

@@ -21,6 +21,7 @@ class SessionAutocompleteField extends ConsumerStatefulWidget {
     this.maxSuggestions = 8,
     this.debounce = const Duration(milliseconds: 500),
     this.style,
+    this.decoration,
   });
 
   final TextEditingController controller;
@@ -34,6 +35,7 @@ class SessionAutocompleteField extends ConsumerStatefulWidget {
   final int maxSuggestions;
   final Duration debounce;
   final TextStyle? style;
+  final InputDecoration? decoration;
 
   @override
   ConsumerState<SessionAutocompleteField> createState() =>
@@ -329,7 +331,8 @@ class _SessionAutocompleteFieldState
     final prefixColor = widget.enabled
         ? colors.onSurfaceVariant
         : colors.onSurfaceVariant.withValues(alpha: 0.5);
-    final decoration = InputDecoration(
+        
+    final defaultDecoration = InputDecoration(
       labelText: widget.labelText,
       hintText: widget.hintText,
       prefixIcon: Icon(Icons.search, color: prefixColor, size: 20),
@@ -355,7 +358,7 @@ class _SessionAutocompleteFieldState
         autofocus: widget.autofocus,
         textInputAction: widget.textInputAction,
         style: widget.style ?? context.textTheme.bodyMedium,
-        decoration: decoration,
+        decoration: widget.decoration ?? defaultDecoration,
         onSubmitted: widget.onSubmitted,
       ),
     );

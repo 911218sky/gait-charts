@@ -804,6 +804,7 @@ class _UserSessionsPreview extends StatelessWidget {
                 return _SimpleSessionCard(
                   sessionName: item.sessionName,
                   bagPath: item.bagPath,
+                  bagFilename: item.bagFilename,
                   createdAt: item.createdAt,
                   onTap: () => onSelectSession(item.sessionName),
                 );
@@ -819,12 +820,15 @@ class _SimpleSessionCard extends StatelessWidget {
   const _SimpleSessionCard({
     required this.sessionName,
     required this.bagPath,
+    required this.bagFilename,
     required this.createdAt,
     required this.onTap,
   });
 
   final String sessionName;
   final String bagPath;
+  /// BAG 檔案名稱。
+  final String bagFilename;
   final DateTime createdAt;
   final VoidCallback onTap;
 
@@ -875,7 +879,7 @@ class _SimpleSessionCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                bagPath,
+                bagFilename,
                 style: context.textTheme.bodySmall?.copyWith(
                   color: colors.onSurfaceVariant,
                   height: 1.4,

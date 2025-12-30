@@ -67,25 +67,24 @@ class ExtractResult {
   const ExtractResult({
     required this.sessionName,
     required this.bagPath,
+    required this.bagFilename,
     required this.npyPath,
     required this.success,
-    this.bagHash,
   });
 
   final String sessionName; // 工作階段名稱
   final String bagPath; // Bag 檔案路徑
   final String npyPath; // NPY 檔案路徑
-  final String? bagHash; // bag hash（後端若未提供則為 null）
+  /// BAG 檔案名稱（例如：1_1_607.bag）。
+  final String bagFilename;
   final bool success; // 是否成功
 
   factory ExtractResult.fromJson(Map<String, dynamic> json) {
     return ExtractResult(
       sessionName: _stringValue(json['session_name']),
       bagPath: _stringValue(json['bag_path']),
+      bagFilename: _stringValue(json['bag_filename']) ?? '',
       npyPath: _stringValue(json['npy_path']),
-      bagHash: _stringValue(json['bag_hash']).trim().isEmpty
-          ? null
-          : _stringValue(json['bag_hash']),
       success: json['success'] == true,
     );
   }

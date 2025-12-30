@@ -11,6 +11,7 @@ class VideoPlayerControls extends StatelessWidget {
     required this.onSeek,
     required this.onVolumeChanged,
     required this.onSpeedChanged,
+    this.onFullscreen,
     super.key,
   });
 
@@ -19,6 +20,7 @@ class VideoPlayerControls extends StatelessWidget {
   final ValueChanged<Duration> onSeek;
   final ValueChanged<double> onVolumeChanged;
   final ValueChanged<double> onSpeedChanged;
+  final VoidCallback? onFullscreen;
 
   String _formatDuration(Duration d) {
     final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
@@ -32,79 +34,127 @@ class VideoPlayerControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colorScheme;
+    
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
             Colors.transparent,
-            Colors.black.withValues(alpha: 0.7),
+            Colors.black.withValues(alpha: 0.8),
+          ],
+          stops: const [0.0, 0.4],
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 進度條
+            SizedBox(
+              height: 20,
+              child: SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  trackHeight: 4,
+                  activeTrackColor: colors.primary,
+                  inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
+                  thumbColor: colors.primary,
+                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                  trackShape: _CustomTrackShape(),
+                ),
+                child: Slider(
+                  value: state.progress,
+                  onChanged: state.isInitialized
+                      ? (value) {
+                          final newPosition = Duration(
+                            milliseconds:
+                                (value * state.duration.inMilliseconds).round(),
+                          );
+                          onSeek(newPosition);
+                        }
+                      : null,
+                ),
+              ),
+            ),
+            
+            // 控制按鈕列
+            Row(
+              children: [
+                // 播放/暫停
+                IconButton(
+                  onPressed: state.isInitialized ? onPlayPause : null,
+                  icon: Icon(
+                    state.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                  tooltip: state.isPlaying ? '暫停 (Space)' : '播放 (Space)',
+                ),
+                
+                const SizedBox(width: 8),
+                
+                // 時間顯示
+                Text(
+                  '${_formatDuration(state.position)} / ${_formatDuration(state.duration)}',
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                
+                const Spacer(),
+                
+                // 播放速度
+                _SpeedSelector(
+                  currentSpeed: state.playbackSpeed,
+                  onSpeedChanged: onSpeedChanged,
+                ),
+                
+                const SizedBox(width: 4),
+                
+                // 音量控制
+                _VolumeControl(
+                  volume: state.volume,
+                  onVolumeChanged: onVolumeChanged,
+                ),
+
+                const SizedBox(width: 4),
+                
+                // 全螢幕按鈕
+                IconButton(
+                   onPressed: onFullscreen,
+                   icon: const Icon(Icons.fullscreen_rounded, color: Colors.white),
+                   tooltip: '全螢幕',
+                ),
+              ],
+            ),
           ],
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 進度條
-          SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              trackHeight: 4,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-            ),
-            child: Slider(
-              value: state.progress,
-              onChanged: state.isInitialized
-                  ? (value) {
-                      final newPosition = Duration(
-                        milliseconds:
-                            (value * state.duration.inMilliseconds).round(),
-                      );
-                      onSeek(newPosition);
-                    }
-                  : null,
-            ),
-          ),
-          const SizedBox(height: 4),
-          // 控制按鈕列
-          Row(
-            children: [
-              // 播放/暫停
-              IconButton(
-                onPressed: state.isInitialized ? onPlayPause : null,
-                icon: Icon(
-                  state.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                  color: Colors.white,
-                  size: 32,
-                ),
-              ),
-              // 時間顯示
-              Text(
-                '${_formatDuration(state.position)} / ${_formatDuration(state.duration)}',
-                style: context.theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.white,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
-              const Spacer(),
-              // 播放速度
-              _SpeedSelector(
-                currentSpeed: state.playbackSpeed,
-                onSpeedChanged: onSpeedChanged,
-              ),
-              const SizedBox(width: 8),
-              // 音量控制
-              _VolumeControl(
-                volume: state.volume,
-                onVolumeChanged: onVolumeChanged,
-              ),
-            ],
-          ),
-        ],
-      ),
     );
+  }
+}
+
+class _CustomTrackShape extends RoundedRectSliderTrackShape {
+  @override
+  Rect getPreferredRect({
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    Offset offset = Offset.zero,
+    bool isEnabled = false,
+    bool isDiscrete = false,
+  }) {
+    final trackHeight = sliderTheme.trackHeight!;
+    final trackLeft = offset.dx;
+    final trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
+    final trackWidth = parentBox.size.width;
+    return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
   }
 }
 

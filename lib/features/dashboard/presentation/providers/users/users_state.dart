@@ -157,7 +157,7 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
 
   Future<void> linkSessionToCurrentUser({
     String? sessionName,
-    String? bagHash,
+    String? bagFilename,
   }) async {
     final currentDetail = state.detail;
     final userCode = currentDetail?.user.userCode ?? state.userCode;
@@ -171,7 +171,7 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
         userCode: userCode,
         request: LinkUserSessionRequest(
           sessionName: sessionName,
-          bagHash: bagHash,
+          bagFilename: bagFilename,
         ),
       );
       final detail = await _repository.fetchUserDetail(userCode: userCode);
@@ -184,7 +184,7 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
 
   Future<UnlinkUserSessionResponse> unlinkSessionFromCurrentUser({
     String? sessionName,
-    String? bagHash,
+    String? bagFilename,
     bool unlinkAll = false,
   }) async {
     final currentDetail = state.detail;
@@ -200,7 +200,7 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
         request: UnlinkUserSessionRequest(
           unlinkAll: unlinkAll,
           sessionName: sessionName,
-          bagHash: bagHash,
+          bagFilename: bagFilename,
         ),
       );
       final detail = await _repository.fetchUserDetail(userCode: userCode);

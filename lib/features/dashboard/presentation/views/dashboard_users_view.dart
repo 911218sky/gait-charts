@@ -29,7 +29,7 @@ class DashboardUsersView extends ConsumerStatefulWidget {
 class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
   late final TextEditingController _userNameController;
   late final TextEditingController _sessionNameController;
-  late final TextEditingController _bagHashController;
+  late final TextEditingController _bagFilenameController;
 
   UserSessionLinkMode _linkMode = UserSessionLinkMode.sessionName;
   String? _selectedUserCode;
@@ -40,7 +40,7 @@ class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
     super.initState();
     _userNameController = TextEditingController();
     _sessionNameController = TextEditingController();
-    _bagHashController = TextEditingController();
+    _bagFilenameController = TextEditingController();
     _userNameController.addListener(_handleUserNameChanged);
   }
 
@@ -50,7 +50,7 @@ class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
       ..removeListener(_handleUserNameChanged)
       ..dispose();
     _sessionNameController.dispose();
-    _bagHashController.dispose();
+    _bagFilenameController.dispose();
     super.dispose();
   }
 
@@ -140,7 +140,10 @@ class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
     }
 
     if (created == null) {
-      _toast('建立使用者失敗', variant: DashboardToastVariant.danger);
+      // 取得詳細錯誤訊息
+      final error = ref.read(userDetailProvider).error;
+      final errorMessage = _formatCreateUserError(error);
+      _toast(errorMessage, variant: DashboardToastVariant.danger);
       return;
     }
 
@@ -149,6 +152,24 @@ class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
       '已建立使用者：${created.name} (${created.userCode})',
       variant: DashboardToastVariant.success,
     );
+  }
+
+  /// 格式化建立使用者的錯誤訊息。
+  String _formatCreateUserError(Object? error) {
+    if (error == null) {
+      return '建立使用者失敗';
+    }
+    final message = error.toString();
+    // 處理名稱重複的錯誤
+    if (message.contains('name already exists')) {
+      return '建立失敗：使用者名稱已存在，請使用其他名稱';
+    }
+    // 處理 user_code 重複的錯誤
+    if (message.contains('user_code already exists')) {
+      return '建立失敗：使用者代碼已存在';
+    }
+    // 其他錯誤
+    return '建立使用者失敗：$message';
   }
 
   Future<void> _openEditDialog(UserItem user) async {
@@ -176,8 +197,20 @@ class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
       if (!mounted) {
         return;
       }
-      _toast('更新失敗：$error', variant: DashboardToastVariant.danger);
+      final errorMessage = _formatUpdateUserError(error);
+      _toast(errorMessage, variant: DashboardToastVariant.danger);
     }
+  }
+
+  /// 格式化更新使用者的錯誤訊息。
+  String _formatUpdateUserError(Object error) {
+    final message = error.toString();
+    // 處理名稱重複的錯誤
+    if (message.contains('name already exists')) {
+      return '更新失敗：使用者名稱已存在，請使用其他名稱';
+    }
+    // 其他錯誤
+    return '更新失敗：$message';
   }
 
   Future<void> _deleteCurrentUser() async {
@@ -226,15 +259,15 @@ class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
     }
 
     final sessionName = _sessionNameController.text.trim();
-    final bagHash = _bagHashController.text.trim();
+    final bagFilename = _bagFilenameController.text.trim();
 
     if (_linkMode == UserSessionLinkMode.sessionName && sessionName.isEmpty) {
       _toast('請輸入 session_name', variant: DashboardToastVariant.warning);
       return;
     }
 
-    if (_linkMode == UserSessionLinkMode.bagHash && bagHash.isEmpty) {
-      _toast('請輸入 bag_hash', variant: DashboardToastVariant.warning);
+    if (_linkMode == UserSessionLinkMode.bagFilename && bagFilename.isEmpty) {
+      _toast('請輸入 bag_filename', variant: DashboardToastVariant.warning);
       return;
     }
 
@@ -244,13 +277,13 @@ class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
         sessionName: _linkMode == UserSessionLinkMode.sessionName
             ? sessionName
             : null,
-        bagHash: _linkMode == UserSessionLinkMode.bagHash ? bagHash : null,
+        bagFilename: _linkMode == UserSessionLinkMode.bagFilename ? bagFilename : null,
       );
       if (!mounted) {
         return;
       }
       _sessionNameController.clear();
-      _bagHashController.clear();
+      _bagFilenameController.clear();
       _toast('已綁定 session 至使用者', variant: DashboardToastVariant.success);
     } catch (error) {
       if (!mounted) {
@@ -573,7 +606,7 @@ class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
             linkMode: _linkMode,
             onLinkModeChanged: (mode) => setState(() => _linkMode = mode),
             sessionController: _sessionNameController,
-            bagHashController: _bagHashController,
+            bagFilenameController: _bagFilenameController,
             onEdit: () => _openEditDialog(userState.detail!.user),
             onDelete: _deleteCurrentUser,
             onCopy: _copyToClipboard,

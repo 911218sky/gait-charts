@@ -101,19 +101,25 @@ class UserSessionItem {
     required this.sessionName,
     required this.npyPath,
     required this.bagPath,
+    required this.bagFilename,
     required this.createdAt,
     required this.updatedAt,
     this.userCode,
-    this.bagHash,
+    this.videoPath,
   });
 
   final String sessionName;
   final String? userCode;
   final String npyPath;
   final String bagPath;
-  final String? bagHash;
+  /// BAG 檔案名稱（例如：1_1_607.bag）。
+  final String bagFilename;
+  final String? videoPath;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  /// 是否有影片可播放。
+  bool get hasVideo => videoPath != null && videoPath!.isNotEmpty;
 
   factory UserSessionItem.fromJson(Map<String, Object?> json) {
     return UserSessionItem(
@@ -121,7 +127,8 @@ class UserSessionItem {
       userCode: _stringValue(json['user_code']),
       npyPath: _stringValue(json['npy_path']) ?? '',
       bagPath: _stringValue(json['bag_path']) ?? '',
-      bagHash: _stringValue(json['bag_hash']),
+      bagFilename: _stringValue(json['bag_filename']) ?? '',
+      videoPath: _stringValue(json['video_path']),
       createdAt:
           _parseDateTime(json['created_at']) ??
           DateTime.fromMillisecondsSinceEpoch(0),
@@ -475,25 +482,25 @@ class UserUpdateRequest {
 /// 把 session(bag) 綁到使用者：POST /v1/users/{user_code}/sessions/link
 @immutable
 class LinkUserSessionRequest {
-  const LinkUserSessionRequest({this.sessionName, this.bagHash});
+  const LinkUserSessionRequest({this.sessionName, this.bagFilename});
 
   final String? sessionName;
-  final String? bagHash;
+  final String? bagFilename;
 
   Map<String, Object?> toJson() {
     final payload = <String, Object?>{};
     final normalizedSessionName = _stringOrNull(sessionName);
-    final normalizedBagHash = _stringOrNull(bagHash);
+    final normalizedBagFilename = _stringOrNull(bagFilename);
 
     if (normalizedSessionName != null) {
       payload['session_name'] = normalizedSessionName;
     }
-    if (normalizedBagHash != null) {
-      payload['bag_hash'] = normalizedBagHash;
+    if (normalizedBagFilename != null) {
+      payload['bag_filename'] = normalizedBagFilename;
     }
 
     if (payload.isEmpty) {
-      throw ArgumentError('Either sessionName or bagHash is required');
+      throw ArgumentError('Either sessionName or bagFilename is required');
     }
 
     return payload;
@@ -506,22 +513,23 @@ class UnlinkUserSessionRequest {
   const UnlinkUserSessionRequest({
     this.unlinkAll = false,
     this.sessionName,
-    this.bagHash,
+    this.bagFilename,
   });
 
   final bool unlinkAll;
   final String? sessionName;
-  final String? bagHash;
+  /// BAG 檔案名稱（推薦使用）。
+  final String? bagFilename;
 
   Map<String, Object?> toJson() {
     final payload = <String, Object?>{};
     final normalizedSessionName = _stringOrNull(sessionName);
-    final normalizedBagHash = _stringOrNull(bagHash);
+    final normalizedBagFilename = _stringOrNull(bagFilename);
 
     if (unlinkAll) {
-      if (normalizedSessionName != null || normalizedBagHash != null) {
+      if (normalizedSessionName != null || normalizedBagFilename != null) {
         throw ArgumentError(
-          'unlinkAll cannot be used together with sessionName/bagHash',
+          'unlinkAll cannot be used together with sessionName/bagFilename',
         );
       }
       payload['unlink_all'] = true;
@@ -531,13 +539,13 @@ class UnlinkUserSessionRequest {
     if (normalizedSessionName != null) {
       payload['session_name'] = normalizedSessionName;
     }
-    if (normalizedBagHash != null) {
-      payload['bag_hash'] = normalizedBagHash;
+    if (normalizedBagFilename != null) {
+      payload['bag_filename'] = normalizedBagFilename;
     }
 
     if (payload.isEmpty) {
       throw ArgumentError(
-        'Either sessionName or bagHash is required (or set unlinkAll=true)',
+        'Either sessionName or bagFilename is required (or set unlinkAll=true)',
       );
     }
 
@@ -723,6 +731,62 @@ class UserListResponse {
                 .map(UserListItem.fromJson)
                 .toList(growable: false)
           : const [],
+    );
+  }
+}
+
+/// 透過 BAG 檔案名稱尋找使用者的請求：POST /v1/users/find-by-bag
+@immutable
+class FindUserByBagRequest {
+  const FindUserByBagRequest({required this.bagFilename});
+
+  /// BAG 檔案名稱（例如：1_1_607.bag）
+  final String bagFilename;
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{'bag_filename': bagFilename.trim()};
+  }
+}
+
+/// 透過 BAG 檔案尋找使用者的回傳：POST /v1/users/find-by-bag
+@immutable
+class FindUserByBagResponse {
+  const FindUserByBagResponse({
+    required this.found,
+    required this.sessions,
+    required this.totalSessions,
+    this.user,
+  });
+
+  /// 是否找到綁定的使用者
+  final bool found;
+
+  /// 找到的使用者資料（若有）
+  final UserItem? user;
+
+  /// 該使用者的所有 session 列表（found=True 時）
+  /// 或使用該 bag_filename 的 session 列表（found=False 時）
+  final List<UserSessionItem> sessions;
+
+  /// 該使用者的 session 總數（found=True 時）
+  /// 或使用該 bag_filename 的 session 總數（found=False 時）
+  final int totalSessions;
+
+  factory FindUserByBagResponse.fromJson(Map<String, Object?> json) {
+    final userRaw = json['user'];
+    final sessionsRaw = json['sessions'];
+    return FindUserByBagResponse(
+      found: _boolValue(json['found']) ?? false,
+      user: userRaw is Map
+          ? UserItem.fromJson(userRaw.cast<String, Object?>())
+          : null,
+      sessions: sessionsRaw is List
+          ? sessionsRaw
+                .whereType<Map<String, Object?>>()
+                .map(UserSessionItem.fromJson)
+                .toList(growable: false)
+          : const [],
+      totalSessions: _intValue(json['total_sessions']) ?? 0,
     );
   }
 }

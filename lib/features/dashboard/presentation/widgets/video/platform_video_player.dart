@@ -73,13 +73,13 @@ class PlatformVideoPlayerState extends State<PlatformVideoPlayer> {
     if (_isSwitching) return;
     _isSwitching = true;
     
-    // 1. 清理舊的播放器
+    // 清理舊的播放器
     _disposePlayer();
     
-    // 2. 短暫延遲，讓底層有時間取消進行中的 HTTP 請求
+    // 短暫延遲，讓底層有時間取消進行中的 HTTP 請求
     await Future<void>.delayed(_switchDelay);
     
-    // 3. 確認 widget 還在，再初始化新的
+    // 確認 widget 還在，再初始化新的
     if (!mounted) {
       _isSwitching = false;
       return;
@@ -307,6 +307,9 @@ class PlatformVideoPlayerState extends State<PlatformVideoPlayer> {
 
   /// 播放/暫停切換。
   Future<void> togglePlayPause() async {
+    // 確保影片已初始化
+    if (!_state.isInitialized) return;
+    
     if (_isWindows && _winController != null) {
       if (_winController!.value.isPlaying) {
         await _winController!.pause();
@@ -324,6 +327,8 @@ class PlatformVideoPlayerState extends State<PlatformVideoPlayer> {
 
   /// 跳轉到指定位置。
   Future<void> seekTo(Duration position) async {
+    if (!_state.isInitialized) return;
+    
     if (_isWindows && _winController != null) {
       await _winController!.seekTo(position);
     } else if (_vpController != null) {
@@ -334,6 +339,11 @@ class PlatformVideoPlayerState extends State<PlatformVideoPlayer> {
   /// 設定音量（0.0 ~ 1.0）。
   Future<void> setVolume(double volume) async {
     final clamped = volume.clamp(0.0, 1.0);
+    if (!_state.isInitialized) {
+      _updateState(_state.copyWith(volume: clamped));
+      return;
+    }
+    
     if (_isWindows && _winController != null) {
       await _winController!.setVolume(clamped);
     } else if (_vpController != null) {
@@ -344,6 +354,11 @@ class PlatformVideoPlayerState extends State<PlatformVideoPlayer> {
 
   /// 設定播放速度。
   Future<void> setPlaybackSpeed(double speed) async {
+    if (!_state.isInitialized) {
+      _updateState(_state.copyWith(playbackSpeed: speed));
+      return;
+    }
+    
     if (_isWindows && _winController != null) {
       await _winController!.setPlaybackSpeed(speed);
     } else if (_vpController != null) {
@@ -511,34 +526,7 @@ class _ErrorDisplay extends StatelessWidget {
                 ),
               ),
             ),
-            if (isNoVideo) ...[
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.lightbulb_outline,
-                      size: 18,
-                      color: Colors.amber.withValues(alpha: 0.8),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      '請選擇有影片標記的 session',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+
             // 重試按鈕（連線錯誤或一般錯誤時顯示）
             if (!isNoVideo && onRetry != null) ...[
               const SizedBox(height: 24),

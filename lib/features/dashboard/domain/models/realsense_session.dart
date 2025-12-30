@@ -7,6 +7,7 @@ class RealsenseSessionItem {
     required this.sessionName,
     required this.npyPath,
     required this.bagPath,
+    required this.bagFilename,
     this.videoPath,
     this.createdAt,
     this.updatedAt,
@@ -15,6 +16,8 @@ class RealsenseSessionItem {
   final String sessionName;
   final String npyPath;
   final String bagPath;
+  /// BAG 檔案名稱（例如：1_1_607.bag）。
+  final String bagFilename;
   /// 輸出的影片檔路徑（若有啟用 save_video）。
   final String? videoPath;
   final DateTime? createdAt;
@@ -37,6 +40,7 @@ class RealsenseSessionItem {
       sessionName: json['session_name']?.toString() ?? '',
       npyPath: json['npy_path']?.toString() ?? '',
       bagPath: json['bag_path']?.toString() ?? '',
+      bagFilename: json['bag_filename']?.toString() ?? '',
       videoPath: (videoPath != null && videoPath.isNotEmpty) ? videoPath : null,
       createdAt: parseDate(json['created_at']),
       updatedAt: parseDate(json['updated_at']),
@@ -120,6 +124,61 @@ class DeleteSessionResponse {
       deletedDb: toBool(json['deleted_db']),
       deletedNpy: toBool(json['deleted_npy']),
       deletedBag: toBool(json['deleted_bag']),
+    );
+  }
+}
+
+/// Session 影片可用性檢查結果。
+///
+/// 用於快速判斷 session 是否有影片可播放，以及影片檔案是否存在。
+@immutable
+class VideoAvailability {
+  const VideoAvailability({
+    required this.sessionName,
+    required this.hasVideo,
+    required this.videoExists,
+    this.videoPath,
+  });
+
+  final String sessionName;
+  
+  /// 是否有影片路徑（session 在萃取時有啟用 save_video）。
+  final bool hasVideo;
+  
+  /// 影片檔案是否實際存在於磁碟上。
+  final bool videoExists;
+  
+  /// 影片檔案路徑（若有）。
+  final String? videoPath;
+
+  /// 影片是否可播放（有路徑且檔案存在）。
+  bool get isPlayable => hasVideo && videoExists;
+
+  /// 取得影片狀態描述。
+  String get statusMessage {
+    if (!hasVideo) {
+      return '此 Session 未生成影片';
+    }
+    if (!videoExists) {
+      return '影片檔案遺失';
+    }
+    return '影片可播放';
+  }
+
+  factory VideoAvailability.fromJson(Map<String, dynamic> json) {
+    bool toBool(dynamic value) {
+      if (value is bool) return value;
+      final raw = value?.toString().toLowerCase().trim();
+      return raw == 'true' || raw == '1' || raw == 'yes';
+    }
+
+    final videoPath = json['video_path']?.toString();
+
+    return VideoAvailability(
+      sessionName: json['session_name']?.toString() ?? '',
+      hasVideo: toBool(json['has_video']),
+      videoExists: toBool(json['video_exists']),
+      videoPath: (videoPath != null && videoPath.isNotEmpty) ? videoPath : null,
     );
   }
 }

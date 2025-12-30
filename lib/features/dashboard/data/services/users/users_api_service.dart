@@ -31,6 +31,9 @@ class UsersApiService {
   static String _unlinkSessionEndpoint(String userCode) =>
       '${_userByCodeEndpoint(userCode)}/sessions/unlink';
 
+  /// 透過 BAG 檔案的 hash 值尋找使用者（`POST /users/find-by-bag`）。
+  static const _findByBagEndpoint = '$_kUsersEndpoint/find-by-bag';
+
   Future<UserItem> createUser({required UserCreateRequest request}) async {
     try {
       final response = await _dio.post<Object?>(
@@ -240,6 +243,33 @@ class UsersApiService {
         throw ApiException(message: '伺服器未回傳有效的資料。');
       }
       return DeleteUserResponse.fromJson(body.cast<String, Object?>());
+    } on DioException catch (error) {
+      throw mapDioError(error);
+    }
+  }
+
+  /// 透過 BAG 檔案名稱尋找使用者。
+  ///
+  /// 由於一個 bag 只能綁定一個使用者，最多只會找到一個使用者。
+  Future<FindUserByBagResponse> findUserByBag({
+    required FindUserByBagRequest request,
+  }) async {
+    final filename = request.bagFilename.trim();
+    if (filename.isEmpty) {
+      throw ApiException(message: 'bag_filename 不可為空');
+    }
+    try {
+      final response = await withApiRetry(
+        () => _dio.post<Object?>(
+          _findByBagEndpoint,
+          data: request.toJson(),
+        ),
+      );
+      final body = response.data;
+      if (body is! Map) {
+        throw ApiException(message: '伺服器未回傳有效的資料。');
+      }
+      return FindUserByBagResponse.fromJson(body.cast<String, Object?>());
     } on DioException catch (error) {
       throw mapDioError(error);
     }

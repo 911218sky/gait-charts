@@ -12,6 +12,7 @@ class SessionGridCard extends StatelessWidget {
   const SessionGridCard({
     required this.sessionName,
     required this.bagPath,
+    required this.bagFilename,
     required this.date,
     super.key,
     this.hasVideo = false,
@@ -27,6 +28,7 @@ class SessionGridCard extends StatelessWidget {
     return SessionGridCard(
       sessionName: item.sessionName,
       bagPath: item.bagPath,
+      bagFilename: item.bagFilename,
       date: item.createdAt,
       hasVideo: item.hasVideo,
       onTap: onTap,
@@ -41,6 +43,7 @@ class SessionGridCard extends StatelessWidget {
     return SessionGridCard(
       sessionName: item.sessionName,
       bagPath: item.bagPath,
+      bagFilename: item.bagFilename,
       date: item.createdAt,
       onTap: onTap,
     );
@@ -48,6 +51,8 @@ class SessionGridCard extends StatelessWidget {
 
   final String sessionName;
   final String bagPath;
+  /// BAG 檔案名稱。
+  final String bagFilename;
   final DateTime? date;
 
   /// 是否有影片可播放。
@@ -117,9 +122,9 @@ class SessionGridCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  // Path
+                  // Bag 檔案名稱
                   Text(
-                    bagPath,
+                    bagFilename,
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       color: colors.onSurfaceVariant,

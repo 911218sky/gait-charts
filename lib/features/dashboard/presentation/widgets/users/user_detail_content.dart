@@ -16,7 +16,7 @@ class UserDetailContent extends StatelessWidget {
     required this.linkMode,
     required this.onLinkModeChanged,
     required this.sessionController,
-    required this.bagHashController,
+    required this.bagFilenameController,
     required this.onEdit,
     required this.onDelete,
     required this.onCopy,
@@ -37,7 +37,7 @@ class UserDetailContent extends StatelessWidget {
   final ValueChanged<UserSessionLinkMode> onLinkModeChanged;
 
   final TextEditingController sessionController;
-  final TextEditingController bagHashController;
+  final TextEditingController bagFilenameController;
 
   final VoidCallback onEdit;
   final VoidCallback onDelete;
@@ -77,7 +77,7 @@ class UserDetailContent extends StatelessWidget {
       linkMode: linkMode,
       onLinkModeChanged: onLinkModeChanged,
       sessionController: sessionController,
-      bagHashController: bagHashController,
+      bagFilenameController: bagFilenameController,
       onLink: onLink,
       onUnlink: onUnlink,
       onUnlinkAll: onUnlinkAll,

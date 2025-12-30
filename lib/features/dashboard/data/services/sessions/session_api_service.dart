@@ -21,6 +21,14 @@ class SessionApiService {
   static const _sessionSearchEndpoint =
       '$_kRealsensePoseExtractorEndpoint/sessions/search';
 
+  /// 取得單一 session 詳情（`GET /realsense_pose_extractor/sessions/{session_name}`）。
+  static String _sessionDetailEndpoint(String sessionName) =>
+      '$_sessionsEndpoint/${Uri.encodeComponent(sessionName)}';
+
+  /// 檢查 session 影片可用性（`GET /realsense_pose_extractor/sessions/{session_name}/video-availability`）。
+  static String _videoAvailabilityEndpoint(String sessionName) =>
+      '$_sessionsEndpoint/${Uri.encodeComponent(sessionName)}/video-availability';
+
   Future<RealsenseSessionList> fetchRealsenseSessions({
     int page = 1,
     int pageSize = 20,
@@ -95,6 +103,63 @@ class SessionApiService {
       throw mapDioError(error);
     }
     return const [];
+  }
+
+  /// 取得單一 session 的詳細資訊。
+  /// 
+  /// 使用新的單一 session 查詢端點（2024-12-30 新增）。
+  Future<RealsenseSessionItem?> fetchSessionDetail({
+    required String sessionName,
+  }) async {
+    final name = sessionName.trim();
+    if (name.isEmpty) {
+      throw ApiException(message: 'session_name 不可為空');
+    }
+    try {
+      final response = await withApiRetry(
+        () => _dio.get<Map<String, dynamic>>(_sessionDetailEndpoint(name)),
+      );
+      final body = response.data;
+      if (body == null) {
+        throw ApiException(message: '伺服器未回傳有效的資料。');
+      }
+      return RealsenseSessionItem.fromJson(body);
+    } on DioException catch (error) {
+      // 404 表示找不到 session，返回 null 而非拋出異常
+      if (error.response?.statusCode == 404) {
+        return null;
+      }
+      throw mapDioError(error);
+    }
+  }
+
+  /// 檢查 session 的影片可用性。
+  /// 
+  /// 輕量級端點，用於快速判斷 session 是否有影片可播放。
+  /// 可區分「未生成影片」vs「影片檔案遺失」的情況。
+  Future<VideoAvailability?> checkVideoAvailability({
+    required String sessionName,
+  }) async {
+    final name = sessionName.trim();
+    if (name.isEmpty) {
+      throw ApiException(message: 'session_name 不可為空');
+    }
+    try {
+      final response = await withApiRetry(
+        () => _dio.get<Map<String, dynamic>>(_videoAvailabilityEndpoint(name)),
+      );
+      final body = response.data;
+      if (body == null) {
+        throw ApiException(message: '伺服器未回傳有效的資料。');
+      }
+      return VideoAvailability.fromJson(body);
+    } on DioException catch (error) {
+      // 404 表示找不到 session，返回 null 而非拋出異常
+      if (error.response?.statusCode == 404) {
+        return null;
+      }
+      throw mapDioError(error);
+    }
   }
 
   /// 刪除指定 session（包含 DB 與對應檔案，若 bag 無其他引用則會一併刪除）。
