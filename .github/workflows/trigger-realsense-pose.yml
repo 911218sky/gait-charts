@@ -11,8 +11,6 @@ on:
     workflows: ["Build & Release (Web / Windows setup.exe / Android APK / Linux / macOS)"]
     types:
       - completed
-    branches:
-      - main
 
 jobs:
   trigger:
