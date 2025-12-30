@@ -11,6 +11,7 @@ import 'package:video_player_win/video_player_win.dart' as win;
 /// 跨平台影片播放器 Widget。
 /// 
 /// Windows 使用 video_player_win，其他平台使用 video_player。
+/// 支援連線中斷偵測與重試功能。
 class PlatformVideoPlayer extends StatefulWidget {
   const PlatformVideoPlayer({
     required this.source,
@@ -39,6 +40,11 @@ class PlatformVideoPlayerState extends State<PlatformVideoPlayer> {
   
   /// 上次更新的 position，用於減少不必要的 setState
   Duration _lastPosition = Duration.zero;
+  
+  /// Buffering 超時偵測（連線中斷判斷）
+  Timer? _bufferingTimeoutTimer;
+  static const _bufferingTimeout = Duration(seconds: 15);
+  DateTime? _bufferingStartTime;
 
   bool get _isWindows => !kIsWeb && Platform.isWindows;
 
@@ -66,6 +72,9 @@ class PlatformVideoPlayerState extends State<PlatformVideoPlayer> {
   void _disposePlayer() {
     _positionTimer?.cancel();
     _positionTimer = null;
+    _bufferingTimeoutTimer?.cancel();
+    _bufferingTimeoutTimer = null;
+    _bufferingStartTime = null;
     
     // 先移除 listener 再 dispose，避免 dispose 時觸發 callback
     if (_winController != null) {
@@ -198,6 +207,10 @@ class PlatformVideoPlayerState extends State<PlatformVideoPlayer> {
   void _onWinPlayerUpdate() {
     if (_winController == null || !mounted) return;
     final value = _winController!.value;
+    
+    // 偵測 buffering 超時（可能是連線中斷）
+    _handleBufferingTimeout(value.isBuffering);
+    
     _updateState(_state.copyWith(
       isPlaying: value.isPlaying,
       isBuffering: value.isBuffering,
@@ -205,10 +218,41 @@ class PlatformVideoPlayerState extends State<PlatformVideoPlayer> {
       duration: value.duration,
     ));
   }
+  
+  /// 處理 buffering 超時偵測。
+  /// 如果持續 buffering 超過 [_bufferingTimeout]，視為連線中斷。
+  void _handleBufferingTimeout(bool isBuffering) {
+    if (isBuffering) {
+      // 開始 buffering，記錄開始時間
+      _bufferingStartTime ??= DateTime.now();
+      
+      // 啟動超時計時器
+      _bufferingTimeoutTimer ??= Timer(_bufferingTimeout, () {
+        if (!mounted) return;
+        if (_state.isBuffering && _bufferingStartTime != null) {
+          final elapsed = DateTime.now().difference(_bufferingStartTime!);
+          if (elapsed >= _bufferingTimeout) {
+            _updateState(_state.copyWith(
+              errorMessage: '影片載入逾時，請檢查網路連線',
+            ));
+          }
+        }
+      });
+    } else {
+      // 停止 buffering，重置計時
+      _bufferingStartTime = null;
+      _bufferingTimeoutTimer?.cancel();
+      _bufferingTimeoutTimer = null;
+    }
+  }
 
   void _onVpPlayerUpdate() {
     if (_vpController == null || !mounted) return;
     final value = _vpController!.value;
+    
+    // 偵測 buffering 超時（可能是連線中斷）
+    _handleBufferingTimeout(value.isBuffering);
+    
     _updateState(_state.copyWith(
       isPlaying: value.isPlaying,
       isBuffering: value.isBuffering,
@@ -274,10 +318,20 @@ class PlatformVideoPlayerState extends State<PlatformVideoPlayer> {
     _updateState(_state.copyWith(playbackSpeed: speed));
   }
 
+  /// 重新載入影片（用於錯誤後重試）。
+  Future<void> retry() async {
+    _disposePlayer();
+    _state = const VideoPlayerState();
+    await _initializePlayer();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_state.hasError) {
-      return _ErrorDisplay(message: _state.errorMessage!);
+      return _ErrorDisplay(
+        message: _state.errorMessage!,
+        onRetry: retry,
+      );
     }
 
     if (!_state.isInitialized) {
@@ -300,7 +354,10 @@ class PlatformVideoPlayerState extends State<PlatformVideoPlayer> {
       );
     }
 
-    return const _ErrorDisplay(message: '播放器初始化失敗');
+    return _ErrorDisplay(
+      message: '播放器初始化失敗',
+      onRetry: retry,
+    );
   }
 }
 
@@ -325,9 +382,13 @@ class _LoadingDisplay extends StatelessWidget {
 
 /// 錯誤顯示。
 class _ErrorDisplay extends StatelessWidget {
-  const _ErrorDisplay({required this.message});
+  const _ErrorDisplay({
+    required this.message,
+    this.onRetry,
+  });
 
   final String message;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -341,6 +402,13 @@ class _ErrorDisplay extends StatelessWidget {
         lowerMessage.contains('corrupted') ||
         lowerMessage.contains('not supported') ||
         lowerMessage.contains('mf_media_engine');
+    
+    // 判斷是否為連線問題
+    final isConnectionError = lowerMessage.contains('逾時') ||
+        lowerMessage.contains('timeout') ||
+        lowerMessage.contains('connection') ||
+        lowerMessage.contains('network') ||
+        lowerMessage.contains('socket');
 
     return Center(
       child: Padding(
@@ -358,7 +426,11 @@ class _ErrorDisplay extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                isNoVideo ? Icons.videocam_off_outlined : Icons.error_outline_rounded,
+                isNoVideo 
+                    ? Icons.videocam_off_outlined 
+                    : isConnectionError
+                        ? Icons.wifi_off_rounded
+                        : Icons.error_outline_rounded,
                 size: 40,
                 color: isNoVideo
                     ? Colors.white.withValues(alpha: 0.6)
@@ -367,7 +439,11 @@ class _ErrorDisplay extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              isNoVideo ? '此 Session 沒有影片' : '無法載入影片',
+              isNoVideo 
+                  ? '此 Session 沒有影片' 
+                  : isConnectionError
+                      ? '連線中斷'
+                      : '無法載入影片',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -413,6 +489,21 @@ class _ErrorDisplay extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+            ],
+            // 重試按鈕（連線錯誤或一般錯誤時顯示）
+            if (!isNoVideo && onRetry != null) ...[
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh),
+                label: const Text('重試'),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ],
