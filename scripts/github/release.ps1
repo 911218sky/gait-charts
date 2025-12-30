@@ -131,6 +131,11 @@ $newPubspec = $pubspecContent -replace "(version:\s*)[^\r\n]+", "`${1}$cleanVers
 
 [System.IO.File]::WriteAllText($pubspecPath, $newPubspec, (New-Object System.Text.UTF8Encoding($false)))
 
+# Get current branch
+$currentBranch = git branch --show-current
+Write-Host "Current branch: $currentBranch"
+Write-Host ""
+
 # Git operations
 Write-Host "Staging changes..."
 git add pubspec.yaml
@@ -138,8 +143,8 @@ git add pubspec.yaml
 Write-Host "Committing..."
 git commit -m "docs: release version $cleanVersion"
 
-Write-Host "Pushing to main..."
-git push origin main
+Write-Host "Pushing to $currentBranch..."
+git push origin $currentBranch
 
 $tagName = "v$cleanVersion"
 Write-Host "Creating tag $tagName..."
@@ -149,5 +154,5 @@ Write-Host "Pushing tag $tagName..."
 git push origin $tagName
 
 Write-Host ""
-Write-Host "Successfully released $tagName!" -ForegroundColor Green
+Write-Host "Successfully released $tagName on branch '$currentBranch'!" -ForegroundColor Green
 Write-Host "Check GitHub Actions for build progress."
