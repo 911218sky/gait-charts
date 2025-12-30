@@ -1,5 +1,8 @@
 allprojects {
     repositories {
+        // 阿里雲 mirror（避免 Maven Central 429 rate limit）
+        maven { url = uri("https://maven.aliyun.com/repository/google") }
+        maven { url = uri("https://maven.aliyun.com/repository/public") }
         google()
         mavenCentral()
     }
