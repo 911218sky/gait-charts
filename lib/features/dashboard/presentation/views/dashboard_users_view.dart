@@ -396,6 +396,20 @@ class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
     _toast('已切換目前 Session：$name', variant: DashboardToastVariant.success);
   }
 
+  void _playVideo(UserSessionItem session) {
+    if (!session.hasVideo) {
+      _toast('此 Session 沒有影片', variant: DashboardToastVariant.warning);
+      return;
+    }
+    // 設置 active session 以便影片播放頁面可以載入
+    ref.read(activeSessionProvider.notifier).setSession(session.sessionName);
+    ref.invalidate(stageDurationsProvider);
+    _toast(
+      '已切換到 ${session.sessionName}，請前往「影片播放」頁面觀看',
+      variant: DashboardToastVariant.success,
+    );
+  }
+
   Future<void> _openUserBrowser({String? initialQuery}) async {
     final result = await showDialog<UserListItem>(
       context: context,
@@ -614,6 +628,7 @@ class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
             onUnlink: _unlinkSession,
             onUnlinkAll: _unlinkAllSessions,
             onActivateSession: _setActiveSession,
+            onPlayVideo: _playVideo,
           ),
       ],
     );

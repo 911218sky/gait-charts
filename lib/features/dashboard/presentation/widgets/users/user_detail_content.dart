@@ -25,6 +25,7 @@ class UserDetailContent extends StatelessWidget {
     required this.onUnlinkAll,
     required this.onActivateSession,
     super.key,
+    this.onPlayVideo,
   });
 
   final UserDetailResponse detail;
@@ -46,6 +47,7 @@ class UserDetailContent extends StatelessWidget {
   final Future<void> Function(UserSessionItem session) onUnlink;
   final Future<void> Function() onUnlinkAll;
   final ValueChanged<String> onActivateSession;
+  final ValueChanged<UserSessionItem>? onPlayVideo;
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +85,7 @@ class UserDetailContent extends StatelessWidget {
       onUnlinkAll: onUnlinkAll,
       onCopy: onCopy,
       onActivateSession: onActivateSession,
+      onPlayVideo: onPlayVideo,
     );
     final profileSectionsCard = UserProfileSectionsCard(user: detail.user);
 

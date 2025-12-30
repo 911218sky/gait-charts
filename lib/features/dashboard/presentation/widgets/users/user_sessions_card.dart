@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gait_charts/app/theme.dart';
 import 'package:gait_charts/core/widgets/app_tooltip.dart';
 import 'package:gait_charts/features/dashboard/domain/models/user_profile.dart';
+import 'package:gait_charts/features/dashboard/presentation/providers/video/video_availability_provider.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/shared/dialogs/session_picker_sheet.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/shared/fields/session_autocomplete_field.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -26,6 +28,7 @@ class UserSessionsCard extends StatelessWidget {
     required this.onCopy,
     required this.onActivateSession,
     super.key,
+    this.onPlayVideo,
   });
 
   final UserItem user;
@@ -43,6 +46,7 @@ class UserSessionsCard extends StatelessWidget {
   final Future<void> Function() onUnlinkAll;
   final Future<void> Function(String label, String value) onCopy;
   final ValueChanged<String> onActivateSession;
+  final ValueChanged<UserSessionItem>? onPlayVideo;
 
   Future<void> _openSessionBrowser(BuildContext context) async {
     // 與分析頁共用的 Session Picker，維持單一樣式與邏輯。
@@ -239,6 +243,7 @@ class UserSessionsCard extends StatelessWidget {
                     onActivateSession: onActivateSession,
                     onUnlink: onUnlink,
                     isBusy: isBusy,
+                    onPlayVideo: onPlayVideo != null ? () => onPlayVideo!(item) : null,
                   );
                 },
               ),
@@ -249,13 +254,14 @@ class UserSessionsCard extends StatelessWidget {
   }
 }
 
-class _UserSessionTile extends StatelessWidget {
+class _UserSessionTile extends ConsumerWidget {
   const _UserSessionTile({
     required this.item,
     required this.onCopy,
     required this.onActivateSession,
     required this.onUnlink,
     required this.isBusy,
+    this.onPlayVideo,
   });
 
   final UserSessionItem item;
@@ -263,16 +269,25 @@ class _UserSessionTile extends StatelessWidget {
   final ValueChanged<String> onActivateSession;
   final Future<void> Function(UserSessionItem session) onUnlink;
   final bool isBusy;
+  final VoidCallback? onPlayVideo;
 
   String _formatDate(DateTime d) {
     return DateFormat('yyyy/MM/dd HH:mm').format(d.toLocal());
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colorScheme;
     final isDark = context.isDark;
     final accent = DashboardAccentColors.of(context);
+
+    // 動態檢查影片可用性
+    final videoAvailability = ref.watch(
+      videoAvailabilityProvider(item.sessionName),
+    );
+    final hasVideo = videoAvailability.whenOrNull(
+      data: (availability) => availability?.videoExists ?? false,
+    ) ?? item.hasVideo; // fallback 到 videoPath 判斷
 
     return Container(
       decoration: BoxDecoration(
@@ -340,6 +355,22 @@ class _UserSessionTile extends StatelessWidget {
           // Actions
           Column(
             children: [
+              if (hasVideo && onPlayVideo != null)
+                AppTooltip(
+                  message: '播放影片',
+                  child: IconButton(
+                    onPressed: isBusy ? null : onPlayVideo,
+                    icon: Icon(
+                      Icons.play_circle_filled,
+                      color: isDark ? Colors.white : colors.primary,
+                    ),
+                    style: IconButton.styleFrom(
+                      backgroundColor: isDark ? const Color(0xFF222222) : colors.surfaceContainer,
+                      padding: const EdgeInsets.all(8),
+                    ),
+                  ),
+                ),
+              if (hasVideo && onPlayVideo != null) const SizedBox(height: 8),
               AppTooltip(
                 message: '設為目前 Session',
                 child: IconButton(

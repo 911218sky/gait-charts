@@ -39,13 +39,16 @@ class SessionGridCard extends StatelessWidget {
   factory SessionGridCard.fromUserSession({
     required UserSessionItem item,
     VoidCallback? onTap,
+    VoidCallback? onPlayVideo,
   }) {
     return SessionGridCard(
       sessionName: item.sessionName,
       bagPath: item.bagPath,
       bagFilename: item.bagFilename,
       date: item.createdAt,
+      hasVideo: item.hasVideo,
       onTap: onTap,
+      onPlayVideo: onPlayVideo,
     );
   }
 
