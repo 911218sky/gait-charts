@@ -1,4 +1,4 @@
-﻿name: gait_charts
+name: gait_charts
 description: "A new Flutter project."
 
 # Do not publish to pub.dev
@@ -8,7 +8,7 @@ publish_to: 'none'
 # On Android, this maps to versionName
 # On iOS, this maps to CFBundleShortVersionString
 # On Windows, this maps to the product version
-version: 1.1.1
+version: 1.1.2
 
 environment:
   sdk: ^3.10.0
