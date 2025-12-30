@@ -54,13 +54,39 @@ class PlatformVideoPlayerState extends State<PlatformVideoPlayer> {
     _initializePlayer();
   }
 
+  /// 切換影片時的延遲，讓瀏覽器/系統有時間清理舊連線。
+  static const _switchDelay = Duration(milliseconds: 100);
+  
+  /// 追蹤是否正在切換影片，避免重複觸發。
+  bool _isSwitching = false;
+
   @override
   void didUpdateWidget(PlatformVideoPlayer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.source.uri != widget.source.uri) {
-      _disposePlayer();
-      _initializePlayer();
+      _switchVideo();
     }
+  }
+  
+  /// 切換影片時，先清理舊的再載入新的，中間加入短暫延遲。
+  Future<void> _switchVideo() async {
+    if (_isSwitching) return;
+    _isSwitching = true;
+    
+    // 1. 清理舊的播放器
+    _disposePlayer();
+    
+    // 2. 短暫延遲，讓底層有時間取消進行中的 HTTP 請求
+    await Future<void>.delayed(_switchDelay);
+    
+    // 3. 確認 widget 還在，再初始化新的
+    if (!mounted) {
+      _isSwitching = false;
+      return;
+    }
+    
+    await _initializePlayer();
+    _isSwitching = false;
   }
 
   @override
@@ -69,6 +95,10 @@ class PlatformVideoPlayerState extends State<PlatformVideoPlayer> {
     super.dispose();
   }
 
+  /// 同步清理播放器資源。
+  /// 
+  /// 注意：這裡使用同步方式清理，避免 async gap 導致的競態條件。
+  /// pause() 和 dispose() 的 Future 會被觸發但不等待完成。
   void _disposePlayer() {
     _positionTimer?.cancel();
     _positionTimer = null;
@@ -76,16 +106,20 @@ class PlatformVideoPlayerState extends State<PlatformVideoPlayer> {
     _bufferingTimeoutTimer = null;
     _bufferingStartTime = null;
     
-    // 先移除 listener 再 dispose，避免 dispose 時觸發 callback
+    // 先移除 listener，避免 dispose 過程中觸發 callback
     if (_winController != null) {
-      _winController!.removeListener(_onWinPlayerUpdate);
-      _winController!.dispose();
+      final controller = _winController!;
       _winController = null;
+      controller.removeListener(_onWinPlayerUpdate);
+      // 先 pause 再 dispose，讓底層有機會取消進行中的請求
+      controller.pause().then((_) => controller.dispose()).ignore();
     }
     if (_vpController != null) {
-      _vpController!.removeListener(_onVpPlayerUpdate);
-      _vpController!.dispose();
+      final controller = _vpController!;
       _vpController = null;
+      controller.removeListener(_onVpPlayerUpdate);
+      // 先 pause 再 dispose，讓底層有機會取消進行中的請求
+      controller.pause().then((_) => controller.dispose()).ignore();
     }
   }
 
@@ -320,9 +354,22 @@ class PlatformVideoPlayerState extends State<PlatformVideoPlayer> {
 
   /// 重新載入影片（用於錯誤後重試）。
   Future<void> retry() async {
+    if (_isSwitching) return;
+    _isSwitching = true;
+    
     _disposePlayer();
     _state = const VideoPlayerState();
+    
+    // 短暫延遲，讓底層清理完成
+    await Future<void>.delayed(_switchDelay);
+    
+    if (!mounted) {
+      _isSwitching = false;
+      return;
+    }
+    
     await _initializePlayer();
+    _isSwitching = false;
   }
 
   @override
