@@ -32,6 +32,9 @@ dependencies:
   window_manager: ^0.5.1               # Window management
   url_launcher: ^6.3.2                 # URL launcher (open browser or external apps)
   web: ^1.1.1                          # Web API support
+  video_player: ^2.9.3                 # Cross-platform video player (iOS/Android/Web/macOS/Linux)
+  video_player_win: 3.2.2              # Windows video player implementation
+  path_provider: ^2.1.5                # Platform-specific paths (temp directory)
 
 dev_dependencies:
   flutter_test:

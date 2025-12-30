@@ -16,9 +16,9 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp(
+        child: const MaterialApp(
           home: Scaffold(
-            body: const SizedBox(
+            body: SizedBox(
               height: 800,
               child: TrajectoryConfigPanel(
                 width: null,

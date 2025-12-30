@@ -1,8 +1,7 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-
 import 'package:gait_charts/app/theme.dart';
 import 'package:gait_charts/core/platform/download/download_file.dart';
 import 'package:gait_charts/core/providers/app_config_provider.dart';
@@ -13,6 +12,7 @@ import 'package:gait_charts/features/apk/domain/models/apk_file.dart';
 import 'package:gait_charts/features/apk/domain/utils/apk_artifact_classifier.dart';
 import 'package:gait_charts/features/apk/domain/utils/apk_download_uri_resolver.dart';
 import 'package:gait_charts/features/apk/presentation/providers/apk_providers.dart';
+import 'package:intl/intl.dart';
 
 /// 登入頁與儀表板共用的「安裝包下載」卡片。
 class ApkDownloadsCard extends ConsumerWidget {

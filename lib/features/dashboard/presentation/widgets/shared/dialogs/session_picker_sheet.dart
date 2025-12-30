@@ -17,6 +17,7 @@ class SessionPickerDialog extends ConsumerStatefulWidget {
     super.key,
     this.excludeUserCode,
     this.enableUserPicker = true,
+    this.filterHasVideo = false,
   });
 
   /// 若不為空，代表 sessions 清單會排除該 user_code（常用於「綁定」時避免選到已綁定的項目）。
@@ -29,6 +30,9 @@ class SessionPickerDialog extends ConsumerStatefulWidget {
   /// - 使用者綁定頁：只需要挑 session（排除已綁定者）時可關閉，避免多一層 user 預覽造成混淆。
   final bool enableUserPicker;
 
+  /// 是否只顯示有影片的 sessions。
+  final bool filterHasVideo;
+
   @override
   ConsumerState<SessionPickerDialog> createState() =>
       _SessionPickerDialogState();
@@ -37,13 +41,23 @@ class SessionPickerDialog extends ConsumerStatefulWidget {
     BuildContext context, {
     String? excludeUserCode,
     bool enableUserPicker = true,
+    bool filterHasVideo = false,
   }) {
     return showDialog<String>(
       context: context,
       builder: (_) => SessionPickerDialog(
         excludeUserCode: excludeUserCode,
         enableUserPicker: enableUserPicker,
+        filterHasVideo: filterHasVideo,
       ),
+    );
+  }
+
+  /// 專門給影片播放用的 session picker，回傳完整的 session 資訊。
+  static Future<RealsenseSessionItem?> showForVideo(BuildContext context) {
+    return showDialog<RealsenseSessionItem>(
+      context: context,
+      builder: (_) => const _VideoSessionPickerDialog(),
     );
   }
 }
@@ -314,6 +328,7 @@ class _SessionPickerDialogState extends ConsumerState<SessionPickerDialog> {
                           borderColor: borderColor,
                           onDelete: _handleDeleteSession,
                           useExplicitPaging: useExplicitPaging,
+                          filterHasVideo: widget.filterHasVideo,
                         )),
       footer: useExplicitPaging
           ? DashboardPaginationFooter(
@@ -360,6 +375,7 @@ class _SessionGrid extends StatelessWidget {
     required this.borderColor,
     required this.onDelete,
     required this.useExplicitPaging,
+    this.filterHasVideo = false,
   });
 
   final SessionListState state;
@@ -368,9 +384,47 @@ class _SessionGrid extends StatelessWidget {
   final Color borderColor;
   final Future<void> Function(RealsenseSessionItem item) onDelete;
   final bool useExplicitPaging;
+  /// 是否只顯示有影片的 sessions。
+  final bool filterHasVideo;
 
   @override
   Widget build(BuildContext context) {
+    // 若啟用影片過濾，只顯示有影片的 sessions
+    final filteredItems = filterHasVideo
+        ? state.items.where((item) => item.hasVideo).toList()
+        : state.items;
+
+    if (filteredItems.isEmpty && !state.isLoading) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              filterHasVideo ? Icons.videocam_off_outlined : Icons.inbox,
+              size: 48,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              filterHasVideo ? '沒有包含影片的 Sessions' : 'No sessions found',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            if (filterHasVideo) ...[
+              const SizedBox(height: 8),
+              Text(
+                '只有在提取時啟用影片輸出的 sessions 才會有影片',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
     final grid = GridView.builder(
       padding: const EdgeInsets.all(24),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -380,13 +434,13 @@ class _SessionGrid extends StatelessWidget {
         mainAxisSpacing: 16,
       ),
       itemCount: useExplicitPaging
-          ? state.items.length
-          : state.items.length + (state.canLoadMore ? 1 : 0),
+          ? filteredItems.length
+          : filteredItems.length + (state.canLoadMore ? 1 : 0),
       itemBuilder: (context, index) {
-        if (!useExplicitPaging && index >= state.items.length) {
+        if (!useExplicitPaging && index >= filteredItems.length) {
           return const Center(child: CircularProgressIndicator());
         }
-        final item = state.items[index];
+        final item = filteredItems[index];
         return _SessionCard(
           item: item,
           backgroundColor: backgroundColor,
@@ -457,68 +511,70 @@ class _SessionCardState extends State<_SessionCard> {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: widget.onSelect,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: widget.backgroundColor,
-            border: Border.all(
-              color: _isHovered
-                  ? colors.primary
-                  : widget.borderColor,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        child: Stack(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: widget.backgroundColor,
+                border: Border.all(
+                  color: _isHovered
+                      ? colors.primary
+                      : widget.borderColor,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: context.isDark
-                          ? Colors.white.withValues(alpha: 0.1)
-                          : colors.primary.withValues(alpha: 0.05),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.analytics_outlined,
-                      size: 16,
-                      color: context.isDark ? Colors.white : colors.primary,
-                    ),
-                  ),
-                  const Spacer(),
-                  if (widget.isDeleting)
-                    const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  else if (_isHovered) ...[
-                    AppTooltip(
-                      message: '刪除 Session',
-                      child: IconButton(
-                        onPressed: widget.onDelete,
-                        icon: const Icon(Icons.delete_outline, size: 18),
-                        style: IconButton.styleFrom(
-                          foregroundColor: colors.onSurface,
-                          padding: EdgeInsets.zero,
-                          minimumSize: const Size(36, 36),
+                  Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: context.isDark
+                              ? Colors.white.withValues(alpha: 0.1)
+                              : colors.primary.withValues(alpha: 0.05),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.analytics_outlined,
+                          size: 16,
+                          color: context.isDark ? Colors.white : colors.primary,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.arrow_forward,
-                      size: 16,
-                      color: colors.onSurface,
-                    ),
-                  ],
-                ],
-              ),
+                      const Spacer(),
+                      if (widget.isDeleting)
+                        const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      else if (_isHovered) ...[
+                        AppTooltip(
+                          message: '刪除 Session',
+                          child: IconButton(
+                            onPressed: widget.onDelete,
+                            icon: const Icon(Icons.delete_outline, size: 18),
+                            style: IconButton.styleFrom(
+                              foregroundColor: colors.onSurface,
+                              padding: EdgeInsets.zero,
+                              minimumSize: const Size(36, 36),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.arrow_forward,
+                          size: 16,
+                          color: colors.onSurface,
+                        ),
+                      ],
+                    ],
+                  ),
               const SizedBox(height: 12),
               Text(
                 widget.item.sessionName,
@@ -548,6 +604,51 @@ class _SessionCardState extends State<_SessionCard> {
               ),
             ],
           ),
+        ),
+        // 右上角影片緞帶標示
+        if (widget.item.hasVideo)
+          Positioned(
+            top: 0,
+            right: 0,
+            child: _VideoRibbon(colors: colors),
+          ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 右上角的影片緞帶標示。
+class _VideoRibbon extends StatelessWidget {
+  const _VideoRibbon({required this.colors});
+
+  final ColorScheme colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            colors.primary,
+            colors.primary.withValues(alpha: 0.85),
+          ],
+        ),
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(8),
+          bottomLeft: Radius.circular(12),
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          Icons.play_arrow_rounded,
+          size: 18,
+          color: colors.onPrimary,
         ),
       ),
     );
@@ -606,6 +707,300 @@ class _EmptyView extends StatelessWidget {
             style: context.textTheme.titleMedium?.copyWith(color: colors.onSurfaceVariant),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 專門給影片播放用的 session picker，回傳完整的 [RealsenseSessionItem]。
+class _VideoSessionPickerDialog extends ConsumerStatefulWidget {
+  const _VideoSessionPickerDialog();
+
+  @override
+  ConsumerState<_VideoSessionPickerDialog> createState() =>
+      _VideoSessionPickerDialogState();
+}
+
+class _VideoSessionPickerDialogState
+    extends ConsumerState<_VideoSessionPickerDialog> {
+  bool _requested = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_requested) {
+      _requested = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(sessionListProvider.notifier).fetchFirstPage(force: true);
+      });
+    }
+  }
+
+  void _selectSession(RealsenseSessionItem item) {
+    context.navigator.pop(item);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(sessionListProvider);
+    final notifier = ref.read(sessionListProvider.notifier);
+    final colors = context.colorScheme;
+    final backgroundColor =
+        context.isDark ? colors.surface : colors.surfaceContainer;
+    final surfaceColor = colors.surfaceContainerLow;
+    final borderColor = colors.outlineVariant;
+
+    return DashboardDialogShell(
+      constraints: const BoxConstraints(maxWidth: 1000, maxHeight: 800),
+      backgroundColor: backgroundColor,
+      header: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '選擇影片',
+                    style: context.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colors.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '選擇一個 Session 來播放影片',
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            AppTooltip(
+              message: '重新整理',
+              child: IconButton(
+                onPressed: state.isLoading
+                    ? null
+                    : () => notifier.fetchFirstPage(force: true),
+                icon: const Icon(Icons.refresh),
+                style: IconButton.styleFrom(foregroundColor: colors.onSurface),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              onPressed: () => context.navigator.pop(),
+              icon: const Icon(Icons.close),
+              style: IconButton.styleFrom(foregroundColor: colors.onSurface),
+            ),
+          ],
+        ),
+      ),
+      body: state.isInitialLoading
+          ? const Center(child: CircularProgressIndicator())
+          : state.error != null && state.items.isEmpty
+              ? _ErrorView(
+                  error: state.error!,
+                  onRetry: () => notifier.fetchFirstPage(force: true),
+                )
+              : state.items.isEmpty
+                  ? const _EmptyView()
+                  : _VideoSessionGrid(
+                      state: state,
+                      notifier: notifier,
+                      backgroundColor: surfaceColor,
+                      borderColor: borderColor,
+                      onSelect: _selectSession,
+                    ),
+      footer: state.totalPages > 0
+          ? DashboardPaginationFooter(
+              currentPage: state.page <= 0 ? 1 : state.page,
+              totalPages: state.totalPages,
+              isLoading: state.isLoading,
+              onSelectPage: notifier.goToPage,
+            )
+          : null,
+    );
+  }
+}
+
+/// 影片 session 選擇用的 Grid。
+class _VideoSessionGrid extends StatelessWidget {
+  const _VideoSessionGrid({
+    required this.state,
+    required this.notifier,
+    required this.backgroundColor,
+    required this.borderColor,
+    required this.onSelect,
+  });
+
+  final SessionListState state;
+  final SessionListNotifier notifier;
+  final Color backgroundColor;
+  final Color borderColor;
+  final ValueChanged<RealsenseSessionItem> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(24),
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 300,
+        mainAxisExtent: 160,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: state.items.length,
+      itemBuilder: (context, index) {
+        final item = state.items[index];
+        final hasVideo = item.hasVideo;
+
+        return _VideoSessionCard(
+          item: item,
+          hasVideo: hasVideo,
+          backgroundColor: backgroundColor,
+          borderColor: borderColor,
+          onSelect: () => onSelect(item),
+        );
+      },
+    );
+  }
+}
+
+/// 影片 session 卡片，有影片的會有標記，沒影片的會顯示灰色。
+class _VideoSessionCard extends StatefulWidget {
+  const _VideoSessionCard({
+    required this.item,
+    required this.hasVideo,
+    required this.backgroundColor,
+    required this.borderColor,
+    required this.onSelect,
+  });
+
+  final RealsenseSessionItem item;
+  final bool hasVideo;
+  final Color backgroundColor;
+  final Color borderColor;
+  final VoidCallback onSelect;
+
+  @override
+  State<_VideoSessionCard> createState() => _VideoSessionCardState();
+}
+
+class _VideoSessionCardState extends State<_VideoSessionCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final createdAt = widget.item.createdAt != null
+        ? DateFormat('yyyy/MM/dd HH:mm').format(widget.item.createdAt!.toLocal())
+        : 'Unknown Date';
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onSelect,
+        child: Stack(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: widget.backgroundColor,
+                border: Border.all(
+                  color: _isHovered
+                      ? (widget.hasVideo ? colors.primary : colors.outline)
+                      : widget.borderColor,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: widget.hasVideo
+                              ? colors.primary.withValues(alpha: 0.15)
+                              : colors.onSurface.withValues(alpha: 0.08),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          widget.hasVideo
+                              ? Icons.play_circle_outline
+                              : Icons.videocam_off_outlined,
+                          size: 16,
+                          color: widget.hasVideo
+                              ? colors.primary
+                              : colors.onSurfaceVariant.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      const Spacer(),
+                      if (!widget.hasVideo)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colors.onSurface.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '無影片',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: colors.onSurfaceVariant.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ),
+                      if (widget.hasVideo && _isHovered)
+                        Icon(
+                          Icons.arrow_forward,
+                          size: 16,
+                          color: colors.onSurface,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    widget.item.sessionName,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: widget.hasVideo
+                          ? colors.onSurface
+                          : colors.onSurfaceVariant.withValues(alpha: 0.6),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Spacer(),
+                  Text(
+                    createdAt,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colors.onSurfaceVariant.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // 右上角影片緞帶標示
+            if (widget.hasVideo)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: _VideoRibbon(colors: colors),
+              ),
+          ],
+        ),
       ),
     );
   }

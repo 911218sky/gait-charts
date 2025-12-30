@@ -24,6 +24,8 @@ class ExtractConfigNotifier extends Notifier<ExtractConfig> {
       state = state.copyWith(maxConcurrency: value);
   void setCalibratePose(bool value) =>
       state = state.copyWith(calibratePose: value);
+  void setSaveVideo(bool value) =>
+      state = state.copyWith(saveVideo: value);
   void reset() => state = const ExtractConfig();
 }
 

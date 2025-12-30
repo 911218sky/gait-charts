@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gait_charts/core/providers/app_config_provider.dart';
 import 'package:gait_charts/core/widgets/async_error_view.dart';
 import 'package:gait_charts/core/widgets/async_loading_view.dart';
 import 'package:gait_charts/features/admin/presentation/providers/admin_auth_provider.dart';
@@ -12,22 +13,34 @@ class AdminAuthGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final auth = ref.watch(adminAuthProvider);
+    // 先等待 appConfig 載入完成，確保 baseUrl 正確
+    final configAsync = ref.watch(appConfigAsyncProvider);
 
-    return auth.when(
-      data: (session) {
-        // 如果登入失敗，則顯示登入畫面
-        if (session == null) {
-          return const AdminLoginView();
-        }
-        // 如果登入成功，則顯示儀表板
-        return const DashboardScreen();
-      },
-      loading: () => const AsyncLoadingView(label: '正在檢查登入狀態...'),
+    return configAsync.when(
+      loading: () => const AsyncLoadingView(label: '正在載入設定...'),
       error: (error, stackTrace) => AsyncErrorView(
         error: error,
-        onRetry: () => ref.invalidate(adminAuthProvider),
+        onRetry: () => ref.invalidate(appConfigAsyncProvider),
       ),
+      data: (_) {
+        // config 載入完成後，再檢查登入狀態
+        final auth = ref.watch(adminAuthProvider);
+        return auth.when(
+          data: (session) {
+            // 如果登入失敗，則顯示登入畫面
+            if (session == null) {
+              return const AdminLoginView();
+            }
+            // 如果登入成功，則顯示儀表板
+            return const DashboardScreen();
+          },
+          loading: () => const AsyncLoadingView(label: '正在檢查登入狀態...'),
+          error: (error, stackTrace) => AsyncErrorView(
+            error: error,
+            onRetry: () => ref.invalidate(adminAuthProvider),
+          ),
+        );
+      },
     );
   }
 }

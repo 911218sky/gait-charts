@@ -10,7 +10,7 @@ import 'package:gait_charts/core/config/app_config.dart';
 /// Dio interceptor：將 JSON request body gzip 壓縮成 bytes，並用 `application/octet-stream`
 /// 送出（binary payload）。
 ///
-/// - 只處理常見的 JSON body（Map/List/String/List<int>/Uint8List）。
+/// - 只處理常見的 JSON body（Map/List/String/`List<int>`/Uint8List）。
 /// - 送出時會將 `Content-Type` 設為 `application/octet-stream`，避免在 Web DevTools 直接顯示 JSON。
 /// - 透過自訂 header 告知後端該如何還原：
 ///   - `X-Payload-Encoding: gzip`

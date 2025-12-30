@@ -34,7 +34,7 @@ void main() {
 
   group('UnlinkUserSessionResponse.fromJson', () {
     test('parses single mode with session', () {
-      final response = UnlinkUserSessionResponse.fromJson({
+      final response = UnlinkUserSessionResponse.fromJson(const {
         'user_code': 'u1',
         'mode': 'single',
         'unlinked_sessions': 1,
@@ -55,7 +55,7 @@ void main() {
     });
 
     test('parses all mode without session', () {
-      final response = UnlinkUserSessionResponse.fromJson({
+      final response = UnlinkUserSessionResponse.fromJson(const {
         'user_code': 'u1',
         'mode': 'all',
         'unlinked_sessions': 3,

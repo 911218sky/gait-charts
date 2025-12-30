@@ -45,9 +45,9 @@ class TrajectoryConfigPanel extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _ConfigSection(
+          const _ConfigSection(
             title: '關節點位',
-            children: const [
+            children: [
               _TrajectoryJointSelector(
                 label: '左側關節 (left_joint)',
                 side: _JointSide.left,

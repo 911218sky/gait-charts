@@ -1,7 +1,4 @@
-import 'package:meta/meta.dart';
-
 /// 單一安裝包檔案（通常為 `.apk`，但後端允許任意檔案）。
-@immutable
 class ApkFile {
   const ApkFile({
     required this.path,

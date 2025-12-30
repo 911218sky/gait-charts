@@ -7,6 +7,7 @@ class RealsenseSessionItem {
     required this.sessionName,
     required this.npyPath,
     required this.bagPath,
+    this.videoPath,
     this.createdAt,
     this.updatedAt,
   });
@@ -14,8 +15,13 @@ class RealsenseSessionItem {
   final String sessionName;
   final String npyPath;
   final String bagPath;
+  /// 輸出的影片檔路徑（若有啟用 save_video）。
+  final String? videoPath;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+
+  /// 是否有影片可播放。
+  bool get hasVideo => videoPath != null && videoPath!.isNotEmpty;
 
   factory RealsenseSessionItem.fromJson(Map<String, dynamic> json) {
     DateTime? parseDate(dynamic value) {
@@ -25,10 +31,13 @@ class RealsenseSessionItem {
       return null;
     }
 
+    final videoPath = json['video_path']?.toString();
+
     return RealsenseSessionItem(
       sessionName: json['session_name']?.toString() ?? '',
       npyPath: json['npy_path']?.toString() ?? '',
       bagPath: json['bag_path']?.toString() ?? '',
+      videoPath: (videoPath != null && videoPath.isNotEmpty) ? videoPath : null,
       createdAt: parseDate(json['created_at']),
       updatedAt: parseDate(json['updated_at']),
     );

@@ -8,8 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gait_charts/app/theme.dart';
 import 'package:gait_charts/core/providers/chart_config_provider.dart';
 import 'package:gait_charts/core/widgets/app_dropdown.dart';
-import 'package:gait_charts/core/widgets/chart_pan_shortcuts.dart';
 import 'package:gait_charts/core/widgets/chart_dots.dart';
+import 'package:gait_charts/core/widgets/chart_pan_shortcuts.dart';
 import 'package:gait_charts/core/widgets/dashboard_glass_tooltip.dart';
 import 'package:gait_charts/features/dashboard/domain/models/dashboard_overview.dart';
 
@@ -476,7 +476,7 @@ class _YHeightDiffChartState extends State<_YHeightDiffChart> {
 
           final brush = _buildBrushRect(chartSize);
 
-          final fullMinX = 0.0;
+          const fullMinX = 0.0;
           final fullMaxX = widget.response.timeSeconds.isNotEmpty
               ? widget.response.timeSeconds.last
               : 1.0;

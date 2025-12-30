@@ -27,9 +27,9 @@ class BagFileItem {
     final name = (json['name'] ?? '').toString().trim();
     final size = json['size_bytes'];
     final sizeBytes = switch (size) {
-      int v => v,
-      num v => v.toInt(),
-      String v => int.tryParse(v) ?? 0,
+      final int v => v,
+      final num v => v.toInt(),
+      final String v => int.tryParse(v) ?? 0,
       _ => 0,
     };
     final modifiedRaw = json['modified_at'];
@@ -83,9 +83,9 @@ class BagFileListResponse {
 
     int toInt(dynamic v) {
       return switch (v) {
-        int x => x,
-        num x => x.toInt(),
-        String x => int.tryParse(x) ?? 0,
+        final int x => x,
+        final num x => x.toInt(),
+        final String x => int.tryParse(x) ?? 0,
         _ => 0,
       };
     }

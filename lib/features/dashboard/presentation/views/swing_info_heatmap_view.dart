@@ -7,9 +7,9 @@ import 'package:gait_charts/core/widgets/async_request_view.dart';
 import 'package:gait_charts/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/analysis/minutely_cadence_bars_card.dart';
+import 'package:gait_charts/features/dashboard/presentation/widgets/shared/layout/dashboard_page_padding.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/swing_info_heatmap/swing_info_heatmap_chart.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/swing_info_heatmap/swing_info_heatmap_header.dart';
-import 'package:gait_charts/features/dashboard/presentation/widgets/shared/layout/dashboard_page_padding.dart';
 
 /// 每分鐘左右擺動期（swing）熱圖的主視圖。
 class SwingInfoHeatmapView extends ConsumerStatefulWidget {

@@ -342,7 +342,7 @@ class TrajectoryDecodedPayload {
   );
 }
 
-/// 反量化後的世界座標場景物件，包含椅子與三角錐的實際座標 (Point<double>)。
+/// 反量化後的世界座標場景物件，包含椅子與三角錐的實際座標 (`Point<double>`)。
 class TrajectorySceneWorld {
   const TrajectorySceneWorld({
     required this.chair,

@@ -19,7 +19,9 @@ void main() {
         child: MaterialApp(
           home: Scaffold(
             body: ListView(
+              // ignore: prefer_const_literals_to_create_immutables
               children: [
+                // ignore: prefer_const_constructors
                 ExtractionPanel(
                   suggestedSession: 'demo_session',
                   onCompleted: _noopCompleted,

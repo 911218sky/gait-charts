@@ -14,18 +14,23 @@ class SessionGridCard extends StatelessWidget {
     required this.bagPath,
     required this.date,
     super.key,
+    this.hasVideo = false,
     this.onTap,
+    this.onPlayVideo,
   });
 
   factory SessionGridCard.fromRealsenseSession({
     required RealsenseSessionItem item,
     VoidCallback? onTap,
+    VoidCallback? onPlayVideo,
   }) {
     return SessionGridCard(
       sessionName: item.sessionName,
       bagPath: item.bagPath,
       date: item.createdAt,
+      hasVideo: item.hasVideo,
       onTap: onTap,
+      onPlayVideo: onPlayVideo,
     );
   }
 
@@ -44,7 +49,13 @@ class SessionGridCard extends StatelessWidget {
   final String sessionName;
   final String bagPath;
   final DateTime? date;
+
+  /// 是否有影片可播放。
+  final bool hasVideo;
   final VoidCallback? onTap;
+  
+  /// 點擊播放影片的 callback。
+  final VoidCallback? onPlayVideo;
 
   String _formatDate(DateTime? d) {
     if (d == null) return '—';
@@ -62,67 +73,117 @@ class SessionGridCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: colors.outlineVariant),
       ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         hoverColor: colors.onSurface.withValues(alpha: 0.05),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            // 讓卡片在未受高度限制（例如預覽區的 SingleChildScrollView）時依內容自適應，避免 RenderBox not laid out。
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Icon
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF222222) : colors.surfaceContainerHighest.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.description_outlined,
-                  size: 18,
-                  color: colors.onSurfaceVariant,
-                ),
+        child: Stack(
+          children: [
+            // 主要內容
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Icon
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF222222)
+                          : colors.surfaceContainerHighest.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.description_outlined,
+                      size: 18,
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Title
+                  Text(
+                    sessionName,
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: colors.onSurface,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  // Path
+                  Text(
+                    bagPath,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: colors.onSurfaceVariant,
+                      height: 1.4,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  // Date
+                  Text(
+                    _formatDate(date),
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: colors.onSurfaceVariant.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              // Title
-              Text(
-                sessionName,
-                style: GoogleFonts.inter(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: colors.onSurface,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              // Path
-              Text(
-                bagPath,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: colors.onSurfaceVariant,
-                  height: 1.4,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-              // Date
-              Text(
-                _formatDate(date),
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  color: colors.onSurfaceVariant.withValues(alpha: 0.7),
-                ),
-              ),
-            ],
-          ),
+            ),
+            // 右上角影片緞帶標示
+            if (hasVideo)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: _VideoRibbon(colors: colors)
+              )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 右上角的影片緞帶標示。
+class _VideoRibbon extends StatelessWidget {
+  const _VideoRibbon({required this.colors});
+
+  final ColorScheme colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            colors.primary,
+            colors.primary.withValues(alpha: 0.85),
+          ],
+        ),
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(12),
+          bottomLeft: Radius.circular(12),
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          Icons.play_arrow_rounded,
+          size: 18,
+          color: colors.onPrimary,
         ),
       ),
     );

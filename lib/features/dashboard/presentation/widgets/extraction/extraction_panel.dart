@@ -6,8 +6,8 @@ import 'package:gait_charts/app/theme.dart';
 import 'package:gait_charts/core/platform/platform_env.dart';
 import 'package:gait_charts/core/widgets/app_dropdown.dart';
 import 'package:gait_charts/core/widgets/dashboard_toast.dart';
-import 'package:gait_charts/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:gait_charts/features/dashboard/domain/feature_availability.dart';
+import 'package:gait_charts/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/extraction/bag_picker_dialog.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/extraction/extraction_config_controls.dart';
@@ -188,8 +188,8 @@ class _ExtractionFilesSection extends ConsumerWidget {
     final serverTitle = hasFiles ? '繼續新增（伺服器）' : '從伺服器挑選 Bag 檔案';
     final serverSubtitle =
         '從伺服器清單挑選，不需上傳；最多同時處理 $maxConcurrency 個檔案';
-    final localTitle = hasFiles ? '繼續新增（本機）' : '從本機挑選 Bag 檔案（桌面）';
-    final localSubtitle = '從本機讀取 .bag；會以 bag_path 送出';
+    const localTitle = '從本機挑選 Bag 檔案（桌面）';
+    const localSubtitle = '從本機讀取 .bag；會以 bag_path 送出';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -338,6 +338,48 @@ class _ExtractionConfigSection extends ConsumerWidget {
               const SizedBox(height: 4),
               Text(
                 '預設啟用，避免姿態偏移；若需原始輸出可關閉。',
+                style: textTheme.bodySmall?.copyWith(
+                  color: colors.onSurfaceVariant,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // 輸出影片開關
+        Container(
+          width: 240,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            color: context.scaffoldBackgroundColor,
+            border: Border.all(color: context.dividerColor),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Switch.adaptive(
+                    value: config.saveVideo,
+                    onChanged: isProcessing ? null : configNotifier.setSaveVideo,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '輸出骨架影片',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: colors.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '預設啟用，產生帶有骨架標註的影片檔。',
                 style: textTheme.bodySmall?.copyWith(
                   color: colors.onSurfaceVariant,
                   fontSize: 12,

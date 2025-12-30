@@ -434,9 +434,9 @@ class _AdminManagementViewState extends ConsumerState<AdminManagementView> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) {
-        bool obscureOld = true;
-        bool obscureNew = true;
-        bool obscureConfirm = true;
+        var obscureOld = true;
+        var obscureNew = true;
+        var obscureConfirm = true;
 
         return StatefulBuilder(
           builder: (context, setState) {
@@ -609,7 +609,7 @@ class _AdminManagementViewState extends ConsumerState<AdminManagementView> {
     final controller = TextEditingController(text: initialUsername);
 
     String? errorText;
-    bool isSaving = false;
+    var isSaving = false;
 
     Future<void> onSubmit(StateSetter setState) async {
       if (isSaving) return;

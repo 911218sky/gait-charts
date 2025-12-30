@@ -14,10 +14,7 @@ import 'package:gait_charts/features/dashboard/presentation/widgets/users/delete
 /// 左側：使用者清單（支援關鍵字搜尋 + 分頁載入）
 /// 右側：選定使用者的 sessions/bag 預覽（點選 session 直接回傳）
 class UserSessionPickerPanel extends ConsumerStatefulWidget {
-  const UserSessionPickerPanel({
-    required this.onSelectSession,
-    super.key,
-  });
+  const UserSessionPickerPanel({required this.onSelectSession, super.key});
 
   final ValueChanged<String> onSelectSession;
 
@@ -26,7 +23,8 @@ class UserSessionPickerPanel extends ConsumerStatefulWidget {
       _UserSessionPickerPanelState();
 }
 
-class _UserSessionPickerPanelState extends ConsumerState<UserSessionPickerPanel> {
+class _UserSessionPickerPanelState
+    extends ConsumerState<UserSessionPickerPanel> {
   final ScrollController _scrollController = ScrollController();
   late final TextEditingController _searchController;
 
@@ -141,7 +139,10 @@ class _UserSessionPickerPanelState extends ConsumerState<UserSessionPickerPanel>
           _isLoading = false;
         });
       } else {
-        final result = await _repo.fetchUserList(page: next, pageSize: _pageSize);
+        final result = await _repo.fetchUserList(
+          page: next,
+          pageSize: _pageSize,
+        );
         if (!mounted || requestId != _listRequestId) return;
         setState(() {
           _items.addAll(result.items);
@@ -175,10 +176,13 @@ class _UserSessionPickerPanelState extends ConsumerState<UserSessionPickerPanel>
     final colors = context.colorScheme;
     final current = _currentPage;
 
-    final pageSet = <int>{1, total, current - 1, current, current + 1}
-        .where((p) => p >= 1 && p <= total)
-        .toList()
-      ..sort();
+    final pageSet = <int>{
+      1,
+      total,
+      current - 1,
+      current,
+      current + 1,
+    }.where((p) => p >= 1 && p <= total).toList()..sort();
 
     final pageButtons = <Widget>[];
     int? last;
@@ -187,7 +191,12 @@ class _UserSessionPickerPanelState extends ConsumerState<UserSessionPickerPanel>
         pageButtons.add(
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text('…', style: context.textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant)),
+            child: Text(
+              '…',
+              style: context.textTheme.bodySmall?.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+            ),
           ),
         );
       }
@@ -198,8 +207,9 @@ class _UserSessionPickerPanelState extends ConsumerState<UserSessionPickerPanel>
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             minimumSize: const Size(40, 36),
-            backgroundColor:
-                selected ? colors.primary.withValues(alpha: 0.12) : null,
+            backgroundColor: selected
+                ? colors.primary.withValues(alpha: 0.12)
+                : null,
             side: BorderSide(
               color: selected ? colors.primary : colors.outlineVariant,
             ),
@@ -373,7 +383,10 @@ class _UserSessionPickerPanelState extends ConsumerState<UserSessionPickerPanel>
         return;
       }
 
-      final result = await _repo.fetchUserList(page: _page, pageSize: _pageSize);
+      final result = await _repo.fetchUserList(
+        page: _page,
+        pageSize: _pageSize,
+      );
       if (!mounted || requestId != _listRequestId) return;
 
       setState(() {
@@ -472,8 +485,9 @@ class _UserSessionPickerPanelState extends ConsumerState<UserSessionPickerPanel>
         variant: DashboardToastVariant.danger,
       );
     } finally {
-      if (!mounted) return;
-      setState(() => _isDeleteUserBusy = false);
+      if (mounted) {
+        setState(() => _isDeleteUserBusy = false);
+      }
     }
   }
 
@@ -567,7 +581,7 @@ class _UserSessionPickerPanelState extends ConsumerState<UserSessionPickerPanel>
                 : ListView.separated(
                     controller: _scrollController,
                     itemCount: _items.length + (_isLoading ? 1 : 0),
-                    separatorBuilder: (_, __) =>
+                    separatorBuilder: (_, _) =>
                         Divider(height: 1, color: colors.outlineVariant),
                     itemBuilder: (context, index) {
                       if (index == _items.length) {
@@ -589,7 +603,9 @@ class _UserSessionPickerPanelState extends ConsumerState<UserSessionPickerPanel>
                         leading: CircleAvatar(
                           backgroundColor: colors.surfaceContainerHigh,
                           child: Text(
-                            item.name.isNotEmpty ? item.name[0].toUpperCase() : '?',
+                            item.name.isNotEmpty
+                                ? item.name[0].toUpperCase()
+                                : '?',
                           ),
                         ),
                         title: Text(
@@ -641,33 +657,31 @@ class _UserSessionPickerPanelState extends ConsumerState<UserSessionPickerPanel>
                 ),
               )
             : _isPreviewLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _previewError != null
-                    ? Center(
-                        child: Text(
-                          '載入失敗：$_previewError',
-                          style: context.textTheme.bodyMedium?.copyWith(
-                            color: colors.error,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      )
-                    : (_preview == null)
-                        ? Center(
-                            child: Text(
-                              '沒有資料',
-                              style: context.textTheme.bodyMedium?.copyWith(
-                                color: colors.onSurfaceVariant,
-                              ),
-                            ),
-                          )
-                        : _UserSessionsPreview(
-                            detail: _preview!,
-                            onSelectSession: widget.onSelectSession,
-                            onDeleteUser: _isDeleteUserBusy
-                                ? null
-                                : _deleteSelectedUser,
-                          ),
+            ? const Center(child: CircularProgressIndicator())
+            : _previewError != null
+            ? Center(
+                child: Text(
+                  '載入失敗：$_previewError',
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: colors.error,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              )
+            : (_preview == null)
+            ? Center(
+                child: Text(
+                  '沒有資料',
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              )
+            : _UserSessionsPreview(
+                detail: _preview!,
+                onSelectSession: widget.onSelectSession,
+                onDeleteUser: _isDeleteUserBusy ? null : _deleteSelectedUser,
+              ),
       ),
     );
 
@@ -885,5 +899,3 @@ class _SimpleSessionCard extends StatelessWidget {
     );
   }
 }
-
-

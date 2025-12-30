@@ -11,6 +11,7 @@ class ExtractConfig {
     this.minTrackingConfidence = 0.5,
     this.maxConcurrency = 3,
     this.calibratePose = true,
+    this.saveVideo = true,
   });
 
   final bool force; // 是否強制重新萃取
@@ -21,6 +22,7 @@ class ExtractConfig {
   final double minTrackingConfidence; // 最小追蹤信心度
   final int maxConcurrency; // 最大並行處理數量
   final bool calibratePose; // 是否在寫入前校準姿勢
+  final bool saveVideo; // 是否輸出帶有骨架標註的影片
 
   ExtractConfig copyWith({
     bool? force,
@@ -31,6 +33,7 @@ class ExtractConfig {
     double? minTrackingConfidence,
     int? maxConcurrency,
     bool? calibratePose,
+    bool? saveVideo,
   }) {
     return ExtractConfig(
       force: force ?? this.force,
@@ -43,6 +46,7 @@ class ExtractConfig {
           minTrackingConfidence ?? this.minTrackingConfidence,
       maxConcurrency: maxConcurrency ?? this.maxConcurrency,
       calibratePose: calibratePose ?? this.calibratePose,
+      saveVideo: saveVideo ?? this.saveVideo,
     );
   }
 
@@ -54,6 +58,7 @@ class ExtractConfig {
     'min_detection_confidence': minDetectionConfidence,
     'min_tracking_confidence': minTrackingConfidence,
     'calibrate_pose': calibratePose,
+    'save_video': saveVideo,
   };
 }
 

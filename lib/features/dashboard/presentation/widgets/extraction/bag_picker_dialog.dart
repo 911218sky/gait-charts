@@ -11,8 +11,8 @@ import 'package:intl/intl.dart';
 /// 從伺服器挑選 bag 檔案（支援多選與分頁）。
 class BagPickerDialog extends ConsumerStatefulWidget {
   const BagPickerDialog({
-    super.key,
     required this.maxSelection,
+    super.key,
   });
 
   final int maxSelection;
@@ -160,10 +160,7 @@ class _BagPickerDialogState extends ConsumerState<BagPickerDialog> {
                       isDense: true,
                       prefixIcon: Icon(Icons.search),
                     ),
-                    onChanged: (v) {
-                      // ignore: discarded_futures
-                      notifier.setQuery(v);
-                    },
+                    onChanged: notifier.setQuery,
                     onSubmitted: (v) {
                       // ignore: discarded_futures
                       notifier.setQuery(v, immediate: true);
@@ -184,7 +181,7 @@ class _BagPickerDialogState extends ConsumerState<BagPickerDialog> {
                       value: state.recursive,
                       onChanged: state.isLoading
                           ? null
-                          : (v) => notifier.setRecursiveAndReload(v),
+                          : notifier.setRecursiveAndReload,
                     ),
                   ],
                 ),
@@ -256,7 +253,7 @@ class _BagListBody extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
       itemCount: items.length,
-      separatorBuilder: (_, __) => Divider(
+      separatorBuilder: (_, _) => Divider(
         height: 1,
         color: context.colorScheme.outlineVariant,
       ),

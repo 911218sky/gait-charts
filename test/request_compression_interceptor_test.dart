@@ -9,7 +9,7 @@ import 'package:gait_charts/core/network/interceptors/request_compression_interc
 
 void main() {
   test('啟用時：JSON body 會 gzip 成 bytes，並以 application/octet-stream 送出', () async {
-    final config = AppConfig(
+    const config = AppConfig(
       baseUrl: 'http://example.com',
       requestCompressionEnabled: true,
     );
@@ -39,7 +39,7 @@ void main() {
     expect(captured!.data, isA<Uint8List>());
 
     final gzBytes = captured!.data as Uint8List;
-    final decoded = GZipDecoder().decodeBytes(gzBytes);
+    final decoded = const GZipDecoder().decodeBytes(gzBytes);
     final jsonText = utf8.decode(decoded);
     expect(jsonDecode(jsonText), {'hello': 'world'});
   });

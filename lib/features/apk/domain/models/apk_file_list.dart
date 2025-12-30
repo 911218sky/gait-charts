@@ -1,9 +1,6 @@
-import 'package:meta/meta.dart';
-
 import 'package:gait_charts/features/apk/domain/models/apk_file.dart';
 
 /// 後端 `/apk` 回傳的檔案清單。
-@immutable
 class ApkFileListResponse {
   const ApkFileListResponse({
     required this.baseDir,

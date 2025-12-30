@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:gait_charts/core/extensions/build_context_extensions.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 export 'package:gait_charts/core/extensions/build_context_extensions.dart';
 

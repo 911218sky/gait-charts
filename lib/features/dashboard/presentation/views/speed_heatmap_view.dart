@@ -5,9 +5,9 @@ import 'package:gait_charts/app/theme.dart';
 import 'package:gait_charts/core/providers/request_failure_store.dart';
 import 'package:gait_charts/core/widgets/async_request_view.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
+import 'package:gait_charts/features/dashboard/presentation/widgets/shared/layout/dashboard_page_padding.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/speed_heatmap/speed_heatmap_chart.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/speed_heatmap/speed_heatmap_header.dart';
-import 'package:gait_charts/features/dashboard/presentation/widgets/shared/layout/dashboard_page_padding.dart';
 
 /// 每圈速度熱圖的主視圖。
 class SpeedHeatmapView extends ConsumerStatefulWidget {

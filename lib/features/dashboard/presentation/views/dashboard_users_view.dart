@@ -8,14 +8,14 @@ import 'package:gait_charts/core/widgets/dashboard_toast.dart';
 import 'package:gait_charts/features/dashboard/domain/models/user_profile.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/shared/fields/user_autocomplete_field.dart';
-import 'package:gait_charts/features/dashboard/presentation/widgets/users/user_browser_dialog.dart';
+import 'package:gait_charts/features/dashboard/presentation/widgets/shared/layout/dashboard_page_padding.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/users/delete_user_dialog.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/users/unlink_all_user_sessions_dialog.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/users/unlink_user_session_dialog.dart';
+import 'package:gait_charts/features/dashboard/presentation/widgets/users/user_browser_dialog.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/users/user_detail_content.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/users/user_profile_form_dialog.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/users/user_sessions_card.dart';
-import 'package:gait_charts/features/dashboard/presentation/widgets/shared/layout/dashboard_page_padding.dart';
 import 'package:intl/intl.dart';
 
 /// 使用者管理：建立/編輯個案、以及把 session(bag) 綁到使用者。

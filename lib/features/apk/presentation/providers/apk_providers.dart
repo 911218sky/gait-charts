@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:gait_charts/core/providers/platform_env_provider.dart';
 import 'package:gait_charts/core/providers/app_config_provider.dart';
+import 'package:gait_charts/core/providers/platform_env_provider.dart';
 import 'package:gait_charts/core/providers/request_failure_store.dart';
 import 'package:gait_charts/features/apk/data/apk_repository.dart';
 import 'package:gait_charts/features/apk/domain/models/apk_artifact_platform.dart';

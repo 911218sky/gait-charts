@@ -1,10 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:gait_charts/core/config/debounce_config.dart';
 import 'package:gait_charts/features/dashboard/data/dashboard_repository.dart';
 import 'package:gait_charts/features/dashboard/domain/models/bag_file.dart';
-import 'dart:async';
 
 @immutable
 class BagListState {

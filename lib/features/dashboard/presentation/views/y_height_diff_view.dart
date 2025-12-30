@@ -6,10 +6,10 @@ import 'package:gait_charts/core/providers/request_failure_store.dart';
 import 'package:gait_charts/core/widgets/async_request_view.dart';
 import 'package:gait_charts/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
+import 'package:gait_charts/features/dashboard/presentation/widgets/shared/layout/dashboard_page_padding.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/y_height_diff/y_height_diff_chart.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/y_height_diff/y_height_diff_header.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/y_height_diff/y_height_diff_metrics.dart';
-import 'package:gait_charts/features/dashboard/presentation/widgets/shared/layout/dashboard_page_padding.dart';
 
 /// 左右關節高度差的專屬頁面。
 class YHeightDiffView extends ConsumerStatefulWidget {

@@ -6,8 +6,8 @@ import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_
 import '../widgets/frequency_analysis/frequency_analysis_header.dart';
 import '../widgets/frequency_analysis/multi_fft_section.dart';
 import '../widgets/frequency_analysis/spatial_spectrum_section.dart';
-import '../widgets/shared/layout/dashboard_page_padding.dart';
 import '../widgets/shared/dialogs/session_picker_sheet.dart';
+import '../widgets/shared/layout/dashboard_page_padding.dart';
 
 /// 專門呈現 /spatial_spectrum 與 /multi_fft_from_series 的視圖。
 class FrequencyAnalysisView extends ConsumerStatefulWidget {

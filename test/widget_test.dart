@@ -9,9 +9,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:gait_charts/app/app.dart';
+import 'package:gait_charts/features/admin/presentation/providers/admin_auth_provider.dart';
 import 'package:gait_charts/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
-import 'package:gait_charts/features/admin/presentation/providers/admin_auth_provider.dart';
 import 'test_helpers/fake_admin_auth_notifier.dart';
 
 void main() {

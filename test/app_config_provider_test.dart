@@ -1,8 +1,8 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:gait_charts/core/config/app_config.dart';
-import 'package:gait_charts/core/storage/app_config_storage.dart';
 import 'package:gait_charts/core/providers/app_config_provider.dart';
+import 'package:gait_charts/core/storage/app_config_storage.dart';
 
 class _FakeAppConfigStorage extends AppConfigStorage {
   _FakeAppConfigStorage({this.initialBaseUrl});

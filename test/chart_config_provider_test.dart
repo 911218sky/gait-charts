@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:gait_charts/core/config/chart_config.dart';
 import 'package:gait_charts/core/providers/chart_config_provider.dart';
 import 'package:gait_charts/core/storage/chart_config_storage.dart';

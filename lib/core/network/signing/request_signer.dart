@@ -37,7 +37,7 @@ class RequestSigner {
   /// 支援：
   /// - null => empty
   /// - String => UTF-8
-  /// - List<int>/Uint8List => raw bytes
+  /// - `List<int>`/Uint8List => raw bytes
   /// - Map/List => jsonEncode + UTF-8（適用 application/json）
   ///
   /// 其他型別（例如 FormData / Stream）會拋錯，避免產生「簽了但一定驗不過」的假簽章。

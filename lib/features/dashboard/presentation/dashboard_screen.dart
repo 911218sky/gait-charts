@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:gait_charts/app/app.dart';
 import 'package:gait_charts/app/theme.dart';
+import 'package:gait_charts/app/widgets/app_connection_settings_panel.dart';
 import 'package:gait_charts/app/widgets/window_title_bar.dart';
-import 'package:gait_charts/core/platform/window_manager_initializer.dart';
-
 import 'package:gait_charts/core/platform/platform_env.dart';
+import 'package:gait_charts/core/platform/window_manager_initializer.dart';
 import 'package:gait_charts/core/widgets/dashboard_toast.dart';
+import 'package:gait_charts/features/admin/presentation/providers/admin_auth_provider.dart';
+import 'package:gait_charts/features/admin/presentation/views/admin_management_view.dart';
+import 'package:gait_charts/features/apk/presentation/views/apk_downloads_view.dart';
 import 'package:gait_charts/features/dashboard/domain/feature_availability.dart';
 import 'package:gait_charts/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
@@ -17,14 +21,11 @@ import 'package:gait_charts/features/dashboard/presentation/views/frequency_anal
 import 'package:gait_charts/features/dashboard/presentation/views/speed_heatmap_view.dart';
 import 'package:gait_charts/features/dashboard/presentation/views/swing_info_heatmap_view.dart';
 import 'package:gait_charts/features/dashboard/presentation/views/trajectory_playback_view.dart';
+import 'package:gait_charts/features/dashboard/presentation/views/video_playback_view.dart';
 import 'package:gait_charts/features/dashboard/presentation/views/y_height_diff_view.dart';
-import 'package:gait_charts/features/apk/presentation/views/apk_downloads_view.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/per_lap_offset/per_lap_offset_view.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/settings/chart_config_panel.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/shared/navigation/sidebar_navigation.dart';
-import 'package:gait_charts/app/widgets/app_connection_settings_panel.dart';
-import 'package:gait_charts/features/admin/presentation/providers/admin_auth_provider.dart';
-import 'package:gait_charts/features/admin/presentation/views/admin_management_view.dart';
 
 /// 儀表板主畫面，整合分析、偏移與資料提取等子頁。
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -41,6 +42,7 @@ enum _DashboardSection {
   speedHeatmap,
   swingHeatmap,
   trajectoryPlayback,
+  videoPlayback,
   frequency,
   yHeightDiff,
   apkDownloads,
@@ -357,6 +359,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           onLoadSession: _loadSession,
         );
         break;
+      case _DashboardSection.videoPlayback:
+        content = VideoPlaybackView(
+          key: const ValueKey('video-playback-view'),
+          sessionController: _sessionController,
+          onLoadSession: _loadSession,
+        );
+        break;
       case _DashboardSection.frequency:
         content = FrequencyAnalysisView(
           key: const ValueKey('frequency-view'),
@@ -610,6 +619,14 @@ const List<_DashboardNavItem> _navItems = [
     selectedIcon: Icons.movie_filter,
     sidebarLabel: '軌跡影片',
     bottomLabel: '軌跡影片',
+    sidebarGroup: '分析',
+  ),
+  _DashboardNavItem(
+    section: _DashboardSection.videoPlayback,
+    icon: Icons.play_circle_outline,
+    selectedIcon: Icons.play_circle,
+    sidebarLabel: '影片播放',
+    bottomLabel: '影片',
     sidebarGroup: '分析',
   ),
   _DashboardNavItem(
