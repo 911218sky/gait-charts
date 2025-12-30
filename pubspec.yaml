@@ -1,4 +1,4 @@
-name: gait_charts
+﻿name: gait_charts
 description: "A new Flutter project."
 
 # Do not publish to pub.dev
@@ -11,7 +11,7 @@ publish_to: 'none'
 version: 1.1.1
 
 environment:
-  sdk: ^3.10.0-162.1.beta
+  sdk: ^3.10.0
 
 dependencies:
   flutter:
