@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gait_charts/app/theme.dart';
 import 'package:gait_charts/core/widgets/app_tooltip.dart';
 import 'package:gait_charts/features/dashboard/domain/models/user_profile.dart';
-import 'package:gait_charts/features/dashboard/presentation/providers/video/video_availability_provider.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/shared/dialogs/session_picker_sheet.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/shared/fields/session_autocomplete_field.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -254,7 +252,7 @@ class UserSessionsCard extends StatelessWidget {
   }
 }
 
-class _UserSessionTile extends ConsumerWidget {
+class _UserSessionTile extends StatelessWidget {
   const _UserSessionTile({
     required this.item,
     required this.onCopy,
@@ -276,18 +274,10 @@ class _UserSessionTile extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final colors = context.colorScheme;
     final isDark = context.isDark;
     final accent = DashboardAccentColors.of(context);
-
-    // 動態檢查影片可用性
-    final videoAvailability = ref.watch(
-      videoAvailabilityProvider(item.sessionName),
-    );
-    final hasVideo = videoAvailability.whenOrNull(
-      data: (availability) => availability?.videoExists ?? false,
-    ) ?? item.hasVideo; // fallback 到 videoPath 判斷
 
     return Container(
       decoration: BoxDecoration(
@@ -355,7 +345,7 @@ class _UserSessionTile extends ConsumerWidget {
           // Actions
           Column(
             children: [
-              if (hasVideo && onPlayVideo != null)
+              if (item.hasVideo && onPlayVideo != null)
                 AppTooltip(
                   message: '播放影片',
                   child: IconButton(
@@ -370,7 +360,7 @@ class _UserSessionTile extends ConsumerWidget {
                     ),
                   ),
                 ),
-              if (hasVideo && onPlayVideo != null) const SizedBox(height: 8),
+              if (item.hasVideo && onPlayVideo != null) const SizedBox(height: 8),
               AppTooltip(
                 message: '設為目前 Session',
                 child: IconButton(
