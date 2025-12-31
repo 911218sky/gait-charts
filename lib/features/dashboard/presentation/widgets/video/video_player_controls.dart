@@ -3,6 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:gait_charts/app/theme.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/video/video_player_provider.dart';
 
+/// 影片播放控制列的顏色配置。
+/// 
+/// 影片播放器的控制列需要在影片上方顯示，因此無論淺色/深色模式，
+/// 都使用深色風格（白色文字 + 黑色漸層背景），確保在影片上方清楚可見。
+class _VideoControlColors {
+  const _VideoControlColors._();
+
+  static const foreground = Colors.white;
+  static const foregroundMuted = Color(0xE6FFFFFF); // 90% white
+  static const gradientEnd = Color(0xCC000000); // 80% black
+  static const controlBackground = Color(0x26FFFFFF); // 15% white
+  static const controlBorder = Color(0x33FFFFFF); // 20% white
+}
+
 /// 影片播放控制列。
 class VideoPlayerControls extends StatelessWidget {
   const VideoPlayerControls({
@@ -38,15 +52,15 @@ class VideoPlayerControls extends StatelessWidget {
     
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
             Colors.transparent,
-            Colors.black.withValues(alpha: 0.8),
+            _VideoControlColors.gradientEnd,
           ],
-          stops: const [0.0, 0.4],
+          stops: [0.0, 0.4],
         ),
       ),
       child: SafeArea(
@@ -61,7 +75,7 @@ class VideoPlayerControls extends StatelessWidget {
                 data: SliderTheme.of(context).copyWith(
                   trackHeight: 4,
                   activeTrackColor: colors.primary,
-                  inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
+                  inactiveTrackColor: _VideoControlColors.foreground.withValues(alpha: 0.3),
                   thumbColor: colors.primary,
                   thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
                   overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
@@ -90,7 +104,7 @@ class VideoPlayerControls extends StatelessWidget {
                   onPressed: state.isInitialized ? onPlayPause : null,
                   icon: Icon(
                     state.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                    color: Colors.white,
+                    color: _VideoControlColors.foreground,
                     size: 28,
                   ),
                   tooltip: state.isPlaying ? '暫停 (Space)' : '播放 (Space)',
@@ -102,7 +116,7 @@ class VideoPlayerControls extends StatelessWidget {
                 Text(
                   '${_formatDuration(state.position)} / ${_formatDuration(state.duration)}',
                   style: context.textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: _VideoControlColors.foregroundMuted,
                     fontFeatures: const [FontFeature.tabularFigures()],
                     fontWeight: FontWeight.w500,
                   ),
@@ -129,7 +143,7 @@ class VideoPlayerControls extends StatelessWidget {
                 // 全螢幕按鈕
                 IconButton(
                    onPressed: onFullscreen,
-                   icon: const Icon(Icons.fullscreen_rounded, color: Colors.white),
+                   icon: const Icon(Icons.fullscreen_rounded, color: _VideoControlColors.foreground),
                    tooltip: '全螢幕',
                 ),
               ],
@@ -210,27 +224,25 @@ class _SpeedSelector extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.15),
+          color: _VideoControlColors.controlBackground,
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.2),
-          ),
+          border: Border.all(color: _VideoControlColors.controlBorder),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.speed, size: 14, color: Colors.white),
+            const Icon(Icons.speed, size: 14, color: _VideoControlColors.foreground),
             const SizedBox(width: 6),
             Text(
               currentSpeed == 1.0 ? '1x' : '${currentSpeed}x',
               style: const TextStyle(
-                color: Colors.white,
+                color: _VideoControlColors.foreground,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(width: 4),
-            const Icon(Icons.arrow_drop_up, size: 16, color: Colors.white),
+            const Icon(Icons.arrow_drop_up, size: 16, color: _VideoControlColors.foreground),
           ],
         ),
       ),
@@ -263,6 +275,8 @@ class _VolumeControlState extends State<_VolumeControl> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colorScheme;
+    
     return MouseRegion(
       onEnter: (_) => setState(() => _showSlider = true),
       onExit: (_) => setState(() => _showSlider = false),
@@ -273,7 +287,7 @@ class _VolumeControlState extends State<_VolumeControl> {
             onPressed: () {
               widget.onVolumeChanged(widget.volume > 0 ? 0 : 1);
             },
-            icon: Icon(_volumeIcon, color: Colors.white, size: 24),
+            icon: Icon(_volumeIcon, color: _VideoControlColors.foreground, size: 24),
             tooltip: '靜音',
           ),
           AnimatedContainer(
@@ -283,6 +297,9 @@ class _VolumeControlState extends State<_VolumeControl> {
                 ? SliderTheme(
                     data: SliderTheme.of(context).copyWith(
                       trackHeight: 3,
+                      activeTrackColor: colors.primary,
+                      inactiveTrackColor: _VideoControlColors.foreground.withValues(alpha: 0.3),
+                      thumbColor: colors.primary,
                       thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
                       overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
                     ),
