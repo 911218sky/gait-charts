@@ -9,5 +9,7 @@
   "then": {
     "type": "askAgent",
     "prompt": "Execute the following steps to commit changes:\n\n1. First, run `git add -A` to stage all changes\n\n2. Then run `git diff --cached` to see the staged changes\n\n3. Analyze the diff and generate a commit message following these rules:\n   - Language: English only\n   - Format: <type>(<scope>): <short description>\n   - Types with emojis:\n     - feat (✨) - new feature\n     - fix (🐛) - bug fix\n     - refactor (♻️) - code refactoring\n     - docs (📝) - documentation\n     - style (💄) - formatting, styling\n     - perf (⚡) - performance improvement\n     - test (✅) - adding/updating tests\n     - chore (🔧) - maintenance tasks\n     - ci (👷) - CI/CD changes\n   - First line must be under 72 characters\n   - Use imperative mood (\"add\" not \"added\")\n   - No period at end of subject line\n   - Infer scope from file paths (e.g., video, api, dashboard, admin, apk)\n   - Add body with bullet points if changes are complex (multiple files or significant changes)\n\n4. Execute the commit with: `git commit -m \"<generated message>\"`\n\nIf there are no staged changes after git add -A, inform the user that there's nothing to commit."
-  }
+  },
+  "workspaceFolderName": "gait-charts",
+  "shortName": "commit-changes"
 }
