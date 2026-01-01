@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:gait_charts/core/network/cookies/dio_cookie_support.dart';
+import 'package:gait_charts/core/network/interceptors/auth_interceptor.dart';
 import 'package:gait_charts/core/network/interceptors/request_compression_interceptor.dart';
 import 'package:gait_charts/core/network/interceptors/signed_headers_interceptor.dart';
 import 'package:gait_charts/core/providers/app_config_provider.dart';
@@ -39,6 +40,9 @@ final dioProvider = Provider<Dio>((ref) {
 
   // 送出請求前補上後端要求的簽章 headers（由 AppConfig 控制是否啟用）。
   dio.interceptors.add(SignedHeadersInterceptor(config: config));
+
+  // 處理 401 Unauthorized：自動清除 token 並觸發登出
+  dio.interceptors.add(AuthInterceptor(ref: ref));
 
   // 在 Debug 模式下加入最小化錯誤 Log：遇到 403 時印出 request/response，方便除錯權限或 token 問題。
   if (kDebugMode) {

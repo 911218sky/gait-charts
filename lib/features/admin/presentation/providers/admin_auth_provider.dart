@@ -10,6 +10,14 @@ class AdminAuthNotifier extends AsyncNotifier<AuthSession?> {
 
   @override
   Future<AuthSession?> build() async {
+    // 監聽 token 狀態變化，當 token 被外部清除（如 401 攔截器）時自動登出
+    ref.listen<String?>(adminTokenStateProvider, (previous, next) {
+      // 如果 token 從有值變成 null，且目前 state 還有 session，則清除 session
+      if (previous != null && next == null && state.asData?.value != null) {
+        state = const AsyncData(null);
+      }
+    });
+
     // 嘗試從本機還原登入 session
     final session = await _repo.restoreSession();
     _syncToken(session);
