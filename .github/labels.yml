@@ -1,0 +1,166 @@
+# 🏷️ GitHub Labels 設定
+# 使用 github-label-sync 或手動在 GitHub 設定
+# 安裝: npm install -g github-label-sync
+# 執行: github-label-sync --access-token <token> <owner>/<repo>
+
+# ═══════════════════════════════════════════════════════════════
+# 📌 類型標籤 (Type)
+# ═══════════════════════════════════════════════════════════════
+- name: "bug"
+  color: "d73a4a"
+  description: "🐛 程式錯誤或異常行為"
+
+- name: "enhancement"
+  color: "a2eeef"
+  description: "✨ 新功能或改進建議"
+
+- name: "documentation"
+  color: "0075ca"
+  description: "📚 文件相關"
+
+- name: "question"
+  color: "d876e3"
+  description: "❓ 問題詢問"
+
+- name: "refactor"
+  color: "fbca04"
+  description: "♻️ 程式碼重構"
+
+- name: "test"
+  color: "bfd4f2"
+  description: "🧪 測試相關"
+
+- name: "chore"
+  color: "fef2c0"
+  description: "🔧 維護性工作"
+
+- name: "security"
+  color: "ee0701"
+  description: "🔒 安全性問題"
+
+# ═══════════════════════════════════════════════════════════════
+# 🎯 優先程度 (Priority)
+# ═══════════════════════════════════════════════════════════════
+- name: "priority: critical"
+  color: "b60205"
+  description: "🔴 緊急 - 需要立即處理"
+
+- name: "priority: high"
+  color: "d93f0b"
+  description: "🟠 高優先"
+
+- name: "priority: medium"
+  color: "fbca04"
+  description: "🟡 中優先"
+
+- name: "priority: low"
+  color: "0e8a16"
+  description: "🟢 低優先"
+
+# ═══════════════════════════════════════════════════════════════
+# 📊 狀態標籤 (Status)
+# ═══════════════════════════════════════════════════════════════
+- name: "待分類"
+  color: "ededed"
+  description: "📥 等待分類處理"
+
+- name: "待評估"
+  color: "c5def5"
+  description: "🔍 需要進一步評估"
+
+- name: "需要協助"
+  color: "008672"
+  description: "🆘 需要社群協助"
+
+- name: "進行中"
+  color: "0052cc"
+  description: "🚧 正在處理中"
+
+- name: "已排程"
+  color: "5319e7"
+  description: "📅 已排入開發計畫"
+
+- name: "已暫緩"
+  color: "ffffff"
+  description: "⏸️ 暫時擱置"
+
+- name: "無法重現"
+  color: "cfd3d7"
+  description: "🤷 無法重現問題"
+
+- name: "不會修復"
+  color: "ffffff"
+  description: "🚫 決定不處理"
+
+- name: "重複"
+  color: "cfd3d7"
+  description: "♻️ 重複的 Issue"
+
+# ═══════════════════════════════════════════════════════════════
+# 📱 平台標籤 (Platform)
+# ═══════════════════════════════════════════════════════════════
+- name: "platform: android"
+  color: "3ddc84"
+  description: "🤖 Android 平台"
+
+- name: "platform: ios"
+  color: "147efb"
+  description: "🍎 iOS 平台"
+
+- name: "platform: web"
+  color: "ff7139"
+  description: "🌐 Web 平台"
+
+- name: "platform: windows"
+  color: "00adef"
+  description: "🪟 Windows 平台"
+
+- name: "platform: macos"
+  color: "999999"
+  description: "💻 macOS 平台"
+
+- name: "platform: linux"
+  color: "fcc624"
+  description: "🐧 Linux 平台"
+
+# ═══════════════════════════════════════════════════════════════
+# 🏗️ 模組標籤 (Module)
+# ═══════════════════════════════════════════════════════════════
+- name: "area: ui"
+  color: "c2e0c6"
+  description: "🎨 UI 介面相關"
+
+- name: "area: chart"
+  color: "bfdadc"
+  description: "📊 圖表相關"
+
+- name: "area: data"
+  color: "d4c5f9"
+  description: "💾 資料處理相關"
+
+- name: "area: network"
+  color: "f9d0c4"
+  description: "🌐 網路 / API 相關"
+
+- name: "area: performance"
+  color: "fef2c0"
+  description: "⚡ 效能相關"
+
+# ═══════════════════════════════════════════════════════════════
+# 🎁 特殊標籤 (Special)
+# ═══════════════════════════════════════════════════════════════
+- name: "good first issue"
+  color: "7057ff"
+  description: "👋 適合新手的入門 Issue"
+
+- name: "help wanted"
+  color: "008672"
+  description: "🙏 歡迎社群協助"
+
+- name: "breaking change"
+  color: "b60205"
+  description: "💥 破壞性變更"
+
+- name: "dependencies"
+  color: "0366d6"
+  description: "📦 依賴套件更新"

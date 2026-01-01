@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Generate Commit Message",
+  "description": "Analyzes the current git diff and generates a conventional commit message with emoji prefixes, then commits and pushes to remote.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Analyze the current git diff by running `git diff --staged` (or `git diff` if nothing is staged). Then generate a commit message following these rules:\n\n1. Language: English only\n2. Format: <type>(<scope>): <short description>\n3. Types with emojis:\n   - feat (✨): New feature\n   - fix (🐛): Bug fix\n   - refactor (♻️): Code refactoring\n   - docs (📝): Documentation\n   - style (💄): Styling/formatting\n   - perf (⚡): Performance improvement\n   - test (✅): Tests\n   - chore (🔧): Maintenance\n   - ci (👷): CI/CD changes\n\n4. Rules:\n   - First line under 72 characters\n   - Use imperative mood (\"add\" not \"added\")\n   - No period at end of subject line\n   - Infer scope from file paths (e.g., video, api, dashboard, src, config)\n   - Add body with bullet points if changes are complex\n\nExamples:\n- ✨ feat(video): add H.264 encoding support\n- 🐛 fix(api): resolve session deletion not removing files\n- ♻️ refactor(processor): extract video codec selection logic\n\nAfter generating the commit message:\n1. Stage all changes if not already staged: `git add -A`\n2. Commit with the generated message: `git commit -m \"<message>\"`\n3. Push to remote: `git push`\n4. If push fails, analyze the error and attempt to fix it:\n   - If remote has new commits: run `git pull --rebase` then `git push` again\n   - If there are merge conflicts: resolve them, stage changes, run `git rebase --continue`, then push\n   - If branch doesn't exist on remote: run `git push -u origin <branch-name>`\n   - If authentication fails: notify the user to check credentials\n   - For other errors: show the error message and suggest solutions\n\nShow me the generated commit message before executing the commands."
+  }
+}

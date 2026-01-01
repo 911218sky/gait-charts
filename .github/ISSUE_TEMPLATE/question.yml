@@ -1,0 +1,65 @@
+name: ❓ 問題詢問
+description: 詢問使用上的問題或尋求幫助
+title: "[Question]: "
+labels: ["question", "需要協助"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        有問題嗎？我們很樂意幫忙！請盡量詳細描述你的問題 😊
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 📂 問題類別
+      description: 你的問題屬於哪個類別？
+      options:
+        - 🚀 安裝 / 設定
+        - 📖 使用方式
+        - 🔧 開發 / 貢獻
+        - 📊 資料 / 圖表
+        - 🔗 API / 整合
+        - 🤷 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: ❓ 你的問題
+      description: 詳細描述你想問的問題
+      placeholder: |
+        請描述你的問題...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 📋 背景資訊
+      description: 提供相關的背景資訊
+      placeholder: |
+        - 你想達成什麼目標？
+        - 你已經嘗試過什麼？
+        - 有遇到什麼錯誤訊息嗎？
+
+  - type: textarea
+    id: code
+    attributes:
+      label: 💻 相關程式碼
+      description: 如果有相關的程式碼，請貼在這裡
+      render: dart
+      placeholder: |
+        // 貼上相關程式碼...
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✔️ 確認事項
+      options:
+        - label: 我已查閱過文件和 README
+          required: true
+        - label: 我已搜尋過現有的 Issues
+          required: true

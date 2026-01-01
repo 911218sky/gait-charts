@@ -1,0 +1,6 @@
+# Issue 模板設定
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 討論區
+    url: https://github.com/user/repo/discussions
+    about: 有問題想討論？歡迎到討論區聊聊
