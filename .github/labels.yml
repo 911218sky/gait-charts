@@ -1,166 +1,166 @@
-# 🏷️ GitHub Labels 設定
-# 使用 github-label-sync 或手動在 GitHub 設定
-# 安裝: npm install -g github-label-sync
-# 執行: github-label-sync --access-token <token> <owner>/<repo>
+# 🏷️ GitHub Labels Configuration
+# Use github-label-sync or manually configure in GitHub
+# Install: npm install -g github-label-sync
+# Run: github-label-sync --access-token <token> <owner>/<repo>
 
 # ═══════════════════════════════════════════════════════════════
-# 📌 類型標籤 (Type)
+# 📌 Type Labels
 # ═══════════════════════════════════════════════════════════════
 - name: "bug"
   color: "d73a4a"
-  description: "🐛 程式錯誤或異常行為"
+  description: "🐛 Something isn't working"
 
 - name: "enhancement"
   color: "a2eeef"
-  description: "✨ 新功能或改進建議"
+  description: "✨ New feature or improvement"
 
 - name: "documentation"
   color: "0075ca"
-  description: "📚 文件相關"
+  description: "📚 Documentation related"
 
 - name: "question"
   color: "d876e3"
-  description: "❓ 問題詢問"
+  description: "❓ Question or help needed"
 
 - name: "refactor"
   color: "fbca04"
-  description: "♻️ 程式碼重構"
+  description: "♻️ Code refactoring"
 
 - name: "test"
   color: "bfd4f2"
-  description: "🧪 測試相關"
+  description: "🧪 Testing related"
 
 - name: "chore"
   color: "fef2c0"
-  description: "🔧 維護性工作"
+  description: "🔧 Maintenance work"
 
 - name: "security"
   color: "ee0701"
-  description: "🔒 安全性問題"
+  description: "🔒 Security issue"
 
 # ═══════════════════════════════════════════════════════════════
-# 🎯 優先程度 (Priority)
+# 🎯 Priority Labels
 # ═══════════════════════════════════════════════════════════════
 - name: "priority: critical"
   color: "b60205"
-  description: "🔴 緊急 - 需要立即處理"
+  description: "🔴 Needs immediate attention"
 
 - name: "priority: high"
   color: "d93f0b"
-  description: "🟠 高優先"
+  description: "🟠 High priority"
 
 - name: "priority: medium"
   color: "fbca04"
-  description: "🟡 中優先"
+  description: "🟡 Medium priority"
 
 - name: "priority: low"
   color: "0e8a16"
-  description: "🟢 低優先"
+  description: "🟢 Low priority"
 
 # ═══════════════════════════════════════════════════════════════
-# 📊 狀態標籤 (Status)
+# 📊 Status Labels
 # ═══════════════════════════════════════════════════════════════
-- name: "待分類"
+- name: "triage"
   color: "ededed"
-  description: "📥 等待分類處理"
+  description: "📥 Needs triage"
 
-- name: "待評估"
+- name: "needs-review"
   color: "c5def5"
-  description: "🔍 需要進一步評估"
+  description: "🔍 Needs further review"
 
-- name: "需要協助"
+- name: "help-wanted"
   color: "008672"
-  description: "🆘 需要社群協助"
+  description: "🆘 Community help needed"
 
-- name: "進行中"
+- name: "in-progress"
   color: "0052cc"
-  description: "🚧 正在處理中"
+  description: "🚧 Currently being worked on"
 
-- name: "已排程"
+- name: "scheduled"
   color: "5319e7"
-  description: "📅 已排入開發計畫"
+  description: "📅 Scheduled for development"
 
-- name: "已暫緩"
+- name: "on-hold"
   color: "ffffff"
-  description: "⏸️ 暫時擱置"
+  description: "⏸️ Temporarily on hold"
 
-- name: "無法重現"
+- name: "cannot-reproduce"
   color: "cfd3d7"
-  description: "🤷 無法重現問題"
+  description: "🤷 Cannot reproduce the issue"
 
-- name: "不會修復"
+- name: "wontfix"
   color: "ffffff"
-  description: "🚫 決定不處理"
+  description: "🚫 Will not be fixed"
 
-- name: "重複"
+- name: "duplicate"
   color: "cfd3d7"
-  description: "♻️ 重複的 Issue"
+  description: "♻️ Duplicate issue"
 
 # ═══════════════════════════════════════════════════════════════
-# 📱 平台標籤 (Platform)
+# 📱 Platform Labels
 # ═══════════════════════════════════════════════════════════════
 - name: "platform: android"
   color: "3ddc84"
-  description: "🤖 Android 平台"
+  description: "🤖 Android platform"
 
 - name: "platform: ios"
   color: "147efb"
-  description: "🍎 iOS 平台"
+  description: "🍎 iOS platform"
 
 - name: "platform: web"
   color: "ff7139"
-  description: "🌐 Web 平台"
+  description: "🌐 Web platform"
 
 - name: "platform: windows"
   color: "00adef"
-  description: "🪟 Windows 平台"
+  description: "🪟 Windows platform"
 
 - name: "platform: macos"
   color: "999999"
-  description: "💻 macOS 平台"
+  description: "💻 macOS platform"
 
 - name: "platform: linux"
   color: "fcc624"
-  description: "🐧 Linux 平台"
+  description: "🐧 Linux platform"
 
 # ═══════════════════════════════════════════════════════════════
-# 🏗️ 模組標籤 (Module)
+# 🏗️ Area Labels
 # ═══════════════════════════════════════════════════════════════
 - name: "area: ui"
   color: "c2e0c6"
-  description: "🎨 UI 介面相關"
+  description: "🎨 UI related"
 
 - name: "area: chart"
   color: "bfdadc"
-  description: "📊 圖表相關"
+  description: "📊 Chart related"
 
 - name: "area: data"
   color: "d4c5f9"
-  description: "💾 資料處理相關"
+  description: "💾 Data processing related"
 
 - name: "area: network"
   color: "f9d0c4"
-  description: "🌐 網路 / API 相關"
+  description: "🌐 Network / API related"
 
 - name: "area: performance"
   color: "fef2c0"
-  description: "⚡ 效能相關"
+  description: "⚡ Performance related"
 
 # ═══════════════════════════════════════════════════════════════
-# 🎁 特殊標籤 (Special)
+# 🎁 Special Labels
 # ═══════════════════════════════════════════════════════════════
 - name: "good first issue"
   color: "7057ff"
-  description: "👋 適合新手的入門 Issue"
+  description: "👋 Good for newcomers"
 
 - name: "help wanted"
   color: "008672"
-  description: "🙏 歡迎社群協助"
+  description: "🙏 Extra attention is needed"
 
 - name: "breaking change"
   color: "b60205"
-  description: "💥 破壞性變更"
+  description: "💥 Breaking change"
 
 - name: "dependencies"
   color: "0366d6"
-  description: "📦 依賴套件更新"
+  description: "📦 Dependency updates"

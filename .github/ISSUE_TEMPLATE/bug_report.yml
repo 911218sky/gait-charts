@@ -1,80 +1,80 @@
-name: 🐛 Bug 回報
-description: 回報程式錯誤或異常行為
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior
 title: "[Bug]: "
-labels: ["bug", "待分類"]
+labels: ["bug", "triage"]
 assignees: []
 
 body:
   - type: markdown
     attributes:
       value: |
-        感謝你花時間回報問題！請盡量詳細填寫以下資訊，幫助我們更快定位問題。
+        Thanks for taking the time to report this issue! Please fill out the information below to help us investigate.
 
   - type: dropdown
     id: severity
     attributes:
-      label: 🔥 嚴重程度
-      description: 這個 bug 對你的影響程度
+      label: 🔥 Severity
+      description: How severe is this bug?
       options:
-        - 🟢 輕微 - 不影響主要功能
-        - 🟡 中等 - 影響部分功能但有替代方案
-        - 🔴 嚴重 - 主要功能無法使用
-        - 💀 致命 - 應用程式崩潰或資料遺失
+        - 🟢 Low - Minor issue, doesn't affect main functionality
+        - 🟡 Medium - Affects some features but has workarounds
+        - 🔴 High - Major functionality is broken
+        - 💀 Critical - App crashes or data loss
     validations:
       required: true
 
   - type: textarea
     id: description
     attributes:
-      label: 📝 問題描述
-      description: 清楚描述你遇到的問題
-      placeholder: 告訴我們發生了什麼事...
+      label: 📝 Description
+      description: Clearly describe the issue you encountered
+      placeholder: Tell us what happened...
     validations:
       required: true
 
   - type: textarea
     id: steps
     attributes:
-      label: 🔄 重現步驟
-      description: 如何重現這個問題？
+      label: 🔄 Steps to Reproduce
+      description: How can we reproduce this issue?
       placeholder: |
-        1. 前往 '...'
-        2. 點擊 '...'
-        3. 滾動到 '...'
-        4. 看到錯誤
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
     validations:
       required: true
 
   - type: textarea
     id: expected
     attributes:
-      label: ✅ 預期行為
-      description: 你預期應該發生什麼？
-      placeholder: 描述正確的行為應該是什麼...
+      label: ✅ Expected Behavior
+      description: What did you expect to happen?
+      placeholder: Describe what should have happened...
     validations:
       required: true
 
   - type: textarea
     id: actual
     attributes:
-      label: ❌ 實際行為
-      description: 實際發生了什麼？
-      placeholder: 描述實際看到的結果...
+      label: ❌ Actual Behavior
+      description: What actually happened?
+      placeholder: Describe what actually happened...
     validations:
       required: true
 
   - type: textarea
     id: screenshots
     attributes:
-      label: 📸 截圖或錄影
-      description: 如果有的話，請附上截圖或錄影幫助說明問題
-      placeholder: 拖曳圖片到這裡或貼上連結...
+      label: 📸 Screenshots / Videos
+      description: If applicable, add screenshots or videos to help explain the issue
+      placeholder: Drag and drop images here or paste links...
 
   - type: dropdown
     id: platform
     attributes:
-      label: 📱 平台
-      description: 在哪個平台遇到問題？
+      label: 📱 Platform
+      description: Which platform(s) are affected?
       multiple: true
       options:
         - Android
@@ -89,39 +89,39 @@ body:
   - type: input
     id: flutter-version
     attributes:
-      label: 🐦 Flutter 版本
-      description: 執行 `flutter --version` 取得
-      placeholder: "例如: 3.24.0"
+      label: 🐦 Flutter Version
+      description: Run `flutter --version` to get this
+      placeholder: "e.g., 3.24.0"
 
   - type: input
     id: device
     attributes:
-      label: 📲 裝置資訊
-      description: 裝置型號和系統版本
-      placeholder: "例如: iPhone 15 Pro (iOS 17.2) / Pixel 8 (Android 14)"
+      label: 📲 Device Info
+      description: Device model and OS version
+      placeholder: "e.g., iPhone 15 Pro (iOS 17.2) / Pixel 8 (Android 14)"
 
   - type: textarea
     id: logs
     attributes:
-      label: 📋 錯誤日誌
-      description: 如果有錯誤訊息，請貼在這裡
+      label: 📋 Error Logs
+      description: If there are any error messages, paste them here
       render: shell
       placeholder: |
-        貼上相關的錯誤日誌...
+        Paste relevant error logs here...
 
   - type: textarea
     id: additional
     attributes:
-      label: 💡 其他資訊
-      description: 任何其他可能有幫助的資訊
-      placeholder: 其他你認為相關的資訊...
+      label: 💡 Additional Context
+      description: Any other information that might be helpful
+      placeholder: Any other relevant information...
 
   - type: checkboxes
     id: checklist
     attributes:
-      label: ✔️ 確認事項
+      label: ✔️ Checklist
       options:
-        - label: 我已搜尋過現有的 Issues，確認這不是重複的問題
+        - label: I have searched existing issues to ensure this is not a duplicate
           required: true
-        - label: 我已更新到最新版本，問題仍然存在
+        - label: I have updated to the latest version and the issue still exists
           required: false

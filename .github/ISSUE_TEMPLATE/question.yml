@@ -1,65 +1,65 @@
-name: ❓ 問題詢問
-description: 詢問使用上的問題或尋求幫助
+name: ❓ Question
+description: Ask a question or seek help
 title: "[Question]: "
-labels: ["question", "需要協助"]
+labels: ["question", "help-wanted"]
 assignees: []
 
 body:
   - type: markdown
     attributes:
       value: |
-        有問題嗎？我們很樂意幫忙！請盡量詳細描述你的問題 😊
+        Got a question? We're happy to help! Please describe your question in detail 😊
 
   - type: dropdown
     id: category
     attributes:
-      label: 📂 問題類別
-      description: 你的問題屬於哪個類別？
+      label: 📂 Category
+      description: What category does your question fall under?
       options:
-        - 🚀 安裝 / 設定
-        - 📖 使用方式
-        - 🔧 開發 / 貢獻
-        - 📊 資料 / 圖表
-        - 🔗 API / 整合
-        - 🤷 其他
+        - 🚀 Installation / Setup
+        - 📖 Usage
+        - 🔧 Development / Contributing
+        - 📊 Data / Charts
+        - 🔗 API / Integration
+        - 🤷 Other
     validations:
       required: true
 
   - type: textarea
     id: question
     attributes:
-      label: ❓ 你的問題
-      description: 詳細描述你想問的問題
+      label: ❓ Your Question
+      description: Describe your question in detail
       placeholder: |
-        請描述你的問題...
+        Please describe your question...
     validations:
       required: true
 
   - type: textarea
     id: context
     attributes:
-      label: 📋 背景資訊
-      description: 提供相關的背景資訊
+      label: 📋 Context
+      description: Provide relevant background information
       placeholder: |
-        - 你想達成什麼目標？
-        - 你已經嘗試過什麼？
-        - 有遇到什麼錯誤訊息嗎？
+        - What are you trying to achieve?
+        - What have you already tried?
+        - Any error messages?
 
   - type: textarea
     id: code
     attributes:
-      label: 💻 相關程式碼
-      description: 如果有相關的程式碼，請貼在這裡
+      label: 💻 Related Code
+      description: If there's relevant code, paste it here
       render: dart
       placeholder: |
-        // 貼上相關程式碼...
+        // Paste related code here...
 
   - type: checkboxes
     id: checklist
     attributes:
-      label: ✔️ 確認事項
+      label: ✔️ Checklist
       options:
-        - label: 我已查閱過文件和 README
+        - label: I have read the documentation and README
           required: true
-        - label: 我已搜尋過現有的 Issues
+        - label: I have searched existing issues
           required: true

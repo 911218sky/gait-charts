@@ -1,5 +1,5 @@
-name: 📚 文件改進
-description: 回報文件錯誤或建議改進
+name: 📚 Documentation
+description: Report documentation errors or suggest improvements
 title: "[Docs]: "
 labels: ["documentation"]
 assignees: []
@@ -8,65 +8,65 @@ body:
   - type: markdown
     attributes:
       value: |
-        好的文件讓大家都受益！感謝你幫助改進文件 📖
+        Good documentation benefits everyone! Thanks for helping improve it 📖
 
   - type: dropdown
     id: doc-type
     attributes:
-      label: 📄 文件類型
-      description: 這是關於哪種文件？
+      label: 📄 Documentation Type
+      description: What type of documentation is this about?
       options:
         - README
-        - API 文件
-        - 程式碼註解
-        - 教學 / 指南
-        - 其他
+        - API Documentation
+        - Code Comments
+        - Tutorials / Guides
+        - Other
     validations:
       required: true
 
   - type: dropdown
     id: issue-type
     attributes:
-      label: 🔍 問題類型
-      description: 這是什麼類型的問題？
+      label: 🔍 Issue Type
+      description: What type of issue is this?
       options:
-        - ❌ 錯誤 - 內容有誤
-        - 🕳️ 缺漏 - 缺少重要資訊
-        - 😕 不清楚 - 描述不夠清楚
-        - 📅 過時 - 內容已過時
-        - ✨ 建議 - 新增內容建議
+        - ❌ Error - Content is incorrect
+        - 🕳️ Missing - Important information is missing
+        - 😕 Unclear - Description is not clear enough
+        - 📅 Outdated - Content is outdated
+        - ✨ Suggestion - New content suggestion
     validations:
       required: true
 
   - type: input
     id: location
     attributes:
-      label: 📍 位置
-      description: 文件的位置或連結
-      placeholder: "例如: README.md 第 50 行 / docs/api.md"
+      label: 📍 Location
+      description: Location or link to the documentation
+      placeholder: "e.g., README.md line 50 / docs/api.md"
     validations:
       required: true
 
   - type: textarea
     id: current
     attributes:
-      label: 📝 目前內容
-      description: 目前的文件內容（如果適用）
-      placeholder: 貼上目前的內容...
+      label: 📝 Current Content
+      description: The current documentation content (if applicable)
+      placeholder: Paste the current content here...
 
   - type: textarea
     id: suggestion
     attributes:
-      label: ✏️ 建議修改
-      description: 你建議如何修改？
-      placeholder: 描述你建議的修改內容...
+      label: ✏️ Suggested Change
+      description: How would you suggest changing it?
+      placeholder: Describe your suggested changes...
     validations:
       required: true
 
   - type: checkboxes
     id: contribution
     attributes:
-      label: 🤝 貢獻意願
+      label: 🤝 Contribution
       options:
-        - label: 我願意提交 PR 來修正這個問題
+        - label: I'm willing to submit a PR to fix this
           required: false
