@@ -32,12 +32,6 @@ class ChartConfigPanel extends ConsumerWidget {
         tooltip: '每圈序列圖表的取樣點數',
       ),
       _ConfigItem(
-        label: 'Per-lap PSD',
-        value: config.perLapPsdMaxPoints,
-        onChanged: controller.updatePerLapPsd,
-        tooltip: '每圈 PSD (功率譜密度) 圖表的取樣點數',
-      ),
-      _ConfigItem(
         label: 'Per-lap θ(t)',
         value: config.perLapThetaMaxPoints,
         onChanged: controller.updatePerLapTheta,

@@ -12,9 +12,9 @@ class BagListApiService {
   final Dio _dio;
 
   /// Realsense Pose Extractor 相關 API 的 base endpoint。
-  static const _kRealsensePoseExtractorEndpoint = '/realsense_pose_extractor';
+  static const _kRealsensePoseExtractorEndpoint = '/realsense-pose-extractor';
 
-  /// 列出伺服器上的 .bag 檔案清單（`GET /realsense_pose_extractor/bags`）。
+  /// 列出伺服器上的 .bag 檔案清單（`GET /realsense-pose-extractor/bags`）。
   static const _bagsEndpoint = '$_kRealsensePoseExtractorEndpoint/bags';
 
   Future<BagFileListResponse> fetchServerBags({

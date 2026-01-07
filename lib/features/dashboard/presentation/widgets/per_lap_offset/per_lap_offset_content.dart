@@ -109,7 +109,6 @@ class PerLapOffsetContent extends ConsumerWidget {
             showSamples: showSamples,
             sampleLimit: sampleLimit,
             seriesMaxPoints: chartConfig.perLapSeriesMaxPoints,
-            psdMaxPoints: chartConfig.perLapPsdMaxPoints,
             thetaMaxPoints: chartConfig.perLapThetaMaxPoints,
           ),
         ),
@@ -241,7 +240,6 @@ class _PerLapCard extends StatelessWidget {
     required this.showSamples,
     required this.sampleLimit,
     required this.seriesMaxPoints,
-    required this.psdMaxPoints,
     required this.thetaMaxPoints,
   });
 
@@ -250,13 +248,10 @@ class _PerLapCard extends StatelessWidget {
   final bool showSamples;
   final int? sampleLimit;
   final int seriesMaxPoints;
-  final int psdMaxPoints;
   final int thetaMaxPoints;
 
   @override
   Widget build(BuildContext context) {
-    final peakFreq = lap.fft.peakFrequencyOrNull;
-    final peakDb = lap.fft.peakDbOrNull;
     final lapDuration = lap.lapDurationSeconds;
     final walkDuration = lap.walkDurationSeconds;
     final textTheme = context.textTheme;
@@ -293,20 +288,6 @@ class _PerLapCard extends StatelessWidget {
                       : '--',
                   color: accent.warning,
                 ),
-                _StatChip(
-                  label: '峰值頻率',
-                  value: peakFreq != null
-                      ? '${peakFreq.toStringAsFixed(2)} Hz'
-                      : '--',
-                  color: accent.danger,
-                ),
-                _StatChip(
-                  label: '峰值功率',
-                  value: peakDb != null
-                      ? '${peakDb.toStringAsFixed(1)} dB'
-                      : '--',
-                  color: const Color(0xFFFFB347),
-                ),
               ],
             ),
             const SizedBox(height: 18),
@@ -326,15 +307,6 @@ class _PerLapCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: _LatPsdChart(
-                          lap: lap,
-                          showSamples: showSamples,
-                          sampleLimit: sampleLimit,
-                          maxPoints: psdMaxPoints,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
                         child: _ThetaChart(
                           lap: lap,
                           showSamples: showSamples,
@@ -348,27 +320,11 @@ class _PerLapCard extends StatelessWidget {
                 if (constraints.maxWidth >= 1100) {
                   return Column(
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: _LatSeriesChart(
-                              lap: lap,
-                              showSamples: showSamples,
-                              sampleLimit: sampleLimit,
-                              maxPoints: seriesMaxPoints,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _LatPsdChart(
-                              lap: lap,
-                              showSamples: showSamples,
-                              sampleLimit: sampleLimit,
-                              maxPoints: psdMaxPoints,
-                            ),
-                          ),
-                        ],
+                      _LatSeriesChart(
+                        lap: lap,
+                        showSamples: showSamples,
+                        sampleLimit: sampleLimit,
+                        maxPoints: seriesMaxPoints,
                       ),
                       const SizedBox(height: 16),
                       _ThetaChart(
@@ -387,13 +343,6 @@ class _PerLapCard extends StatelessWidget {
                       showSamples: showSamples,
                       sampleLimit: sampleLimit,
                       maxPoints: seriesMaxPoints,
-                    ),
-                    const SizedBox(height: 16),
-                    _LatPsdChart(
-                      lap: lap,
-                      showSamples: showSamples,
-                      sampleLimit: sampleLimit,
-                      maxPoints: psdMaxPoints,
                     ),
                     const SizedBox(height: 16),
                     _ThetaChart(
@@ -623,178 +572,6 @@ class _LatSeriesChart extends StatelessWidget {
                         color: const Color(0xFF4ADE80),
                         strokeWidth: showSmoothStroke ? 1 : 0,
                         strokeColor: showSmoothStroke
-                            ? (isDark ? Colors.black : Colors.white)
-                            : Colors.transparent,
-                      ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LatPsdChart extends StatelessWidget {
-  const _LatPsdChart({
-    required this.lap,
-    required this.showSamples,
-    required this.sampleLimit,
-    required this.maxPoints,
-  });
-
-  final PerLapOffsetLap lap;
-  final bool showSamples;
-  final int? sampleLimit;
-  final int maxPoints;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colorScheme;
-    final isDark = context.isDark;
-
-    final freq = lap.fft.frequencyHz;
-    final psd = lap.fft.psdDb;
-    if (freq.isEmpty || psd.isEmpty) {
-      return const _LapChartCard(
-        title: 'PSD lat(t)',
-        subtitle: '走路區段的頻譜 (dB)',
-        reserveLegendSpace: true,
-        child: _EmptyChartMessage('缺少 FFT / PSD 資料'),
-      );
-    }
-
-    final unlimitSamples = showSamples && sampleLimit == null;
-    final baseSpots = _buildSpots(
-      freq,
-      psd,
-      maxPoints: unlimitSamples ? freq.length : maxPoints,
-    );
-    final sampleSpots = showSamples
-        ? _limitFlSpots(baseSpots, sampleLimit)
-        : null;
-    final spots = sampleSpots ?? baseSpots;
-    final showStroke = shouldShowDotStroke(
-      sampleLimit: sampleLimit,
-      spots: sampleSpots,
-    );
-    final yRange = _computeRange(psd);
-    final minY = yRange.min - 3;
-    final maxY = yRange.max + 3;
-    final peakFreq = lap.fft.peakFrequencyOrNull;
-    final freqSpan = lap.fft.band.length >= 2
-        ? lap.fft.band[1] - lap.fft.band[0]
-        : freq.last - freq.first;
-    final verticalInterval = freqSpan > 0
-        ? freqSpan / 4
-        : math.max(0.1, (freq.last - freq.first).abs() / 4);
-
-    return _LapChartCard(
-      title: 'PSD lat(t)',
-      subtitle: '走路區段的頻譜 (dB)',
-      reserveLegendSpace: true,
-      child: LineChart(
-        LineChartData(
-          minX: freq.first,
-          maxX: freq.last,
-          minY: minY,
-          maxY: maxY,
-          lineTouchData: LineTouchData(
-            handleBuiltInTouches: true,
-            touchTooltipData: LineTouchTooltipData(
-              getTooltipColor: (_) => Colors.black.withValues(alpha: 0.7),
-              getTooltipItems: (spots) {
-                final items = <LineTooltipItem?>[];
-                var shown = false;
-                for (final spot in spots) {
-                  if (shown || spot.bar.barWidth == 0) {
-                    items.add(null);
-                    continue;
-                  }
-                  items.add(
-                    LineTooltipItem(
-                      '${spot.x.toStringAsFixed(2)} Hz\n${spot.y.toStringAsFixed(1)} dB',
-                      const TextStyle(fontSize: 11, color: Colors.white),
-                    ),
-                  );
-                  shown = true;
-                }
-                return items;
-              },
-            ),
-          ),
-          extraLinesData: ExtraLinesData(
-            verticalLines: [
-              if (peakFreq != null)
-                VerticalLine(
-                  x: peakFreq,
-                  color: const Color(0xFFFFC857),
-                  strokeWidth: 1,
-                  dashArray: [8, 4],
-                  label: VerticalLineLabel(
-                    show: true,
-                    alignment: Alignment.topRight,
-                    padding: const EdgeInsets.only(bottom: 8),
-                    style: const TextStyle(
-                      color: Color(0xFFFFC857),
-                      fontSize: 11,
-                    ),
-                    labelResolver: (line) =>
-                        'peak ${peakFreq.toStringAsFixed(2)} Hz',
-                  ),
-                ),
-            ],
-          ),
-          gridData: FlGridData(
-            drawHorizontalLine: true,
-            horizontalInterval: _gridInterval(minY, maxY, fallback: 5),
-            getDrawingHorizontalLine: (value) => FlLine(
-              color: colors.onSurface.withValues(alpha: isDark ? 0.08 : 0.12),
-              strokeWidth: 1,
-            ),
-            drawVerticalLine: true,
-            verticalInterval: verticalInterval,
-            getDrawingVerticalLine: (value) => FlLine(
-              color: colors.onSurface.withValues(alpha: isDark ? 0.04 : 0.06),
-              strokeWidth: 1,
-            ),
-          ),
-          borderData: FlBorderData(
-            show: true,
-            border: Border(
-              left: BorderSide(color: colors.onSurface.withValues(alpha: isDark ? 0.24 : 0.18)),
-              bottom: BorderSide(color: colors.onSurface.withValues(alpha: isDark ? 0.24 : 0.18)),
-              right: const BorderSide(color: Colors.transparent),
-              top: const BorderSide(color: Colors.transparent),
-            ),
-          ),
-          titlesData: _buildTitles(
-            context,
-            bottomLabel: '頻率 (Hz)',
-            leftFormatter: (value) => value.toStringAsFixed(0),
-          ),
-          lineBarsData: [
-            LineChartBarData(
-              spots: spots,
-              isCurved: true,
-              color: const Color(0xFFFF8C42),
-              barWidth: 2,
-              dotData: const FlDotData(show: false),
-            ),
-            if (sampleSpots != null)
-              LineChartBarData(
-                spots: sampleSpots,
-                isCurved: false,
-                color: Colors.transparent,
-                barWidth: 0,
-                dotData: FlDotData(
-                  show: true,
-                  getDotPainter: (spot, percent, bar, index) =>
-                      FlDotCirclePainter(
-                        radius: 3,
-                        color: const Color(0xFFFF8C42),
-                        strokeWidth: showStroke ? 1 : 0,
-                        strokeColor: showStroke
                             ? (isDark ? Colors.black : Colors.white)
                             : Colors.transparent,
                       ),

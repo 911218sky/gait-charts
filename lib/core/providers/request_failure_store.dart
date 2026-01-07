@@ -1,11 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// 記錄「某個 requestId 在特定參數指紋下」的最後一次失敗。
+/// 記錄某個 requestId 在特定參數指紋下的最後一次失敗。
 ///
-/// 設計目的：
-/// - 避免後端在連續失敗時，被 UI/Provider rebuild 反覆觸發同一支 API。
-/// - 失敗後 UI 應直接顯示錯誤，不要一直轉圈；只有使用者按「重試」才再送一次。
+/// 避免後端在連續失敗時被 UI/Provider rebuild 反覆觸發同一支 API。
+/// 失敗後 UI 應直接顯示錯誤，只有使用者按「重試」才再送一次。
 @immutable
 class RequestFailure {
   const RequestFailure({
@@ -14,7 +13,7 @@ class RequestFailure {
     required this.stackTrace,
   });
 
-  /// 用來辨識「同一組請求條件」的指紋（例如 session + config 組合）。
+  /// 辨識同一組請求條件的指紋（如 session + config 組合）。
   final int fingerprint;
 
   final Object error;
@@ -66,10 +65,9 @@ final requestFailureProvider = Provider.family<RequestFailure?, String>((
   );
 });
 
-/// 用於 FutureProvider 的共用包裝：
-/// - 若相同 fingerprint 曾失敗，直接丟出同樣錯誤（不再打 API）
-/// - 成功則清除 failure
-/// - 失敗則寫入 failure
+/// FutureProvider 的共用包裝：
+/// - 相同 fingerprint 曾失敗則直接丟出同樣錯誤（不再打 API）
+/// - 成功則清除 failure，失敗則寫入 failure
 Future<T> fetchWithFailureGate<T>(
   Ref ref, {
   required String requestId,

@@ -6,14 +6,9 @@ import 'package:dio/dio.dart';
 import 'package:gait_charts/core/config/app_config.dart';
 import 'package:gait_charts/core/network/signing/request_signer.dart';
 
-/// Dio interceptor：在送出 request 前自動補上後端要求的 HMAC 簽章 headers。
+/// 自動補上後端要求的 HMAC 簽章 headers。
 ///
-/// Headers:
-/// - X-Client-Id
-/// - X-Nonce
-/// - X-Timestamp
-/// - X-Signature (hex HMAC-SHA256)
-/// - X-Signature-Version
+/// Headers: X-Client-Id, X-Nonce, X-Timestamp, X-Signature, X-Signature-Version
 class SignedHeadersInterceptor extends Interceptor {
   SignedHeadersInterceptor({
     required this.config,
@@ -30,7 +25,7 @@ class SignedHeadersInterceptor extends Interceptor {
       return;
     }
 
-    // 放行 preflight（與後端規格一致）。
+    // 放行 preflight
     if (options.method.toUpperCase() == 'OPTIONS') {
       handler.next(options);
       return;
@@ -58,7 +53,7 @@ class SignedHeadersInterceptor extends Interceptor {
     }
 
     final nonce = _signer.generateNonceHex();
-    // 後端要求 Unix timestamp（秒）；這裡用整數秒字串，避免浮點誤差。
+    // 後端要求 Unix timestamp（秒）
     final timestamp = (DateTime.now().millisecondsSinceEpoch ~/ 1000).toString();
 
     final String bodySha256;
@@ -102,7 +97,7 @@ class SignedHeadersInterceptor extends Interceptor {
     handler.next(options);
   }
 
-  /// 如果 path 在 exemptPathPrefixes 中，則不進行簽章
+  /// 檢查 path 是否在免簽章清單中
   bool _isExemptPath(String path) {
     if (config.authExemptPathPrefixes.isEmpty) {
       return false;

@@ -123,6 +123,14 @@ class TrajectoryConfigPanel extends ConsumerWidget {
               SwitchListTile.adaptive(
                 dense: true,
                 contentPadding: EdgeInsets.zero,
+                value: overlayUi.showFullTrail,
+                onChanged: overlayNotifier.toggleFullTrail,
+                title: const Text('顯示全部軌跡'),
+                subtitle: const Text('開：從開始保留到目前 frame（新→舊熱力圖）。關：只顯示當圈（也使用熱力圖）。'),
+              ),
+              SwitchListTile.adaptive(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
                 value: overlayUi.showChairArea,
                 onChanged: overlayNotifier.toggleChairArea,
                 title: const Text('顯示椅子區域'),

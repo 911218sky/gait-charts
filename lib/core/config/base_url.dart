@@ -1,18 +1,18 @@
-/// baseUrl 的基礎驗證與正規化工具。
+/// baseUrl 驗證與正規化。
 ///
-/// 規則：
-/// - 會 trim
-/// - 會移除尾端多餘的 `/`
-/// - 必須是可解析的 Uri 且包含 http/https scheme
+/// 處理規則：
+/// - trim 空白
+/// - 移除尾端多餘的 `/`
+/// - 驗證為有效的 http/https URL
 ///
-/// 注意：是否一定要包含 `/v1` 由使用者自行決定（不同後端版本可能不同）。
+/// 是否包含 `/v1` 由使用者決定，不同後端版本可能不同。
 String normalizeBaseUrl(String input) {
   final trimmed = input.trim();
   if (trimmed.isEmpty) {
     throw const FormatException('baseUrl 不可為空。');
   }
 
-  // 移除尾端的 '/'，避免 path 拼接時出現 '//'。
+  // 移除尾端 `/`，避免 path 拼接時產生 `//`
   var normalized = trimmed;
   while (normalized.endsWith('/')) {
     normalized = normalized.substring(0, normalized.length - 1);

@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:gait_charts/app/theme.dart';
 
-/// 區塊標題組件。
-///
-/// 用於顯示各區塊的標題，如「基本資料」、「身體數據」等。
+/// 區塊標題元件，用於顯示「基本資料」、「身體數據」等區塊標題。
 class InfoSectionTitle extends StatelessWidget {
   const InfoSectionTitle({
     required this.title,
@@ -48,9 +46,7 @@ class InfoSectionTitle extends StatelessWidget {
   }
 }
 
-/// 資訊欄位組件（標籤 + 值）。
-///
-/// 用於顯示單一欄位的標籤和值，如「年齡: 42 歲」。
+/// 資訊欄位元件（標籤 + 值），如「年齡: 42 歲」。
 class InfoLabelValue extends StatelessWidget {
   const InfoLabelValue({
     required this.label,
@@ -107,9 +103,7 @@ class InfoLabelValue extends StatelessWidget {
   }
 }
 
-/// 數值卡片組件。
-///
-/// 用於顯示帶單位的數值，如身高、體重、BMI 等。
+/// 數值卡片元件，用於顯示帶單位的數值（身高、體重、BMI 等）。
 class InfoMetricCard extends StatelessWidget {
   const InfoMetricCard({
     required this.label,
@@ -207,9 +201,7 @@ class InfoMetricCard extends StatelessWidget {
   }
 }
 
-/// 統計數據項目組件。
-///
-/// 用於顯示統計數據，如「總記錄: 3」。
+/// 統計數據項目元件，如「總記錄: 3」。
 class InfoStatItem extends StatelessWidget {
   const InfoStatItem({
     required this.label,
@@ -254,9 +246,7 @@ class InfoStatItem extends StatelessWidget {
   }
 }
 
-/// 資訊區塊容器組件。
-///
-/// 用於包裝一組相關的資訊內容，提供統一的樣式。
+/// 資訊區塊容器，提供統一的樣式包裝。
 class InfoSectionContainer extends StatelessWidget {
   const InfoSectionContainer({
     required this.child,
@@ -284,9 +274,7 @@ class InfoSectionContainer extends StatelessWidget {
   }
 }
 
-/// 使用者頭像組件。
-///
-/// 顯示使用者名稱的首字母作為頭像。
+/// 使用者頭像元件，顯示名稱首字母。
 class UserAvatarCircle extends StatelessWidget {
   const UserAvatarCircle({
     required this.name,
@@ -328,9 +316,7 @@ class UserAvatarCircle extends StatelessWidget {
   }
 }
 
-/// 空狀態組件。
-///
-/// 用於顯示無資料或未選擇時的提示。
+/// 空狀態元件，用於顯示無資料或未選擇時的提示。
 class InfoEmptyState extends StatelessWidget {
   const InfoEmptyState({
     required this.icon,
@@ -391,9 +377,7 @@ class InfoEmptyState extends StatelessWidget {
   }
 }
 
-/// 統計數據列組件。
-///
-/// 用於顯示一排統計數據，如「總記錄」、「最近評估」等。
+/// 統計數據列元件，橫向排列多個 [InfoStatItem]。
 class InfoStatsRow extends StatelessWidget {
   const InfoStatsRow({
     required this.items,
@@ -431,9 +415,7 @@ class InfoStatsRow extends StatelessWidget {
   }
 }
 
-/// Session 列表項目組件。
-///
-/// 用於顯示單一 session 項目，支援選中狀態和禁用狀態。
+/// Session 列表項目元件，支援選中與禁用狀態。
 class SessionListItem extends StatelessWidget {
   const SessionListItem({
     required this.sessionName,

@@ -3,13 +3,11 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 
 /// 非 Web 平台：用 CookieJar 保存/回送 Set-Cookie。
-///
-/// 這裡用記憶體 CookieJar（不落地），避免在 Provider 建立 Dio 時引入 async 依賴。
-/// 若未來需要跨重啟保留 Cookie，可再改成 PersistCookieJar + path_provider。
+/// 使用記憶體 CookieJar 避免 async 依賴，若需跨重啟保留可改用 PersistCookieJar。
 final CookieJar _cookieJar = CookieJar();
 
 void configureDioCookieSupportImpl(Dio dio) {
-  // 避免重複加入（例如 provider rebuild 建立新的 Dio）。
+  // 避免 provider rebuild 時重複加入
   final alreadyAdded = dio.interceptors.any((i) => i is CookieManager);
   if (alreadyAdded) return;
 

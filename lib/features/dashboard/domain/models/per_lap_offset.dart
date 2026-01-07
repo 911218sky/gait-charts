@@ -47,7 +47,6 @@ class PerLapOffsetLap {
     required this.coneTurn,
     required this.chairTurn,
     required this.walkRegion,
-    required this.fft,
   });
 
   final int lapIndex;
@@ -58,7 +57,6 @@ class PerLapOffsetLap {
   final LapRegion coneTurn;
   final LapRegion chairTurn;
   final LapRegion walkRegion;
-  final PerLapOffsetFft fft;
 
   double get lapDurationSeconds =>
       timeSeconds.isEmpty ? 0 : timeSeconds.last - timeSeconds.first;
@@ -113,13 +111,6 @@ class PerLapOffsetLap {
       coneTurn: coneRegion.normalize(times.length),
       chairTurn: chairRegion.normalize(times.length),
       walkRegion: walkRegion.normalize(times.length),
-      fft: PerLapOffsetFft.fromJson(
-        json['fft'] is Map<String, dynamic>
-            ? json['fft'] as Map<String, dynamic>
-            : json['fft'] is Map
-            ? Map<String, dynamic>.from(json['fft'] as Map)
-            : const <String, dynamic>{},
-      ),
     );
   }
 }
@@ -155,111 +146,51 @@ class LapRegion {
   }
 }
 
-/// 儲存 FFT / PSD 相關的頻譜資訊。
-class PerLapOffsetFft {
-  const PerLapOffsetFft({
-    required this.band,
-    required this.frequencyHz,
-    required this.psdDb,
-    required this.peakFreqHz,
-    required this.peakPower,
-    required this.peakDb,
-  });
-
-  final List<double> band;
-  final List<double> frequencyHz;
-  final List<double> psdDb;
-  final double peakFreqHz;
-  final double peakPower;
-  final double peakDb;
-
-  double? get peakFrequencyOrNull => peakFreqHz.isFinite ? peakFreqHz : null;
-
-  double? get peakDbOrNull => peakDb.isFinite ? peakDb : null;
-
-  factory PerLapOffsetFft.fromJson(Map<String, dynamic> json) {
-    final bandList = _toDoubleList(json['band']);
-    final freq = _toF32ZlibB64DecodedList(json['freq_hz_f32_zlib_b64']);
-    final psd = _toF32ZlibB64DecodedList(json['psd_db_f32_zlib_b64']);
-
-    return PerLapOffsetFft(
-      band: bandList.length >= 2 ? bandList.sublist(0, 2) : const [0, 0],
-      frequencyHz: freq,
-      psdDb: psd,
-      peakFreqHz: _toDouble(json['peak_freq_hz']),
-      peakPower: _toDouble(json['peak_power']),
-      peakDb: _toDouble(json['peak_db']),
-    );
-  }
-}
-
 /// per-lap offset API 查詢設定。
 class PerLapOffsetConfig {
   const PerLapOffsetConfig({
     this.projection = 'xz',
-    this.smoothWindow = 3,
-    this.minVAbs = 15,
-    this.flatFrac = 0.7,
+    this.smoothWindowSeconds = 0.1,
+    this.minVAbs = 0.05,
+    this.flatFrac = 0.15,
     this.kSmooth = 1,
-    this.fftBandLow = 0,
-    this.fftBandHigh = 2,
-    this.fftParams = const FftPeriodogramParams(),
   });
 
   final String projection;
-  final int smoothWindow;
+  final double smoothWindowSeconds;
   final double minVAbs;
   final double flatFrac;
   final int kSmooth;
-  final double fftBandLow;
-  final double fftBandHigh;
-  final FftPeriodogramParams fftParams;
 
   PerLapOffsetConfig copyWith({
     String? projection,
-    int? smoothWindow,
+    double? smoothWindowSeconds,
     double? minVAbs,
     double? flatFrac,
     int? kSmooth,
-    double? fftBandLow,
-    double? fftBandHigh,
-    FftPeriodogramParams? fftParams,
   }) {
-    var low = fftBandLow ?? this.fftBandLow;
-    var high = fftBandHigh ?? this.fftBandHigh;
-    if (low > high) {
-      final temp = low;
-      low = high;
-      high = temp;
-    }
     return PerLapOffsetConfig(
       projection: projection ?? this.projection,
-      smoothWindow: smoothWindow ?? this.smoothWindow,
+      smoothWindowSeconds: smoothWindowSeconds ?? this.smoothWindowSeconds,
       minVAbs: minVAbs ?? this.minVAbs,
       flatFrac: flatFrac ?? this.flatFrac,
       kSmooth: kSmooth ?? this.kSmooth,
-      fftBandLow: low,
-      fftBandHigh: high,
-      fftParams: fftParams ?? this.fftParams,
     );
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'projection': projection,
-    'smooth_window_s': smoothWindow,
+    'smooth_window_s': smoothWindowSeconds,
     'min_v_abs': minVAbs,
     'flat_frac': flatFrac,
     'k_smooth': kSmooth,
-    'fft_band': [fftBandLow, fftBandHigh],
-    'fft_params': fftParams.toJson(),
   };
 
   @override
   String toString() {
     return 'PerLapOffsetConfig('
-        'projection: $projection, smoothWindow: $smoothWindow, '
+        'projection: $projection, smoothWindowSeconds: $smoothWindowSeconds, '
         'minVAbs: $minVAbs, flatFrac: $flatFrac, '
-        'kSmooth: $kSmooth, fftBand: [$fftBandLow, $fftBandHigh], '
-        'fftParams: $fftParams)';
+        'kSmooth: $kSmooth)';
   }
 }

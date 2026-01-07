@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:gait_charts/core/network/errors/api_exception.dart';
 import 'package:gait_charts/features/dashboard/data/services/analysis/stage_analysis_api_service.dart';
 import 'package:gait_charts/features/dashboard/data/services/extraction/bag_list_api_service.dart';
 import 'package:gait_charts/features/dashboard/data/services/extraction/extraction_api_service.dart';
@@ -196,10 +197,50 @@ class DashboardRepository {
   /// 刪除指定 Realsense session。
   Future<DeleteSessionResponse> deleteRealsenseSession({
     required String sessionName,
-  }) {
-    return _sessionApi.deleteRealsenseSession(
-      sessionName: sessionName,
+  }) async {
+    final normalized = sessionName.trim();
+    if (normalized.isEmpty) {
+      throw ApiException(message: 'session_name 不可為空');
+    }
+
+    final response = await _sessionApi.deleteRealsenseSessionsBatch(
+      request: DeleteSessionsBatchRequest(sessionNames: <String>[normalized]),
     );
+
+    if (response.failed.contains(normalized)) {
+      throw ApiException(message: '刪除失敗：$normalized');
+    }
+
+    final detail = response.details
+        .where((e) => e.sessionName == normalized)
+        .cast<DeleteSessionsBatchDetail?>()
+        .firstWhere((e) => e != null, orElse: () => null);
+
+    // 後端理論上會回傳 details；若沒有，至少回傳「推測成功」的結果避免 UI 崩潰。
+    if (detail == null) {
+      return DeleteSessionResponse(
+        sessionName: normalized,
+        deletedDb: response.deletedDb > 0,
+        deletedNpy: response.deletedNpy > 0,
+        deletedVideo: response.deletedVideo > 0,
+        deletedBag: response.deletedBag > 0,
+      );
+    }
+
+    return DeleteSessionResponse(
+      sessionName: detail.sessionName,
+      deletedDb: detail.deletedDb,
+      deletedNpy: detail.deletedNpy,
+      deletedVideo: detail.deletedVideo,
+      deletedBag: detail.deletedBag,
+    );
+  }
+
+  /// 批量刪除多個 Realsense sessions（1-100）。
+  Future<DeleteSessionsBatchResponse> deleteRealsenseSessionsBatch({
+    required DeleteSessionsBatchRequest request,
+  }) {
+    return _sessionApi.deleteRealsenseSessionsBatch(request: request);
   }
 
   // ===========================================================================
@@ -234,15 +275,22 @@ class DashboardRepository {
 
   /// 依「name 前綴」搜尋使用者（可直接顯示清單）。
   Future<UserSearchSuggestionResponse> searchUserSuggestions({
-    required String keyword,
+    String? keyword,
+    List<String>? cohorts,
     int page = 1,
     int pageSize = 20,
   }) {
     return _usersApi.searchUserSuggestions(
       keyword: keyword,
+      cohorts: cohorts,
       page: page,
       pageSize: pageSize,
     );
+  }
+
+  /// 取得所有族群統計（結果可能快取）。
+  Future<UserCohortsResponse> fetchUserCohorts({bool refresh = false}) {
+    return _usersApi.fetchCohorts(refresh: refresh);
   }
 
   /// 取得使用者詳情（包含綁定的 sessions/bag 列表）。
@@ -276,14 +324,53 @@ class DashboardRepository {
     return _usersApi.unlinkSession(userCode: userCode, request: request);
   }
 
-  /// 刪除指定使用者。
+  /// 批量刪除使用者（1-100）。
+  Future<DeleteUsersBatchResponse> deleteUsersBatch({
+    required DeleteUsersBatchRequest request,
+  }) {
+    return _usersApi.deleteUsersBatch(request: request);
+  }
+
+  /// 刪除指定使用者（內部仍走批量刪除端點）。
   Future<DeleteUserResponse> deleteUser({
     required String userCode,
     bool deleteSessions = false,
-  }) {
-    return _usersApi.deleteUser(
-      userCode: userCode,
-      deleteSessions: deleteSessions,
+  }) async {
+    final code = userCode.trim();
+    if (code.isEmpty) {
+      throw ApiException(message: 'user_code 不可為空');
+    }
+
+    final response = await _usersApi.deleteUsersBatch(
+      request: DeleteUsersBatchRequest(
+        userCodes: <String>[code],
+        deleteSessions: deleteSessions,
+      ),
+    );
+
+    if (response.failed.contains(code)) {
+      throw ApiException(message: '刪除失敗：$code');
+    }
+
+    final detail = response.details
+        .where((e) => e.userCode == code)
+        .cast<DeleteUsersBatchDetail?>()
+        .firstWhere((e) => e != null, orElse: () => null);
+
+    if (detail == null) {
+      return DeleteUserResponse(
+        userCode: code,
+        deletedUser: response.deletedUsers > 0,
+        unlinkedSessions: response.totalUnlinkedSessions,
+        deletedSessions: response.totalDeletedSessions,
+      );
+    }
+
+    return DeleteUserResponse(
+      userCode: detail.userCode,
+      deletedUser: detail.deletedUser,
+      unlinkedSessions: detail.unlinkedSessions,
+      deletedSessions: detail.deletedSessions,
     );
   }
 }

@@ -199,8 +199,8 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
         userCode: userCode,
         request: UnlinkUserSessionRequest(
           unlinkAll: unlinkAll,
-          sessionName: sessionName,
-          bagFilename: bagFilename,
+          sessionNames: sessionName != null ? <String>[sessionName] : null,
+          bagFilenames: bagFilename != null ? <String>[bagFilename] : null,
         ),
       );
       final detail = await _repository.fetchUserDetail(userCode: userCode);
@@ -246,5 +246,12 @@ final userDetailProvider =
     NotifierProvider<UserDetailNotifier, UserDetailState>(
       UserDetailNotifier.new,
     );
+
+/// 族群統計（供表單快速選取/顯示使用）。
+final userCohortsProvider =
+    FutureProvider.autoDispose.family<UserCohortsResponse, bool>((ref, refresh) {
+      final repo = ref.watch(dashboardRepositoryProvider);
+      return repo.fetchUserCohorts(refresh: refresh);
+    });
 
 const _sentinelError = Object();

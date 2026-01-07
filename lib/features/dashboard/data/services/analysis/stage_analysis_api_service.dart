@@ -12,7 +12,7 @@ class StageAnalysisApiService {
   final Dio _dio;
 
   /// 復健分析（rehab analyzer）相關 API 的 base endpoint。
-  static const _kRehabAnalyzerEndpoint = '/rehab_analyzer';
+  static const _kRehabAnalyzerEndpoint = '/rehab-analyzer';
 
   /// 步態分期持續時間 - 分析各步態階段（支撐期、擺動期等）的時間分佈
   static const _stageDurationsEndpoint = '$_kRehabAnalyzerEndpoint/stage_durations';

@@ -9,10 +9,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:gait_charts/app/app.dart';
+import 'package:gait_charts/core/providers/app_config_provider.dart';
 import 'package:gait_charts/features/admin/presentation/providers/admin_auth_provider.dart';
 import 'package:gait_charts/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'test_helpers/fake_admin_auth_notifier.dart';
+import 'test_helpers/fake_app_config_storage.dart';
 
 void main() {
   testWidgets('Dashboard renders header', (tester) async {
@@ -40,11 +42,13 @@ void main() {
       overrides: [
         // 模擬已登入，避免卡在 AdminAuthGate 的登入頁而找不到 dashboard header。
         adminAuthProvider.overrideWith(FakeAdminAuthNotifier.new),
+        appConfigStorageProvider.overrideWithValue(FakeAppConfigStorage()),
         stageDurationsProvider.overrideWith((ref) async => response),
       ],
     );
     addTearDown(container.dispose);
     // 預熱：確保 AdminAuthGate 進入畫面時已經是 data(session) 狀態。
+    await container.read(appConfigAsyncProvider.future);
     await container.read(adminAuthProvider.future);
 
     await tester.pumpWidget(

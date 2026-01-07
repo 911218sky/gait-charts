@@ -27,7 +27,7 @@ Map<String, dynamic> _makeF32ZlibB64Payload(List<double> values) {
 }
 
 void main() {
-  test('PerLapOffsetResponse.fromJson: reads lap series *_f32_zlib_b64 + FFT *_f32_zlib_b64', () {
+  test('PerLapOffsetResponse.fromJson: reads lap series *_f32_zlib_b64 (FFT removed)', () {
     final json = <String, dynamic>{
       'laps': [
         {
@@ -42,14 +42,6 @@ void main() {
             'chair': {'start_idx': 1, 'end_idx': 2},
           },
           'walk_region': {'start_idx': 0, 'end_idx': 2},
-          'fft': {
-            'band': [0.0, 2.0],
-            'freq_hz_f32_zlib_b64': _makeF32ZlibB64Payload([0.1, 0.2, 0.3]),
-            'psd_db_f32_zlib_b64': _makeF32ZlibB64Payload([-10.0, -20.0, -30.0]),
-            'peak_freq_hz': 0.2,
-            'peak_power': 1.0,
-            'peak_db': -20.0,
-          },
         },
       ],
     };
@@ -74,22 +66,13 @@ void main() {
     expect(lap.thetaDegrees[0], closeTo(0.0, 1e-6));
     expect(lap.thetaDegrees[1], closeTo(5.0, 1e-6));
     expect(lap.thetaDegrees[2], closeTo(10.0, 1e-6));
-    expect(lap.fft.band, [0.0, 2.0]);
 
-    final freq = lap.fft.frequencyHz;
-    expect(freq.length, 3);
-    expect(freq[0], closeTo(0.1, 1e-6));
-    expect(freq[1], closeTo(0.2, 1e-6));
-    expect(freq[2], closeTo(0.3, 1e-6));
-
-    final psd = lap.fft.psdDb;
-    expect(psd.length, 3);
-    expect(psd[0], closeTo(-10.0, 1e-6));
-    expect(psd[1], closeTo(-20.0, 1e-6));
-    expect(psd[2], closeTo(-30.0, 1e-6));
-
-    expect(lap.fft.peakFrequencyOrNull, closeTo(0.2, 1e-6));
-    expect(lap.fft.peakDbOrNull, closeTo(-20.0, 1e-6));
+    expect(lap.coneTurn.startIndex, 0);
+    expect(lap.coneTurn.endIndex, 1);
+    expect(lap.chairTurn.startIndex, 1);
+    expect(lap.chairTurn.endIndex, 2);
+    expect(lap.walkRegion.startIndex, 0);
+    expect(lap.walkRegion.endIndex, 2);
   });
 }
 

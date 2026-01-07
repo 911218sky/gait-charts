@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gait_charts/app/theme.dart';
 import 'package:gait_charts/core/widgets/app_dropdown.dart';
 import 'package:gait_charts/core/widgets/app_tooltip.dart';
 import 'package:gait_charts/features/dashboard/domain/models/user_profile.dart';
+import 'package:gait_charts/features/dashboard/presentation/providers/users/users_state.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 /// 新增 / 編輯使用者的表單 Dialog。
-class UserProfileFormDialog extends StatefulWidget {
+class UserProfileFormDialog extends ConsumerStatefulWidget {
   const UserProfileFormDialog({super.key}) : user = null;
 
   const UserProfileFormDialog.edit({required this.user, super.key})
@@ -16,10 +18,11 @@ class UserProfileFormDialog extends StatefulWidget {
   final UserItem? user;
 
   @override
-  State<UserProfileFormDialog> createState() => _UserProfileFormDialogState();
+  ConsumerState<UserProfileFormDialog> createState() =>
+      _UserProfileFormDialogState();
 }
 
-class _UserProfileFormDialogState extends State<UserProfileFormDialog> {
+class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _userCodeController;
@@ -34,6 +37,7 @@ class _UserProfileFormDialogState extends State<UserProfileFormDialog> {
   late final TextEditingController _dateDisplayController;
 
   DateTime? _assessmentDate;
+  List<String> _cohortTags = const ['正常人'];
 
   // ==========
   // 診斷資訊
@@ -121,6 +125,7 @@ class _UserProfileFormDialogState extends State<UserProfileFormDialog> {
       text: user?.educationLevel ?? '',
     );
     _notesController = TextEditingController(text: user?.notes ?? '');
+    _cohortTags = (user?.cohort.isNotEmpty ?? false) ? user!.cohort : const ['正常人'];
 
     // nested sections
     final diagnosis = user?.diagnosis;
@@ -703,6 +708,7 @@ class _UserProfileFormDialogState extends State<UserProfileFormDialog> {
       weightKg: _tryParseDouble(_weightController.text),
       bmi: _tryParseDouble(_bmiController.text),
       educationLevel: _educationController.text,
+      cohort: _cohortTags.isNotEmpty ? _cohortTags : const ['正常人'],
       diagnosis: diagnosis,
       medicalHistory: medicalHistory,
       symptoms: symptoms,
@@ -717,6 +723,7 @@ class _UserProfileFormDialogState extends State<UserProfileFormDialog> {
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
     final size = MediaQuery.sizeOf(context);
+    final cohortsAsync = ref.watch(userCohortsProvider(false));
 
     final dialogWidth = (size.width * 0.92).clamp(0.0, 1200.0).toDouble();
     final dialogHeight = (size.height * 0.92).clamp(0.0, 920.0).toDouble();
@@ -808,6 +815,18 @@ class _UserProfileFormDialogState extends State<UserProfileFormDialog> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 20),
+
+                // Row 1.5: Cohort tags
+                _CohortEditor(
+                  labelStyle: labelStyle,
+                  items: _cohortTags,
+                  onChanged: (next) => setState(() {
+                    _cohortTags = next.isNotEmpty ? next : const ['正常人'];
+                  }),
+                  cohortsAsync: cohortsAsync,
+                ),
+
                 const SizedBox(height: 20),
 
                 // Row 2: Demographics
@@ -1571,6 +1590,107 @@ class _UserProfileFormDialogState extends State<UserProfileFormDialog> {
     ),
   ),
 );
+  }
+}
+
+class _CohortEditor extends StatelessWidget {
+  const _CohortEditor({
+    required this.labelStyle,
+    required this.items,
+    required this.onChanged,
+    required this.cohortsAsync,
+  });
+
+  final TextStyle labelStyle;
+  final List<String> items;
+  final ValueChanged<List<String>> onChanged;
+  final AsyncValue<UserCohortsResponse> cohortsAsync;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colorScheme;
+
+    final stats = cohortsAsync.maybeWhen(
+      data: (r) => r.cohorts,
+      orElse: () => const <UserCohortStat>[],
+    );
+    final suggested = [...stats]..sort((a, b) => b.userCount.compareTo(a.userCount));
+    final top = suggested.take(12).toList(growable: false);
+
+    void addCohort(String label) {
+      final v = label.trim();
+      if (v.isEmpty) return;
+      if (items.contains(v)) return;
+      onChanged([...items, v]);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _ChipsEditor(
+          label: '族群 (cohort)',
+          labelStyle: labelStyle,
+          hintText: '輸入後按 Enter 或「加入」',
+          items: items,
+          onChanged: onChanged,
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Icon(
+              Icons.info_outline,
+              size: 14,
+              color: colors.onSurfaceVariant.withValues(alpha: 0.75),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                '可多選；若未指定，預設為「正常人」。',
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: colors.onSurfaceVariant.withValues(alpha: 0.75),
+                ),
+              ),
+            ),
+            if (cohortsAsync.isLoading)
+              const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+          ],
+        ),
+        if (top.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final s in top)
+                ActionChip(
+                  onPressed: () => addCohort(s.cohort),
+                  avatar: Icon(
+                    Icons.add_circle_outline,
+                    size: 18,
+                    color: colors.onSurfaceVariant,
+                  ),
+                  label: Text('${s.cohort} (${s.userCount})'),
+                ),
+            ],
+          ),
+        ],
+        if (cohortsAsync.hasError) ...[
+          const SizedBox(height: 8),
+          Text(
+            '（族群清單載入失敗：${cohortsAsync.error}）',
+            style: context.textTheme.bodySmall?.copyWith(
+              color: colors.error,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ],
+    );
   }
 }
 

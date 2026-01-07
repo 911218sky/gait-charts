@@ -1,18 +1,23 @@
 import 'package:dio/dio.dart';
 
-/// 自定義 API 異常類別，統一封裝錯誤訊息與狀態碼。
+/// API 異常，封裝錯誤訊息與 HTTP 狀態碼。
 class ApiException implements Exception {
   ApiException({required this.message, this.statusCode, this.original});
 
-  final String message; // 錯誤訊息
-  final int? statusCode; // HTTP 狀態碼
-  final Object? original; // 原始錯誤物件
+  /// 錯誤訊息
+  final String message;
+
+  /// HTTP 狀態碼
+  final int? statusCode;
+
+  /// 原始錯誤物件
+  final Object? original;
 
   @override
   String toString() => 'ApiException($statusCode): $message';
 }
 
-/// 嘗試從伺服器回傳的 body 取出可讀訊息。
+/// 從伺服器回傳的 body 取出可讀訊息。
 String? _extractServerMessage(Response<dynamic>? response) {
   // 將 dynamic 轉換為 String
   String? asString(dynamic value) {
@@ -35,7 +40,7 @@ String? _extractServerMessage(Response<dynamic>? response) {
   return null;
 }
 
-/// 將 Dio 層的錯誤轉換為 UI 友善的 ApiException。
+/// 將 DioException 轉換為 UI 友善的 ApiException。
 ApiException mapDioError(DioException error) {
   // 處理連線逾時
   if (error.type == DioExceptionType.connectionTimeout ||

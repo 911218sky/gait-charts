@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gait_charts/app/theme.dart';
 
-/// 顯示非同步載入失敗時的友善錯誤提示與重試行為。
+/// 非同步載入失敗時的錯誤提示與重試按鈕。
 class AsyncErrorView extends StatelessWidget {
   const AsyncErrorView({
     required this.error,
@@ -10,9 +10,14 @@ class AsyncErrorView extends StatelessWidget {
     this.compact = false,
   });
 
-  final Object error; // 錯誤物件
-  final VoidCallback? onRetry; // 重試回呼函式
-  final bool compact; // 是否為精簡模式 (適用於小區塊)
+  /// 錯誤物件
+  final Object error;
+
+  /// 重試回呼
+  final VoidCallback? onRetry;
+
+  /// 精簡模式，適用於小區塊
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +25,7 @@ class AsyncErrorView extends StatelessWidget {
     final colors = context.colorScheme;
     final accentColors = DashboardAccentColors.of(context);
 
-    // 嘗試從錯誤中提取可讀訊息，若是一般 Exception 則取 toString
-    // 這裡可以根據專案實際 Exception 類型做更細緻的 parsing
+    // 從錯誤中提取可讀訊息
     final errorMessage = error.toString().replaceAll('Exception:', '').trim();
 
     if (compact) {

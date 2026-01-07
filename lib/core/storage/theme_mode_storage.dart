@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:gait_charts/core/storage/secure_storage_config.dart';
 
-/// 主題模式的本機持久化。
-///
-/// 使用統一的 SecureStorageConfig 確保跨平台加密一致性。
+/// ThemeMode 本機持久化。
 class ThemeModeStorage {
   ThemeModeStorage({FlutterSecureStorage? storage})
       : _storage = storage ?? SecureStorageConfig.instance;

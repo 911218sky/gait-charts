@@ -4,6 +4,7 @@ export 'analysis/multi_fft_state.dart';
 export 'analysis/per_lap_offset_state.dart';
 export 'analysis/spatial_spectrum_state.dart';
 export 'analysis/speed_heatmap_state.dart';
+export 'analysis/stage_durations_overview_state.dart';
 export 'analysis/stage_durations_state.dart';
 export 'analysis/swing_info_heatmap_state.dart';
 export 'analysis/trajectory_overlay_state.dart';

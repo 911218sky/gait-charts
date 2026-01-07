@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// 封裝後端連線設定與共用逾時參數。
+/// 後端連線設定，包含 API 基礎網址、逾時與簽章驗證參數。
 @immutable
 class AppConfig {
   const AppConfig({
@@ -16,33 +16,30 @@ class AppConfig {
         const bool.fromEnvironment('REQUEST_COMPRESSION_ENABLED', defaultValue: true),
   });
 
-  final String baseUrl; // API 基礎網址
-  final Duration requestTimeout; // 請求逾時時間
+  /// API 基礎網址
+  final String baseUrl;
+
+  /// 請求逾時時間
+  final Duration requestTimeout;
 
   /// 是否啟用後端 HMAC 簽章驗證（對應後端 AUTH_ENABLED）。
-  ///
-  /// 注意：若啟用，務必提供 [authClientId] / [authClientSecret]，否則所有 API 呼叫會被後端拒絕。
+  /// 若啟用，須提供 [authClientId] 與 [authClientSecret]，否則 API 呼叫會被拒絕。
   final bool authEnabled;
 
   /// 請求簽章使用的 client_id（對應後端 X-Client-Id）。
   final String authClientId;
 
   /// 請求簽章使用的密鑰（對應後端 client secret）。
-  ///
-  /// 注意：把 secret 放在前端不是嚴格安全；這裡是為了與目前後端驗證機制對接。
+  /// 前端存放 secret 並非嚴格安全，僅為配合現有後端驗證機制。
   final String authClientSecret;
 
   /// 簽章版本（對應後端 X-Signature-Version；預設 v1）。
   final String authSignatureVersion;
 
-  /// 客戶端側免簽章路徑（以 prefix 判斷）。
-  ///
-  /// 用途：例如 upload/multipart 等客戶端尚未支援簽章的路徑。
+  /// 免簽章路徑前綴清單，用於 upload/multipart 等尚未支援簽章的端點。
   final List<String> authExemptPathPrefixes;
 
-  /// 是否啟用 request body 壓縮（gzip）。
-  ///
-  /// 注意：後端必須支援 `Content-Encoding: gzip` 的解壓，否則會無法解析 body。
+  /// 是否啟用 request body gzip 壓縮。後端須支援 `Content-Encoding: gzip` 解壓。
   final bool requestCompressionEnabled;
 
   /// 產生帶有覆蓋值的新設定。
@@ -69,9 +66,11 @@ class AppConfig {
   }
 }
 
-/// 本地開發預設設定，可由 provider 注入。
+/// 本地開發預設設定。
 const defaultAppConfig = AppConfig(
-  baseUrl: 'https://nycu-realsense-pose.sky1218.com/v1/',
-  // baseUrl: 'http://localhost:8100/v1',
+  // baseUrl 不以 `/` 結尾，避免與 service path 拼接時產生 `//`
+  // 2026-01 起新版後端以 `/api/v1` 為前綴；舊版可能仍使用 `/v1`
+  baseUrl: 'https://nycu-realsense-pose.sky1218.com/api/v1',
+  // baseUrl: 'http://localhost:8100/api/v1',
   requestTimeout: Duration(seconds: 20),
 );

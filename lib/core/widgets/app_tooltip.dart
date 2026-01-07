@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 統一的 Tooltip 包裝元件。
-///
-/// 包一層方便未來集中調整 tooltip 行為。
+/// 統一的 Tooltip 包裝元件，方便集中調整 tooltip 行為。
 class AppTooltip extends StatelessWidget {
   const AppTooltip({
     required this.message,

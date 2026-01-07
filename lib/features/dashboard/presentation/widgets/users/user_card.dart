@@ -55,6 +55,16 @@ class UserCard extends StatelessWidget {
                             label: Text('user_code：${user.userCode}'),
                             avatar: const Icon(Icons.badge_outlined, size: 18),
                           ),
+                          if (user.cohort.isNotEmpty)
+                            ...user.cohort.map(
+                              (c) => Chip(
+                                label: Text(c),
+                                avatar: const Icon(
+                                  Icons.groups_rounded,
+                                  size: 18,
+                                ),
+                              ),
+                            ),
                           ActionChip(
                             label: const Text('複製'),
                             avatar: const Icon(Icons.copy_rounded, size: 18),
