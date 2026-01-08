@@ -79,67 +79,69 @@ class AsyncErrorView extends StatelessWidget {
     }
 
     return Center(
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 380),
-        margin: const EdgeInsets.all(24),
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: colors.surfaceContainer,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: colors.outlineVariant),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 錯誤圖示區塊
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: accentColors.danger.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                Icons.cloud_off_rounded,
-                size: 28,
-                color: accentColors.danger,
-              ),
-            ),
-            const SizedBox(height: 20),
-            // 標題
-            Text(
-              '無法載入資料',
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colors.onSurface,
-                letterSpacing: -0.3,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            // 錯誤訊息
-            Text(
-              errorMessage.isEmpty ? '發生未知錯誤，請稍後再試' : errorMessage,
-              style: textTheme.bodySmall?.copyWith(
-                color: colors.onSurfaceVariant,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (onRetry != null) ...[
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: onRetry,
-                  icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: const Text('重新載入'),
+      child: SingleChildScrollView(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 380),
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: colors.surfaceContainer,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: colors.outlineVariant),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 錯誤圖示區塊
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: accentColors.danger.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.cloud_off_rounded,
+                  size: 28,
+                  color: accentColors.danger,
                 ),
               ),
+              const SizedBox(height: 20),
+              // 標題
+              Text(
+                '無法載入資料',
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colors.onSurface,
+                  letterSpacing: -0.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              // 錯誤訊息
+              Text(
+                errorMessage.isEmpty ? '發生未知錯誤，請稍後再試' : errorMessage,
+                style: textTheme.bodySmall?.copyWith(
+                  color: colors.onSurfaceVariant,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (onRetry != null) ...[
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: onRetry,
+                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                    label: const Text('重新載入'),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
