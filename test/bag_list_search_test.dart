@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:gait_charts/features/dashboard/data/dashboard_repository.dart';
 import 'package:gait_charts/features/dashboard/data/services/analysis/stage_analysis_api_service.dart';
+import 'package:gait_charts/features/dashboard/data/services/cohort_benchmark/cohort_benchmark_api_service.dart';
 import 'package:gait_charts/features/dashboard/data/services/extraction/bag_list_api_service.dart';
 import 'package:gait_charts/features/dashboard/data/services/extraction/extraction_api_service.dart';
 import 'package:gait_charts/features/dashboard/data/services/sessions/session_api_service.dart';
@@ -40,6 +40,7 @@ void main() {
     final dio = Dio();
 
     final repo = DashboardRepository(
+      cohortBenchmarkApi: CohortBenchmarkApiService(dio),
       stageAnalysisApi: StageAnalysisApiService(dio),
       bagListApi: fakeBagApi,
       extractionApi: ExtractionApiService(dio),
