@@ -32,7 +32,7 @@ class SignedHeadersInterceptor extends Interceptor {
     }
 
     final uri = options.uri;
-    final path = uri.path;
+    final path = Uri.decodeFull(uri.path);
     // 如果 path 在 exemptPathPrefixes 中，則不進行簽章
     if (_isExemptPath(path)) {
       handler.next(options);
