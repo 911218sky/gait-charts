@@ -9,6 +9,7 @@ import 'package:gait_charts/features/dashboard/domain/models/user_profile.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/shared/fields/user_autocomplete_field.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/shared/layout/dashboard_page_padding.dart';
+import 'package:gait_charts/features/dashboard/presentation/widgets/users/batch_delete_users_dialog.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/users/delete_user_dialog.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/users/unlink_all_user_sessions_dialog.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/users/unlink_user_session_dialog.dart';
@@ -460,6 +461,17 @@ class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
                       ),
                     ),
                     const SizedBox(width: 16),
+                    OutlinedButton.icon(
+                      onPressed: userState.isBusy
+                          ? null
+                          : () => BatchDeleteUsersDialog.show(
+                                context,
+                                initialQuery: _userNameController.text.trim(),
+                              ),
+                      icon: const Icon(Icons.delete_sweep_outlined),
+                      label: const Text('批量刪除'),
+                    ),
+                    const SizedBox(width: 12),
                     FilledButton.icon(
                       onPressed: userState.isBusy ? null : _openCreateDialog,
                       icon: const Icon(Icons.person_add_alt_1_outlined),

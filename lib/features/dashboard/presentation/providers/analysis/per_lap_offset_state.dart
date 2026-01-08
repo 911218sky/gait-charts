@@ -56,11 +56,11 @@ class PerLapOffsetConfigNotifier extends Notifier<PerLapOffsetConfig> {
     _updateWithDebounce(() => state.copyWith(projection: value));
   }
 
-  void updateSmoothWindow(int value) {
-    if (state.smoothWindow == value) {
+  void updateSmoothWindowSeconds(double value) {
+    if (_roughlyEqual(state.smoothWindowSeconds, value)) {
       return;
     }
-    _updateWithDebounce(() => state.copyWith(smoothWindow: value));
+    _updateWithDebounce(() => state.copyWith(smoothWindowSeconds: value));
   }
 
   void updateMinVAbs(double value) {
@@ -82,23 +82,6 @@ class PerLapOffsetConfigNotifier extends Notifier<PerLapOffsetConfig> {
       return;
     }
     _updateWithDebounce(() => state.copyWith(kSmooth: value));
-  }
-
-  void updateFftBand(double low, double high) {
-    if (_roughlyEqual(state.fftBandLow, low) &&
-        _roughlyEqual(state.fftBandHigh, high)) {
-      return;
-    }
-    _updateWithDebounce(
-      () => state.copyWith(fftBandLow: low, fftBandHigh: high),
-    );
-  }
-
-  void updateFftParams(FftPeriodogramParams params) {
-    if (state.fftParams == params) {
-      return;
-    }
-    _updateWithDebounce(() => state.copyWith(fftParams: params));
   }
 
   void reset() {

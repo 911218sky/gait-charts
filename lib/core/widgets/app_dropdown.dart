@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gait_charts/app/theme.dart';
 
-/// 通用的下拉選單，提供懸浮、陰影與選中標記。
+/// 通用下拉選單，提供懸浮、陰影與選中標記。
 ///
-/// - 設計意圖：過去版本偏向「只支援深色」，在淺色模式會出現白字白底/邊框消失的問題。
-/// - 目前做法：統一改為依 Theme/ColorScheme 自動適配淺/深色，避免在 UI 端硬編顏色。
+/// 依 Theme/ColorScheme 自動適配淺/深色模式。
 class AppSelect<T> extends StatelessWidget {
   const AppSelect({
     required this.value,
@@ -60,7 +59,7 @@ class AppSelect<T> extends StatelessWidget {
         tooltip: effectiveTooltip,
         initialValue: selectionValue,
         enabled: isEnabled,
-        offset: const Offset(0, 42), // 讓選單稍微向下偏移，不遮擋按鈕
+        offset: const Offset(0, 42), // 選單向下偏移，不遮擋按鈕
         color: menuBackground,
         elevation: 8,
         shadowColor: menuShadow,
@@ -141,7 +140,7 @@ class AppSelect<T> extends StatelessWidget {
   }
 }
 
-/// 封裝 PopupMenuButton 的值，確保 null 也能被選取而非視為取消。
+/// 封裝 PopupMenuButton 的值，確保 null 也能被選取。
 class _SelectValue<T> {
   const _SelectValue(this.value);
 

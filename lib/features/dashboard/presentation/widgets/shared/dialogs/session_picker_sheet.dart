@@ -97,6 +97,7 @@ class _SessionPickerDialogState extends ConsumerState<SessionPickerDialog> {
 
       final details = <String>[
         'npy=${response.deletedNpy ? 'deleted' : 'kept'}',
+        'video=${response.deletedVideo ? 'deleted' : 'kept'}',
         'bag=${response.deletedBag ? 'deleted' : 'kept'}',
       ];
       final suffix = ' (${details.join(', ')})';

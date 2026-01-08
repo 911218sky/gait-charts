@@ -15,6 +15,7 @@ class UserItem {
     this.weightKg,
     this.bmi,
     this.educationLevel,
+    this.cohort = const ['正常人'],
     this.diagnosis,
     this.medicalHistory,
     this.symptoms,
@@ -37,6 +38,11 @@ class UserItem {
   final double? bmi;
   final String? educationLevel;
 
+  /// 使用者族群分類（可多選）。
+  ///
+  /// 後端預設：["正常人"]
+  final List<String> cohort;
+
   /// 後端回傳的 nested sections 目前以 Map 保存，避免前端硬綁欄位。
   final Map<String, Object?>? diagnosis;
   final Map<String, Object?>? medicalHistory;
@@ -56,6 +62,7 @@ class UserItem {
       weightKg: _doubleValue(json['weight_kg']),
       bmi: _doubleValue(json['bmi']),
       educationLevel: _stringValue(json['education_level']),
+      cohort: _normalizeCohortList(_stringListValue(json['cohort'])),
       diagnosis: _mapValue(json['diagnosis']),
       medicalHistory: _mapValue(json['medical_history']),
       symptoms: _mapValue(json['symptoms']),
@@ -83,6 +90,7 @@ class UserItem {
       'weight_kg': weightKg,
       'bmi': bmi,
       'education_level': educationLevel,
+      'cohort': cohort,
       'diagnosis': diagnosis,
       'medical_history': medicalHistory,
       'symptoms': symptoms,
@@ -187,6 +195,7 @@ class UserProfileDraft {
     this.weightKg,
     this.bmi,
     this.educationLevel,
+    this.cohort = const ['正常人'],
     this.diagnosis,
     this.medicalHistory,
     this.symptoms,
@@ -203,6 +212,7 @@ class UserProfileDraft {
   final double? weightKg;
   final double? bmi;
   final String? educationLevel;
+  final List<String> cohort;
   final Map<String, Object?>? diagnosis;
   final Map<String, Object?>? medicalHistory;
   final Map<String, Object?>? symptoms;
@@ -210,6 +220,7 @@ class UserProfileDraft {
   final String? notes;
 
   Map<String, Object?> toCreateJson() {
+    final normalizedCohort = _normalizeCohortList(cohort);
     final payload = <String, Object?>{
       'name': name.trim(),
       if (_stringOrNull(userCode) != null) 'user_code': _stringOrNull(userCode),
@@ -222,6 +233,7 @@ class UserProfileDraft {
       if (bmi != null) 'bmi': bmi,
       if (_stringOrNull(educationLevel) != null)
         'education_level': _stringOrNull(educationLevel),
+      if (!_isDefaultCohort(normalizedCohort)) 'cohort': normalizedCohort,
       if (_compactJsonMap(diagnosis) != null)
         'diagnosis': _compactJsonMap(diagnosis),
       if (_compactJsonMap(medicalHistory) != null)
@@ -291,6 +303,15 @@ class UserProfileDraft {
       _stringOrNull(original.educationLevel),
     );
 
+    // cohort：後端為覆蓋更新（非 merge）。
+    final nextCohort = _normalizeCohortList(cohort);
+    setIfChanged<List<String>>(
+      'cohort',
+      nextCohort,
+      _normalizeCohortList(original.cohort),
+      equals: _stringListEquals,
+    );
+
     setIfChanged<String?>(
       'notes',
       _stringOrNull(notes),
@@ -358,6 +379,7 @@ class UserCreateRequest {
     this.weightKg,
     this.bmi,
     this.educationLevel,
+    this.cohort = const ['正常人'],
     this.diagnosis,
     this.medicalHistory,
     this.symptoms,
@@ -374,6 +396,7 @@ class UserCreateRequest {
   final double? weightKg;
   final double? bmi;
   final String? educationLevel;
+  final List<String> cohort;
   final Map<String, Object?>? diagnosis;
   final Map<String, Object?>? medicalHistory;
   final Map<String, Object?>? symptoms;
@@ -391,6 +414,7 @@ class UserCreateRequest {
       weightKg: draft.weightKg,
       bmi: draft.bmi,
       educationLevel: draft.educationLevel,
+      cohort: draft.cohort,
       diagnosis: draft.diagnosis,
       medicalHistory: draft.medicalHistory,
       symptoms: draft.symptoms,
@@ -401,6 +425,7 @@ class UserCreateRequest {
 
   Map<String, Object?> toJson() {
     final payload = <String, Object?>{'name': name.trim()};
+    final normalizedCohort = _normalizeCohortList(cohort);
 
     final code = _stringOrNull(userCode);
     if (code != null) {
@@ -432,6 +457,10 @@ class UserCreateRequest {
     final normalizedEducation = _stringOrNull(educationLevel);
     if (normalizedEducation != null) {
       payload['education_level'] = normalizedEducation;
+    }
+
+    if (!_isDefaultCohort(normalizedCohort)) {
+      payload['cohort'] = normalizedCohort;
     }
 
     final diagnosisPayload = _compactJsonMap(diagnosis);
@@ -512,40 +541,58 @@ class LinkUserSessionRequest {
 class UnlinkUserSessionRequest {
   const UnlinkUserSessionRequest({
     this.unlinkAll = false,
-    this.sessionName,
-    this.bagFilename,
+    this.sessionNames,
+    this.bagFilenames,
   });
 
   final bool unlinkAll;
-  final String? sessionName;
-  /// BAG 檔案名稱（推薦使用）。
-  final String? bagFilename;
+  /// 要解除綁定的 session_names（1-100）。
+  final List<String>? sessionNames;
+  /// 要解除綁定的 bag_filenames（1-100，推薦使用）。
+  final List<String>? bagFilenames;
 
   Map<String, Object?> toJson() {
     final payload = <String, Object?>{};
-    final normalizedSessionName = _stringOrNull(sessionName);
-    final normalizedBagFilename = _stringOrNull(bagFilename);
+
+    List<String>? normalizeList(List<String>? raw) {
+      if (raw == null) return null;
+      final out = raw
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toSet()
+          .toList(growable: false);
+      return out.isEmpty ? null : out;
+    }
+
+    final normalizedSessionNames = normalizeList(sessionNames);
+    final normalizedBagFilenames = normalizeList(bagFilenames);
 
     if (unlinkAll) {
-      if (normalizedSessionName != null || normalizedBagFilename != null) {
+      if (normalizedSessionNames != null || normalizedBagFilenames != null) {
         throw ArgumentError(
-          'unlinkAll cannot be used together with sessionName/bagFilename',
+          'unlinkAll cannot be used together with sessionNames/bagFilenames',
         );
       }
       payload['unlink_all'] = true;
       return payload;
     }
 
-    if (normalizedSessionName != null) {
-      payload['session_name'] = normalizedSessionName;
+    if (normalizedSessionNames != null) {
+      if (normalizedSessionNames.length > 100) {
+        throw ArgumentError('sessionNames length must be <= 100');
+      }
+      payload['session_names'] = normalizedSessionNames;
     }
-    if (normalizedBagFilename != null) {
-      payload['bag_filename'] = normalizedBagFilename;
+    if (normalizedBagFilenames != null) {
+      if (normalizedBagFilenames.length > 100) {
+        throw ArgumentError('bagFilenames length must be <= 100');
+      }
+      payload['bag_filenames'] = normalizedBagFilenames;
     }
 
     if (payload.isEmpty) {
       throw ArgumentError(
-        'Either sessionName or bagFilename is required (or set unlinkAll=true)',
+        'Either sessionNames or bagFilenames is required (or set unlinkAll=true)',
       );
     }
 
@@ -562,28 +609,135 @@ class UnlinkUserSessionResponse {
     required this.userCode,
     required this.mode,
     required this.unlinkedSessions,
-    this.session,
+    required this.failed,
   });
 
   final String userCode;
-  final String mode; // 'single' | 'all'
+  final String mode; // 'batch'
   final int unlinkedSessions;
-  final UserSessionItem? session;
+  final List<String> failed;
 
   factory UnlinkUserSessionResponse.fromJson(Map<String, Object?> json) {
-    final sessionRaw = json['session'];
+    final failedRaw = json['failed'];
     return UnlinkUserSessionResponse(
       userCode: _stringValue(json['user_code']) ?? '',
-      mode: _stringValue(json['mode']) ?? 'single',
+      mode: _stringValue(json['mode']) ?? 'batch',
       unlinkedSessions: _intValue(json['unlinked_sessions']) ?? 0,
-      session: sessionRaw is Map
-          ? UserSessionItem.fromJson(sessionRaw.cast<String, Object?>())
-          : null,
+      failed: failedRaw is List
+          ? failedRaw
+                .map((e) => e?.toString().trim() ?? '')
+                .where((e) => e.isNotEmpty)
+                .toList(growable: false)
+          : const [],
     );
   }
 }
 
-/// 刪除使用者回應：DELETE /v1/users/{user_code}?delete_sessions=...
+/// 刪除使用者（批量）請求：POST /users/delete
+@immutable
+class DeleteUsersBatchRequest {
+  const DeleteUsersBatchRequest({
+    required this.userCodes,
+    this.deleteSessions = false,
+  });
+
+  /// 要刪除的 user_codes（1-100）。
+  final List<String> userCodes;
+
+  /// true：連同刪除該使用者名下 sessions（DB 紀錄）
+  /// false：只解除綁定（保留 sessions）
+  final bool deleteSessions;
+
+  Map<String, Object?> toJson() {
+    final codes = userCodes
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toSet()
+        .toList(growable: false);
+
+    if (codes.isEmpty) {
+      throw ArgumentError('userCodes must not be empty');
+    }
+    if (codes.length > 100) {
+      throw ArgumentError('userCodes length must be <= 100');
+    }
+
+    return <String, Object?>{
+      'user_codes': codes,
+      'delete_sessions': deleteSessions,
+    };
+  }
+}
+
+/// 刪除使用者（批量）回應明細。
+@immutable
+class DeleteUsersBatchDetail {
+  const DeleteUsersBatchDetail({
+    required this.userCode,
+    required this.deletedUser,
+    required this.unlinkedSessions,
+    required this.deletedSessions,
+  });
+
+  final String userCode;
+  final bool deletedUser;
+  final int unlinkedSessions;
+  final int deletedSessions;
+
+  factory DeleteUsersBatchDetail.fromJson(Map<String, Object?> json) {
+    return DeleteUsersBatchDetail(
+      userCode: _stringValue(json['user_code']) ?? '',
+      deletedUser: _boolValue(json['deleted_user']) ?? false,
+      unlinkedSessions: _intValue(json['unlinked_sessions']) ?? 0,
+      deletedSessions: _intValue(json['deleted_sessions']) ?? 0,
+    );
+  }
+}
+
+/// 刪除使用者（批量）回應：POST /users/delete
+@immutable
+class DeleteUsersBatchResponse {
+  const DeleteUsersBatchResponse({
+    required this.totalRequested,
+    required this.deletedUsers,
+    required this.totalUnlinkedSessions,
+    required this.totalDeletedSessions,
+    required this.failed,
+    required this.details,
+  });
+
+  final int totalRequested;
+  final int deletedUsers;
+  final int totalUnlinkedSessions;
+  final int totalDeletedSessions;
+  final List<String> failed;
+  final List<DeleteUsersBatchDetail> details;
+
+  factory DeleteUsersBatchResponse.fromJson(Map<String, Object?> json) {
+    final failedRaw = json['failed'];
+    final detailsRaw = json['details'];
+    return DeleteUsersBatchResponse(
+      totalRequested: _intValue(json['total_requested']) ?? 0,
+      deletedUsers: _intValue(json['deleted_users']) ?? 0,
+      totalUnlinkedSessions: _intValue(json['total_unlinked_sessions']) ?? 0,
+      totalDeletedSessions: _intValue(json['total_deleted_sessions']) ?? 0,
+      failed: failedRaw is List
+          ? failedRaw
+                .map((e) => e?.toString().trim() ?? '')
+                .where((e) => e.isNotEmpty)
+                .toList(growable: false)
+          : const [],
+      details: detailsRaw is List
+          ? detailsRaw
+                .whereType<Map<String, Object?>>()
+                .map(DeleteUsersBatchDetail.fromJson)
+                .toList(growable: false)
+          : const [],
+    );
+  }
+}
+
+/// 刪除使用者回應明細（由批量刪除回應的 details 取出）。
 @immutable
 class DeleteUserResponse {
   const DeleteUserResponse({
@@ -616,12 +770,14 @@ class UserListItem {
     required this.name,
     required this.createdAt,
     required this.updatedAt,
+    this.cohort = const ['正常人'],
   });
 
   final String userCode;
   final String name;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final List<String> cohort;
 
   factory UserListItem.fromJson(Map<String, Object?> json) {
     return UserListItem(
@@ -633,6 +789,7 @@ class UserListItem {
       updatedAt:
           _parseDateTime(json['updated_at']) ??
           DateTime.fromMillisecondsSinceEpoch(0),
+      cohort: _normalizeCohortList(_stringListValue(json['cohort'])),
     );
   }
 }
@@ -646,11 +803,13 @@ class UserSearchSuggestionItem {
     required this.userCode,
     required this.name,
     required this.createdAt,
+    this.cohort = const ['正常人'],
   });
 
   final String userCode;
   final String name;
   final DateTime createdAt;
+  final List<String> cohort;
 
   factory UserSearchSuggestionItem.fromJson(Map<String, Object?> json) {
     return UserSearchSuggestionItem(
@@ -659,6 +818,46 @@ class UserSearchSuggestionItem {
       createdAt:
           _parseDateTime(json['created_at']) ??
           DateTime.fromMillisecondsSinceEpoch(0),
+      cohort: _normalizeCohortList(_stringListValue(json['cohort'])),
+    );
+  }
+}
+
+/// 族群統計項目（GET /v1/users/cohorts）。
+@immutable
+class UserCohortStat {
+  const UserCohortStat({required this.cohort, required this.userCount});
+
+  final String cohort;
+  final int userCount;
+
+  factory UserCohortStat.fromJson(Map<String, Object?> json) {
+    return UserCohortStat(
+      cohort: _stringValue(json['cohort']) ?? '',
+      userCount: _intValue(json['user_count']) ?? 0,
+    );
+  }
+}
+
+/// 族群統計回傳：GET /v1/users/cohorts
+@immutable
+class UserCohortsResponse {
+  const UserCohortsResponse({required this.cohorts, required this.totalCohorts});
+
+  final List<UserCohortStat> cohorts;
+  final int totalCohorts;
+
+  factory UserCohortsResponse.fromJson(Map<String, Object?> json) {
+    final cohortsRaw = json['cohorts'];
+    return UserCohortsResponse(
+      cohorts: cohortsRaw is List
+          ? cohortsRaw
+                .whereType<Map<String, Object?>>()
+                .map(UserCohortStat.fromJson)
+                .where((e) => e.cohort.trim().isNotEmpty)
+                .toList(growable: false)
+          : const [],
+      totalCohorts: _intValue(json['total_cohorts']) ?? 0,
     );
   }
 }
@@ -821,6 +1020,22 @@ String? _stringValue(Object? value) {
   return asString.isEmpty ? null : asString;
 }
 
+List<String>? _stringListValue(Object? value) {
+  if (value is! List) {
+    return null;
+  }
+  final out = <String>[];
+  final seen = <String>{};
+  for (final item in value) {
+    final s = item?.toString().trim() ?? '';
+    if (s.isEmpty) continue;
+    if (seen.add(s)) {
+      out.add(s);
+    }
+  }
+  return out.isEmpty ? null : out;
+}
+
 int? _intValue(Object? value) {
   if (value is int) {
     return value;
@@ -871,6 +1086,38 @@ Map<String, Object?>? _mapValue(Object? value) {
     return value.cast<String, Object?>();
   }
   return null;
+}
+
+List<String> _normalizeCohortList(List<String>? raw) {
+  // 族群最少保留 1 個；若未提供/清空，回到預設。
+  final normalized = (raw ?? const <String>[])
+      .map((e) => e.trim())
+      .where((e) => e.isNotEmpty)
+      .toList(growable: false);
+  if (normalized.isEmpty) {
+    return const ['正常人'];
+  }
+  // 保留插入順序的去重
+  final out = <String>[];
+  final seen = <String>{};
+  for (final c in normalized) {
+    if (seen.add(c)) out.add(c);
+  }
+  return out.isEmpty ? const ['正常人'] : out;
+}
+
+bool _isDefaultCohort(List<String> cohort) {
+  return cohort.length == 1 && cohort.first.trim() == '正常人';
+}
+
+bool _stringListEquals(List<String>? a, List<String>? b) {
+  if (a == null && b == null) return true;
+  if (a == null || b == null) return false;
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
 }
 
 /// 用於「Create」時的 nested payload 壓縮：

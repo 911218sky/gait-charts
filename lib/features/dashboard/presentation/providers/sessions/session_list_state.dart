@@ -327,6 +327,24 @@ class SessionListNotifier extends Notifier<SessionListState> {
       rethrow;
     }
   }
+
+  /// 從目前列表中移除多個 sessions（用於批量刪除後的就地更新）。
+  void removeSessions(Iterable<String> sessionNames) {
+    final normalized = sessionNames
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toSet();
+    if (normalized.isEmpty) {
+      return;
+    }
+
+    final remaining = state.items
+        .where((item) => !normalized.contains(item.sessionName))
+        .toList(growable: false);
+    final updatedDeleting = {...state.deletingSessions}
+      ..removeWhere(normalized.contains);
+    state = state.copyWith(items: remaining, deletingSessions: updatedDeleting);
+  }
 }
 
 /// 提供 session 清單狀態的 auto dispose Provider。

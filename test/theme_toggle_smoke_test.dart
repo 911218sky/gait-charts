@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:gait_charts/app/app.dart';
+import 'package:gait_charts/core/providers/app_config_provider.dart';
 import 'package:gait_charts/features/admin/domain/models/admin_models.dart';
 import 'package:gait_charts/features/admin/presentation/providers/admin_auth_provider.dart';
 import 'package:gait_charts/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
+import 'test_helpers/fake_app_config_storage.dart';
 
 class _FakeAdminAuthNotifier extends AdminAuthNotifier {
   @override
@@ -33,6 +35,7 @@ void main() {
       overrides: [
         // 模擬已登入，避免卡在 AdminAuthGate 的登入頁而找不到 dashboard 導覽項目。
         adminAuthProvider.overrideWith(_FakeAdminAuthNotifier.new),
+        appConfigStorageProvider.overrideWithValue(FakeAppConfigStorage()),
         // 讓 swing view 的 heatmap request 直接回空，避免後端依賴。
         swingInfoHeatmapProvider.overrideWith((ref) async {
           return const SwingInfoHeatmapResponse(
@@ -60,6 +63,7 @@ void main() {
     );
     addTearDown(container.dispose);
     // 預熱：確保 AdminAuthGate 進入畫面時已經是 data(session) 狀態。
+    await container.read(appConfigAsyncProvider.future);
     await container.read(adminAuthProvider.future);
 
     await tester.pumpWidget(

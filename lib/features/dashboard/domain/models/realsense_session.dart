@@ -94,7 +94,7 @@ class RealsenseSessionList {
 
 /// 刪除指定 session 的回應結果。
 ///
-/// 後端 `DELETE /realsense_pose_extractor/sessions/{session_name}` 會：
+/// 後端 `POST /realsense-pose-extractor/sessions/delete` 會：
 /// - 刪除 DB 紀錄
 /// - 嘗試刪除對應的 npy 檔案
 /// - bag 檔若仍被其他 session 共用，則只保留不刪
@@ -104,12 +104,14 @@ class DeleteSessionResponse {
     required this.sessionName,
     required this.deletedDb,
     required this.deletedNpy,
+    required this.deletedVideo,
     required this.deletedBag,
   });
 
   final String sessionName;
   final bool deletedDb;
   final bool deletedNpy;
+  final bool deletedVideo;
   final bool deletedBag;
 
   factory DeleteSessionResponse.fromJson(Map<String, dynamic> json) {
@@ -123,7 +125,124 @@ class DeleteSessionResponse {
       sessionName: json['session_name']?.toString() ?? '',
       deletedDb: toBool(json['deleted_db']),
       deletedNpy: toBool(json['deleted_npy']),
+      deletedVideo: toBool(json['deleted_video']),
       deletedBag: toBool(json['deleted_bag']),
+    );
+  }
+}
+
+/// 批量刪除 sessions 的請求：POST /realsense-pose-extractor/sessions/delete
+@immutable
+class DeleteSessionsBatchRequest {
+  const DeleteSessionsBatchRequest({required this.sessionNames});
+
+  /// 要刪除的 session_name 列表（1-100）。
+  final List<String> sessionNames;
+
+  Map<String, Object?> toJson() {
+    final normalized = sessionNames
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toSet()
+        .toList(growable: false);
+
+    if (normalized.isEmpty) {
+      throw ArgumentError('sessionNames must not be empty');
+    }
+    if (normalized.length > 100) {
+      throw ArgumentError('sessionNames length must be <= 100');
+    }
+
+    return <String, Object?>{'session_names': normalized};
+  }
+}
+
+/// 批量刪除 sessions 的單筆明細。
+@immutable
+class DeleteSessionsBatchDetail {
+  const DeleteSessionsBatchDetail({
+    required this.sessionName,
+    required this.deletedDb,
+    required this.deletedNpy,
+    required this.deletedVideo,
+    required this.deletedBag,
+  });
+
+  final String sessionName;
+  final bool deletedDb;
+  final bool deletedNpy;
+  final bool deletedVideo;
+  final bool deletedBag;
+
+  factory DeleteSessionsBatchDetail.fromJson(Map<String, dynamic> json) {
+    bool toBool(dynamic value) {
+      if (value is bool) return value;
+      final raw = value?.toString().toLowerCase().trim();
+      return raw == 'true' || raw == '1' || raw == 'yes';
+    }
+
+    return DeleteSessionsBatchDetail(
+      sessionName: json['session_name']?.toString() ?? '',
+      deletedDb: toBool(json['deleted_db']),
+      deletedNpy: toBool(json['deleted_npy']),
+      deletedVideo: toBool(json['deleted_video']),
+      deletedBag: toBool(json['deleted_bag']),
+    );
+  }
+}
+
+/// 批量刪除 sessions 的回應：POST /realsense-pose-extractor/sessions/delete
+@immutable
+class DeleteSessionsBatchResponse {
+  const DeleteSessionsBatchResponse({
+    required this.totalRequested,
+    required this.deletedSessions,
+    required this.deletedDb,
+    required this.deletedNpy,
+    required this.deletedVideo,
+    required this.deletedBag,
+    required this.failed,
+    required this.details,
+  });
+
+  final int totalRequested;
+  final int deletedSessions;
+  final int deletedDb;
+  final int deletedNpy;
+  final int deletedVideo;
+  final int deletedBag;
+  final List<String> failed;
+  final List<DeleteSessionsBatchDetail> details;
+
+  factory DeleteSessionsBatchResponse.fromJson(Map<String, dynamic> json) {
+    int toInt(dynamic value, {int fallback = 0}) {
+      if (value is int) return value;
+      if (value is num) return value.toInt();
+      return int.tryParse('${value ?? ''}'.trim()) ?? fallback;
+    }
+
+    final failedRaw = json['failed'];
+    final detailsRaw = json['details'];
+
+    return DeleteSessionsBatchResponse(
+      totalRequested: toInt(json['total_requested']),
+      deletedSessions: toInt(json['deleted_sessions']),
+      deletedDb: toInt(json['deleted_db']),
+      deletedNpy: toInt(json['deleted_npy']),
+      deletedVideo: toInt(json['deleted_video']),
+      deletedBag: toInt(json['deleted_bag']),
+      failed: failedRaw is List
+          ? failedRaw
+                .map((e) => e?.toString().trim() ?? '')
+                .where((e) => e.isNotEmpty)
+                .toList(growable: false)
+          : const [],
+      details: detailsRaw is List
+          ? detailsRaw
+                .whereType<Map<String, dynamic>>()
+                .map(DeleteSessionsBatchDetail.fromJson)
+                .toList(growable: false)
+          : const [],
     );
   }
 }

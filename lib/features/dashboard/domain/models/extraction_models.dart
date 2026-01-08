@@ -83,7 +83,7 @@ class ExtractResult {
     return ExtractResult(
       sessionName: _stringValue(json['session_name']),
       bagPath: _stringValue(json['bag_path']),
-      bagFilename: _stringValue(json['bag_filename']) ?? '',
+      bagFilename: _stringValue(json['bag_filename']),
       npyPath: _stringValue(json['npy_path']),
       success: json['success'] == true,
     );
@@ -106,8 +106,8 @@ class ExtractJobCreatedResponse {
 
   factory ExtractJobCreatedResponse.fromJson(Map<String, dynamic> json) {
     final createdRaw = _stringValue(json['created_at']);
-    final createdAt = DateTime.tryParse(createdRaw) ??
-        DateTime.fromMillisecondsSinceEpoch(0);
+    final createdAt =
+        DateTime.tryParse(createdRaw) ?? DateTime.fromMillisecondsSinceEpoch(0);
     return ExtractJobCreatedResponse(
       jobId: _stringValue(json['job_id']),
       status: _stringValue(json['status']),
@@ -137,7 +137,9 @@ class ExtractJobStatusResponse {
     if (resultRaw is Map<String, dynamic>) {
       parsedResult = ExtractResult.fromJson(resultRaw);
     } else if (resultRaw is Map) {
-      parsedResult = ExtractResult.fromJson(Map<String, dynamic>.from(resultRaw));
+      parsedResult = ExtractResult.fromJson(
+        Map<String, dynamic>.from(resultRaw),
+      );
     }
 
     final err = _stringValue(json['error']).trim();

@@ -5,13 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gait_charts/core/config/chart_config.dart';
 import 'package:gait_charts/core/storage/chart_config_storage.dart';
 
-/// 管理圖表渲染相關設定，集中調整最大點數。
+/// 圖表渲染設定管理，集中調整最大點數。
 class ChartConfigNotifier extends Notifier<ChartConfig> {
   ChartConfigStorage get _storage => ref.read(chartConfigStorageProvider);
 
   @override
   ChartConfig build() {
-    // 先用預設值，避免 UI 等待 IO；再從本機偏好設定背景還原。
+    // 先用預設值避免 UI 等待 IO，再從本機背景還原
     unawaited(_restore());
     return defaultChartConfig;
   }
@@ -46,13 +46,6 @@ class ChartConfigNotifier extends Notifier<ChartConfig> {
     _setAndPersist(state.copyWith(perLapSeriesMaxPoints: value));
   }
 
-  void updatePerLapPsd(int value) {
-    if (value == state.perLapPsdMaxPoints) {
-      return;
-    }
-    _setAndPersist(state.copyWith(perLapPsdMaxPoints: value));
-  }
-
   void updatePerLapTheta(int value) {
     if (value == state.perLapThetaMaxPoints) {
       return;
@@ -81,19 +74,19 @@ class ChartConfigNotifier extends Notifier<ChartConfig> {
     _setAndPersist(state.copyWith(multiFftMaxPoints: value));
   }
 
-  /// 回到預設值。
+  /// 重設為預設值。
   void reset() {
     state = defaultChartConfig;
     unawaited(_storage.clearChartConfig());
   }
 }
 
-/// 圖表渲染設定的本機儲存層 Provider。
+/// ChartConfig 本機儲存層。
 final chartConfigStorageProvider = Provider<ChartConfigStorage>((ref) {
   return ChartConfigStorage();
 });
 
-/// 提供給 UI 調整或監聽的 Provider。
+/// ChartConfig provider，供 UI 調整或監聽。
 final chartConfigProvider = NotifierProvider<ChartConfigNotifier, ChartConfig>(
   ChartConfigNotifier.new,
 );

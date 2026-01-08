@@ -1,10 +1,8 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:gait_charts/core/storage/secure_storage_config.dart';
 
-/// AppConfig 的本機持久化（目前只存 baseUrl）。
-///
-/// 這層屬於 IO/Storage，避免讓 UI 直接碰到 FlutterSecureStorage。
-/// 使用統一的 SecureStorageConfig 確保跨平台加密一致性。
+/// AppConfig 本機持久化，目前只存 baseUrl。
+/// 使用 SecureStorageConfig 確保跨平台加密一致性。
 class AppConfigStorage {
   AppConfigStorage({FlutterSecureStorage? storage})
       : _storage = storage ?? SecureStorageConfig.instance;

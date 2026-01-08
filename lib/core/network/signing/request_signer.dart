@@ -6,21 +6,13 @@ import 'package:crypto/crypto.dart';
 
 /// 後端請求簽章工具（HMAC-SHA256）。
 ///
-/// 與後端 `require_signed_headers` 的 canonical string 規格保持一致：
-/// - version
-/// - METHOD（大寫）
-/// - path[?query]
-/// - nonce
-/// - timestamp（Unix 時間戳，秒；字串）
-/// - body_sha256（hex）
+/// Canonical string 格式：version, METHOD, path[?query], nonce, timestamp, body_sha256
 class RequestSigner {
   RequestSigner({Random? random}) : _random = random ?? Random.secure();
 
   final Random _random;
 
-  /// 產生 nonce（hex 字串）。
-  ///
-  /// 預設 16 bytes => 32 hex chars。
+  /// 產生 nonce（hex 字串），預設 16 bytes => 32 hex chars。
   String generateNonceHex({int bytes = 16}) {
     if (bytes <= 0) {
       throw ArgumentError.value(bytes, 'bytes', 'must be > 0');
@@ -32,15 +24,10 @@ class RequestSigner {
     return _toHex(data);
   }
 
-  /// 將 request body 正規化成 bytes（用於 body_sha256）。
+  /// 將 request body 正規化為 bytes。
   ///
-  /// 支援：
-  /// - null => empty
-  /// - String => UTF-8
-  /// - `List<int>`/Uint8List => raw bytes
-  /// - Map/List => jsonEncode + UTF-8（適用 application/json）
-  ///
-  /// 其他型別（例如 FormData / Stream）會拋錯，避免產生「簽了但一定驗不過」的假簽章。
+  /// 支援 null、String、`List<int>`、Uint8List、Map、List。
+  /// 其他型別（FormData/Stream）會拋錯，避免產生無效簽章。
   Uint8List normalizeBodyBytes(Object? body) {
     if (body == null) {
       return Uint8List(0);
@@ -66,7 +53,7 @@ class RequestSigner {
     return sha256.convert(bytes).toString();
   }
 
-  /// 產生 canonical string（後端/客戶端必須完全一致）。
+  /// 產生 canonical string，須與後端完全一致。
   String canonicalString({
     required String method,
     required String path,

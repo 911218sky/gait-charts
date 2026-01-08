@@ -9,14 +9,12 @@ typedef AsyncDataBuilder<T> = Widget Function(BuildContext context, T data);
 typedef AsyncEmptyPredicate<T> = bool Function(T data);
 typedef AsyncEmptyBuilder = Widget Function(BuildContext context);
 
-/// 統一處理「AsyncValue 顯示」的共用 Widget：
-/// - loading：顯示 loader（但若已有 failure 快取，直接顯示錯誤避免一直轉圈）
+/// AsyncValue 顯示的共用 Widget：
+/// - loading：顯示 loader（若已有 failure 快取則直接顯示錯誤）
 /// - error：顯示 AsyncErrorView
 /// - data：交給 dataBuilder
 ///
-/// 搭配 [fetchWithFailureGate] 使用，可確保：
-/// - 相同條件的 request 失敗後，不會被 rebuild 反覆觸發 API
-/// - UI 也不會卡在 loading 轉圈
+/// 搭配 fetchWithFailureGate 使用，避免相同條件的 request 失敗後被 rebuild 反覆觸發。
 class AsyncRequestView<T> extends ConsumerWidget {
   const AsyncRequestView({
     required this.requestId,
@@ -51,7 +49,7 @@ class AsyncRequestView<T> extends ConsumerWidget {
       );
     }
 
-    // 若已經有失敗紀錄，且目前又進入 loading（例如 refresh/rebuild），直接顯示錯誤避免無限轉圈。
+    // 已有失敗紀錄且目前又進入 loading，直接顯示錯誤避免無限轉圈
     if (value.isLoading && failure != null) {
       return buildError(failure.error);
     }

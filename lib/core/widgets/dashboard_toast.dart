@@ -10,7 +10,7 @@ enum DashboardToastVariant { info, success, warning, danger }
 /// 單次最多顯示的 Toast 數量，避免蓋住主要內容。
 const int _dashboardToastHardLimit = 3;
 
-/// 提供頂部浮出的 Toast，風格貼近 Vercel dark UI，支援堆疊顯示。
+/// 頂部浮出的 Toast 元件，支援堆疊顯示。
 class DashboardToast {
   DashboardToast._();
 
@@ -44,7 +44,7 @@ class DashboardToast {
       _dashboardToastHardLimit,
     );
     final payload = _ToastPayload(
-      // 使用遞增 id 確保 key 唯一，避免同微秒產生重複。
+      // 遞增 id 確保 key 唯一
       id: ++_idSeed,
       message: message,
       variant: variant,
@@ -121,7 +121,7 @@ class _DashboardToastHostState extends State<_DashboardToastHost> {
   }
 }
 
-/// 極簡 queue，維持 LIFO 堆疊並自動裁切超出上限的項目。
+/// LIFO 佇列，自動裁切超出上限的項目。
 class _DashboardToastQueue extends ChangeNotifier {
   final List<_ToastPayload> _items = [];
 
@@ -154,7 +154,7 @@ class _DashboardToastQueue extends ChangeNotifier {
   }
 }
 
-/// 儲存單一 Toast 所需的資料，方便 queue 管理。
+/// Toast 資料載體。
 class _ToastPayload {
   _ToastPayload({
     required this.id,

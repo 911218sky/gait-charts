@@ -17,7 +17,7 @@ class UsersApiService {
   /// 依「name 前綴」搜尋使用者，回傳精簡 items（`GET /users/search`）。
   static const _searchEndpoint = '$_kUsersEndpoint/search';
 
-  /// 取得/更新/刪除單一使用者（`GET|PATCH|DELETE /users/{user_code}`）。
+  /// 取得/更新單一使用者（`GET|PATCH /users/{user_code}`）。
   ///
   /// 注意：包含 path param，無法用 const；統一透過此 helper 建立。
   static String _userByCodeEndpoint(String userCode) =>
@@ -33,6 +33,12 @@ class UsersApiService {
 
   /// 透過 BAG 檔案的 hash 值尋找使用者（`POST /users/find-by-bag`）。
   static const _findByBagEndpoint = '$_kUsersEndpoint/find-by-bag';
+
+  /// 批量刪除使用者（`POST /users/delete`）。
+  static const _deleteUsersEndpoint = '$_kUsersEndpoint/delete';
+
+  /// 取得所有族群統計（`GET /users/cohorts`）。
+  static const _cohortsEndpoint = '$_kUsersEndpoint/cohorts';
 
   Future<UserItem> createUser({required UserCreateRequest request}) async {
     try {
@@ -91,26 +97,23 @@ class UsersApiService {
 
   /// 依「name 前綴」搜尋使用者，回傳精簡 items（可直接用於 UI 清單）。
   Future<UserSearchSuggestionResponse> searchUserSuggestions({
-    required String keyword,
+    String? keyword,
+    List<String>? cohorts,
     int page = 1,
     int pageSize = 20,
   }) async {
-    final k = keyword.trim();
-    if (k.isEmpty) {
-      return UserSearchSuggestionResponse(
-        total: 0,
-        page: 1,
-        pageSize: pageSize,
-        totalPages: 0,
-        items: const [],
-      );
-    }
+    final k = keyword?.trim() ?? '';
+    final cohortList = (cohorts ?? const <String>[])
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList(growable: false);
     try {
       final response = await withApiRetry(
         () => _dio.get<Object?>(
           _searchEndpoint,
           queryParameters: {
-            'keyword': k,
+            if (k.isNotEmpty) 'keyword': k,
+            if (cohortList.isNotEmpty) 'cohort': cohortList,
             // 後端新版支援分頁：page/page_size
             'page': page,
             'page_size': pageSize,
@@ -221,28 +224,20 @@ class UsersApiService {
     }
   }
 
-  /// 刪除指定使用者。
-  ///
-  /// - deleteSessions=false（預設）：刪除使用者並解除該使用者名下 sessions 的綁定（保留 sessions）
-  /// - deleteSessions=true：連同綁定的 sessions(DB 紀錄) 一併刪除
-  Future<DeleteUserResponse> deleteUser({
-    required String userCode,
-    bool deleteSessions = false,
+  /// 批量刪除使用者（1-100）。
+  Future<DeleteUsersBatchResponse> deleteUsersBatch({
+    required DeleteUsersBatchRequest request,
   }) async {
-    final code = userCode.trim();
-    if (code.isEmpty) {
-      throw ApiException(message: 'user_code 不可為空');
-    }
     try {
-      final response = await _dio.delete<Object?>(
-        _userByCodeEndpoint(code),
-        queryParameters: {'delete_sessions': deleteSessions},
+      final response = await _dio.post<Object?>(
+        _deleteUsersEndpoint,
+        data: request.toJson(),
       );
       final body = response.data;
       if (body is! Map) {
         throw ApiException(message: '伺服器未回傳有效的資料。');
       }
-      return DeleteUserResponse.fromJson(body.cast<String, Object?>());
+      return DeleteUsersBatchResponse.fromJson(body.cast<String, Object?>());
     } on DioException catch (error) {
       throw mapDioError(error);
     }
@@ -270,6 +265,27 @@ class UsersApiService {
         throw ApiException(message: '伺服器未回傳有效的資料。');
       }
       return FindUserByBagResponse.fromJson(body.cast<String, Object?>());
+    } on DioException catch (error) {
+      throw mapDioError(error);
+    }
+  }
+
+  /// 取得所有族群統計（可用 refresh=true 強制刷新快取）。
+  Future<UserCohortsResponse> fetchCohorts({bool refresh = false}) async {
+    try {
+      final response = await withApiRetry(
+        () => _dio.get<Object?>(
+          _cohortsEndpoint,
+          queryParameters: {
+            if (refresh) 'refresh': true,
+          },
+        ),
+      );
+      final body = response.data;
+      if (body is! Map) {
+        throw ApiException(message: '伺服器未回傳有效的資料。');
+      }
+      return UserCohortsResponse.fromJson(body.cast<String, Object?>());
     } on DioException catch (error) {
       throw mapDioError(error);
     }

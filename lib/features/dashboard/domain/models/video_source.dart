@@ -31,7 +31,9 @@ class VideoSource {
     final normalizedBase = baseUrl.endsWith('/')
         ? baseUrl.substring(0, baseUrl.length - 1)
         : baseUrl;
-    final uri = '$normalizedBase/realsense_pose_extractor/sessions/$sessionName/video';
+    final encodedName = Uri.encodeComponent(sessionName.trim());
+    final uri =
+        '$normalizedBase/realsense-pose-extractor/sessions/$encodedName/video';
     return VideoSource(
       type: VideoSourceType.network,
       uri: uri,

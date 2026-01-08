@@ -71,7 +71,7 @@ class ApkDownloadsCard extends ConsumerWidget {
       decoration = isFloating
           ? BoxDecoration(
               color: isDark
-                  ? Colors.black.withValues(alpha: 0.6)
+                  ? const Color(0xFF0A0A0A).withValues(alpha: 0.85)
                   : colors.surface.withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
@@ -81,7 +81,7 @@ class ApkDownloadsCard extends ConsumerWidget {
               ),
             )
           : BoxDecoration(
-              color: context.cardColor,
+              color: isDark ? const Color(0xFF0A0A0A) : context.cardColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: colors.outlineVariant),
             );
@@ -420,11 +420,11 @@ class _ApkFileRow extends ConsumerWidget {
       padding: EdgeInsets.all(isProminent ? 16 : 12),
       decoration: BoxDecoration(
         color: isDark
-            ? (isProminent ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.05))
+            ? (isProminent ? const Color(0xFF111111) : const Color(0xFF0D0D0D))
             : colors.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: isDark
-            ? Border.all(color: Colors.white.withValues(alpha: 0.1))
+            ? Border.all(color: Colors.white.withValues(alpha: 0.08))
             : Border.all(color: colors.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Row(
@@ -434,7 +434,7 @@ class _ApkFileRow extends ConsumerWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: isDark 
-                  ? Colors.black26 
+                  ? const Color(0xFF1A1A1A)
                   : colors.surface,
               borderRadius: BorderRadius.circular(8),
             ),
@@ -533,11 +533,11 @@ class _EmptyState extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: isDark 
-            ? Colors.white.withValues(alpha: 0.05)
+            ? const Color(0xFF111111)
             : colors.surfaceContainerHighest.withValues(alpha: 0.25),
         borderRadius: BorderRadius.circular(12),
         border: isDark 
-            ? Border.all(color: Colors.white.withValues(alpha: 0.1))
+            ? Border.all(color: Colors.white.withValues(alpha: 0.08))
             : Border.all(color: colors.outlineVariant),
       ),
       child: Column(

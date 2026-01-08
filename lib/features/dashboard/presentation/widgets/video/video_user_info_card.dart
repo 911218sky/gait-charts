@@ -172,6 +172,12 @@ class VideoUserInfoCard extends StatelessWidget {
           runSpacing: 24,
           children: [
             InfoLabelValue(
+              label: '族群',
+              value: user.cohort.isNotEmpty ? user.cohort.join('、') : '未填寫',
+              width: 220,
+              maxLines: 2,
+            ),
+            InfoLabelValue(
               label: '年齡',
               value: user.ageYears != null ? '${user.ageYears} 歲' : '未填寫',
               width: 140,
@@ -436,7 +442,7 @@ class VideoUserInfoCard extends StatelessWidget {
     if (value is List) {
       if (value.isEmpty) return '未填寫';
       final items = value
-          .map((e) => _formatSingleValue(e))
+          .map(_formatSingleValue)
           .where((s) => s.isNotEmpty)
           .join('、');
       return items.isEmpty ? '未填寫' : items;

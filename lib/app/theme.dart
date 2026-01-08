@@ -387,6 +387,12 @@ ThemeData buildLightTheme() {
         warning: _lightWarningColor,
         danger: _lightCriticalColor,
       ),
+      DashboardBenchmarkCompareColors(
+        // light: slightly deeper tones for readability
+        inRange: Color(0xFF16A34A), // green-600
+        lower: Color(0xFF0284C7), // sky-600
+        higher: Color(0xFF7C3AED), // violet-600
+      ),
       DashboardHeatmapPalette(colors: _viridisColors),
     ],
   );
@@ -601,6 +607,11 @@ ThemeData buildDarkTheme() {
         warning: _warningColor,
         danger: _criticalColor,
       ),
+      DashboardBenchmarkCompareColors(
+        inRange: Color(0xFF4ADE80), // emerald-400
+        lower: Color(0xFF38BDF8), // sky-400
+        higher: Color(0xFFC084FC), // purple-400
+      ),
       DashboardHeatmapPalette(colors: _viridisColors),
     ],
   );
@@ -653,6 +664,61 @@ class DashboardAccentColors extends ThemeExtension<DashboardAccentColors> {
       success: Color.lerp(success, other.success, t) ?? success,
       warning: Color.lerp(warning, other.warning, t) ?? warning,
       danger: Color.lerp(danger, other.danger, t) ?? danger,
+    );
+  }
+}
+
+/// 族群基準比對（percentile compare）使用的狀態色：
+/// - lower: 低於參考區間（< P25）
+/// - inRange: 落在參考區間（P25..P75）
+/// - higher: 高於參考區間（> P75）
+///
+/// 設計意圖：避免使用 danger red 造成「異常/警示」的情緒暗示，
+/// 改用更中性的藍/綠/紫來表達相對位置。
+@immutable
+class DashboardBenchmarkCompareColors
+    extends ThemeExtension<DashboardBenchmarkCompareColors> {
+  const DashboardBenchmarkCompareColors({
+    required this.inRange,
+    required this.lower,
+    required this.higher,
+  });
+
+  final Color inRange;
+  final Color lower;
+  final Color higher;
+
+  static DashboardBenchmarkCompareColors of(BuildContext context) =>
+      context.extension<DashboardBenchmarkCompareColors>() ??
+      const DashboardBenchmarkCompareColors(
+        inRange: Color(0xFF4ADE80), // emerald-400
+        lower: Color(0xFF38BDF8), // sky-400
+        higher: Color(0xFFC084FC), // purple-400
+      );
+
+  @override
+  ThemeExtension<DashboardBenchmarkCompareColors> copyWith({
+    Color? inRange,
+    Color? lower,
+    Color? higher,
+  }) {
+    return DashboardBenchmarkCompareColors(
+      inRange: inRange ?? this.inRange,
+      lower: lower ?? this.lower,
+      higher: higher ?? this.higher,
+    );
+  }
+
+  @override
+  ThemeExtension<DashboardBenchmarkCompareColors> lerp(
+    ThemeExtension<DashboardBenchmarkCompareColors>? other,
+    double t,
+  ) {
+    if (other is! DashboardBenchmarkCompareColors) return this;
+    return DashboardBenchmarkCompareColors(
+      inRange: Color.lerp(inRange, other.inRange, t) ?? inRange,
+      lower: Color.lerp(lower, other.lower, t) ?? lower,
+      higher: Color.lerp(higher, other.higher, t) ?? higher,
     );
   }
 }

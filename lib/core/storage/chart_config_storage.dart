@@ -4,9 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:gait_charts/core/config/chart_config.dart';
 import 'package:gait_charts/core/storage/secure_storage_config.dart';
 
-/// 圖表渲染設定（ChartConfig）的本機持久化。
-///
-/// 使用統一的 SecureStorageConfig 確保跨平台加密一致性。
+/// ChartConfig 本機持久化。
 class ChartConfigStorage {
   ChartConfigStorage({FlutterSecureStorage? storage})
       : _storage = storage ?? SecureStorageConfig.instance;

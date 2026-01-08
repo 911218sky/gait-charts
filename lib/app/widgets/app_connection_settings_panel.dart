@@ -148,7 +148,7 @@ class _AppConnectionSettingsPanelState
             ),
             const SizedBox(height: 16),
             Text(
-              '修改後會立即套用到所有 API 呼叫（Dio 會重建）。建議輸入包含版本路徑，例如 /v1。',
+              '修改後會立即套用到所有 API 呼叫（Dio 會重建）。建議輸入包含版本路徑，例如新版 /api/v1（或舊版 /v1）。',
               style: context.textTheme.bodySmall?.copyWith(
                 color: colors.onSurfaceVariant.withValues(alpha: 0.85),
                 height: 1.35,

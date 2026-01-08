@@ -12,12 +12,12 @@ class ExtractionApiService {
   final Dio _dio;
 
   /// Realsense Pose Extractor 相關 API 的 base endpoint。
-  static const _kRealsensePoseExtractorEndpoint = '/realsense_pose_extractor';
+  static const _kRealsensePoseExtractorEndpoint = '/realsense-pose-extractor';
 
-  /// 觸發姿態萃取（建立背景 job，`POST /realsense_pose_extractor/extract`）。
+  /// 觸發姿態萃取（建立背景 job，`POST /realsense-pose-extractor/extract`）。
   static const _extractEndpoint = '$_kRealsensePoseExtractorEndpoint/extract';
 
-  /// 查詢姿態萃取 job 狀態（`GET /realsense_pose_extractor/extract/jobs/{job_id}`）。
+  /// 查詢姿態萃取 job 狀態（`GET /realsense-pose-extractor/extract/jobs/{job_id}`）。
   static const _extractJobEndpoint =
       '$_kRealsensePoseExtractorEndpoint/extract/jobs';
 

@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:gait_charts/app/app.dart';
+import 'package:gait_charts/core/providers/app_config_provider.dart';
 import 'package:gait_charts/features/admin/presentation/providers/admin_auth_provider.dart';
 import 'test_helpers/fake_admin_auth_notifier.dart';
+import 'test_helpers/fake_app_config_storage.dart';
 
 void main() {
   testWidgets('手機寬度下顯示「更多」並可打開 BottomSheet', (tester) async {
@@ -14,9 +16,11 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         adminAuthProvider.overrideWith(FakeAdminAuthNotifier.new),
+        appConfigStorageProvider.overrideWithValue(FakeAppConfigStorage()),
       ],
     );
     addTearDown(container.dispose);
+    await container.read(appConfigAsyncProvider.future);
     await container.read(adminAuthProvider.future);
 
     await tester.pumpWidget(

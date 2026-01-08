@@ -7,18 +7,14 @@ import 'package:flutter/foundation.dart';
 
 import 'package:gait_charts/core/config/app_config.dart';
 
-/// Dio interceptor：將 JSON request body gzip 壓縮成 bytes，並用 `application/octet-stream`
-/// 送出（binary payload）。
+/// 將 JSON request body gzip 壓縮後以 binary 送出。
 ///
-/// - 只處理常見的 JSON body（Map/List/String/`List<int>`/Uint8List）。
-/// - 送出時會將 `Content-Type` 設為 `application/octet-stream`，避免在 Web DevTools 直接顯示 JSON。
-/// - 透過自訂 header 告知後端該如何還原：
-///   - `X-Payload-Encoding: gzip`
-///   - `X-Payload-Content-Type: application/json`
+/// 處理 Map/List/String/bytes 類型的 body，設定以下 headers：
+/// - Content-Type: application/octet-stream
+/// - X-Payload-Encoding: gzip
+/// - X-Payload-Content-Type: application/json
 ///
-/// 注意：
-/// - 這是「傳輸格式」調整，不是加密；有心人仍可解壓還原內容。
-/// - Query string 仍會在 URL 中可見，無法透過此機制隱藏。
+/// 這是傳輸格式調整而非加密，Query string 仍在 URL 中可見。
 class RequestCompressionInterceptor extends Interceptor {
   RequestCompressionInterceptor({required this.config});
 
@@ -29,20 +25,20 @@ class RequestCompressionInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    // 如果未啟用壓縮，則直接跳過。
+    // 未啟用壓縮則跳過
     if (!config.requestCompressionEnabled) {
       handler.next(options);
       return;
     }
 
-    // 僅壓縮有 body 的 request，避免 GET/DELETE 等無意義處理。
+    // 僅壓縮有 body 的 request
     final method = options.method.toUpperCase();
     if (method == 'GET' || method == 'HEAD') {
       handler.next(options);
       return;
     }
 
-    // 已經是 binary payload 就不再處理，避免 double gzip。
+    // 已是 binary payload 則不再處理，避免 double gzip
     final alreadyBinary = (options.headers[Headers.contentTypeHeader] ?? '')
         .toString()
         .toLowerCase()
@@ -52,7 +48,7 @@ class RequestCompressionInterceptor extends Interceptor {
       return;
     }
 
-    // 嘗試將 body 轉換為 bytes。
+    // 嘗試將 body 轉為 bytes
     final bodyBytes = _tryBodyToBytes(options.data);
     if (bodyBytes == null || bodyBytes.isEmpty) {
       handler.next(options);
@@ -66,16 +62,13 @@ class RequestCompressionInterceptor extends Interceptor {
       return;
     }
 
-    // 用 bytes 取代原本 data，並設定 Content-Encoding，讓後端知道要解壓。
+    // 用壓縮後的 bytes 取代原本 data
     options.data = Uint8List.fromList(gz);
-    // 設定 Content-Type 為 application/octet-stream，避免在 Web DevTools 直接顯示 JSON。
     options.headers[Headers.contentTypeHeader] = 'application/octet-stream';
-    // 設定 X-Payload-Encoding 為 gzip，讓後端知道要解壓。
     options.headers[kHeaderPayloadEncoding] = 'gzip';
-    // 設定 Content-Type 為 application/json，讓後端知道要還原為 JSON。
     options.headers[kHeaderPayloadContentType] = 'application/json';
 
-    // Dio 對 bytes body 不一定會補 Content-Type；保留既有設定即可。
+    // Dio 對 bytes body 不一定會補 Content-Type，保留既有設定即可
     handler.next(options);
   }
 }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gait_charts/app/theme.dart';
 import 'package:gait_charts/core/widgets/app_tooltip.dart';
 
-/// 統一的整數滑桿元件，支援 tooltip 說明
+/// 整數滑桿元件。
 class AppIntSliderTile extends StatefulWidget {
   const AppIntSliderTile({
     required this.label,
@@ -130,7 +130,7 @@ class _AppIntSliderTileState extends State<AppIntSliderTile> {
   }
 }
 
-/// 統一的浮點數滑桿元件，支援 tooltip 說明
+/// 浮點數滑桿元件。
 class AppDoubleSliderTile extends StatefulWidget {
   const AppDoubleSliderTile({
     required this.label,
@@ -227,7 +227,7 @@ class _AppDoubleSliderTileState extends State<AppDoubleSliderTile> {
     if (widget.formatter != null) {
       return widget.formatter!(value);
     }
-    // 預設顯示：小數最多 2 位，但會去掉尾端 0（例如 3.00 -> 3、3.10 -> 3.1）。
+    // 預設顯示小數最多 2 位，去掉尾端 0
     final formatted = value.toStringAsFixed(2).replaceFirst(
       RegExp(r'\.?0+$'),
       '',
@@ -268,7 +268,7 @@ class _AppDoubleSliderTileState extends State<AppDoubleSliderTile> {
   }
 }
 
-/// 統一的範圍滑桿元件，支援 tooltip 說明
+/// 範圍滑桿元件。
 class AppRangeSliderTile extends StatelessWidget {
   const AppRangeSliderTile({
     required this.label,

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gait_charts/app/theme.dart';
 
-/// Dashboard 共用 Dialog 外殼：
-/// - 統一深色 Vercel-ish 外觀（圓角/邊框/分隔線）
-/// - 統一 Header/Body/Footer 的版面結構
+/// Dashboard 共用 Dialog 外殼。
 ///
-/// 注意：此 widget 僅處理容器與版面，不處理業務邏輯。
+/// 提供統一的深色 Vercel 風格外觀與 Header/Body/Footer 版面結構。
 class DashboardDialogShell extends StatelessWidget {
   const DashboardDialogShell({
     required this.header,
@@ -59,9 +57,9 @@ class DashboardDialogShell extends StatelessWidget {
   }
 }
 
-/// Dashboard 共用 Dialog Header：
-/// - 左側標題/副標
-/// - 右側 action（常見：refresh/close）
+/// Dashboard 共用 Dialog Header。
+///
+/// 左側顯示標題/副標，右側放置 action（如 refresh/close）。
 class DashboardDialogHeader extends StatelessWidget {
   const DashboardDialogHeader({
     required this.title,

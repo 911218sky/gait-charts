@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:gait_charts/app/app.dart';
+import 'package:gait_charts/core/providers/app_config_provider.dart';
 import 'package:gait_charts/features/admin/presentation/providers/admin_auth_provider.dart';
 import 'package:gait_charts/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'test_helpers/fake_admin_auth_notifier.dart';
+import 'test_helpers/fake_app_config_storage.dart';
 
 void main() {
   testWidgets('手機寬度下 Swing 熱圖頁不應出現 RenderFlex overflow', (tester) async {
@@ -16,6 +18,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         adminAuthProvider.overrideWith(FakeAdminAuthNotifier.new),
+        appConfigStorageProvider.overrideWithValue(FakeAppConfigStorage()),
         swingInfoHeatmapProvider.overrideWith((ref) async {
           // minutes 稍多一點，確保 legend / 軸線等 UI 都會被 build。
           return const SwingInfoHeatmapResponse(
@@ -41,6 +44,7 @@ void main() {
       ],
     );
     addTearDown(container.dispose);
+    await container.read(appConfigAsyncProvider.future);
     await container.read(adminAuthProvider.future);
 
     await tester.pumpWidget(
@@ -65,6 +69,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         adminAuthProvider.overrideWith(FakeAdminAuthNotifier.new),
+        appConfigStorageProvider.overrideWithValue(FakeAppConfigStorage()),
         swingInfoHeatmapProvider.overrideWith((ref) async {
           // minutes 稍多一點，確保水平可捲動（超過手機寬度）。
           return const SwingInfoHeatmapResponse(
@@ -90,6 +95,7 @@ void main() {
       ],
     );
     addTearDown(container.dispose);
+    await container.read(appConfigAsyncProvider.future);
     await container.read(adminAuthProvider.future);
 
     await tester.pumpWidget(

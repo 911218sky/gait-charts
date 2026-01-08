@@ -6,6 +6,7 @@ import 'package:gait_charts/app/theme.dart';
 import 'package:gait_charts/core/widgets/dashboard_toast.dart';
 import 'package:gait_charts/features/dashboard/data/dashboard_repository.dart';
 import 'package:gait_charts/features/dashboard/domain/models/user_profile.dart';
+import 'package:gait_charts/features/dashboard/presentation/providers/users/users_state.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/shared/fields/user_autocomplete_field.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/users/delete_user_dialog.dart';
 
@@ -42,6 +43,7 @@ class _UserSessionPickerPanelState
   int _totalPages = 0;
   String? _error;
   String _keyword = '';
+  final List<String> _selectedCohorts = [];
 
   // preview (user detail)
   bool _isPreviewLoading = false;
@@ -79,6 +81,39 @@ class _UserSessionPickerPanelState
     _fetchFirstPageForCurrentQuery();
   }
 
+  void _toggleCohort(String cohort) {
+    final label = cohort.trim();
+    if (label.isEmpty) {
+      return;
+    }
+    setState(() {
+      if (_selectedCohorts.contains(label)) {
+        _selectedCohorts.remove(label);
+      } else {
+        if (_selectedCohorts.length >= 3) {
+          DashboardToast.show(
+            context,
+            message: '最多只能選 3 個族群',
+            variant: DashboardToastVariant.warning,
+          );
+          return;
+        }
+        _selectedCohorts.add(label);
+      }
+      _prepareSearchAndShowLoading(_keyword);
+    });
+    _fetchFirstPageForCurrentQuery();
+  }
+
+  void _clearCohorts() {
+    if (_selectedCohorts.isEmpty) return;
+    setState(() {
+      _selectedCohorts.clear();
+      _prepareSearchAndShowLoading(_keyword);
+    });
+    _fetchFirstPageForCurrentQuery();
+  }
+
   void _onScroll() {
     // 已有明確分頁 UI 時，避免無限滾動造成「一頁資料被 append 成多頁」而難以理解。
     if (_totalPages > 0) {
@@ -103,6 +138,7 @@ class _UserSessionPickerPanelState
 
     final requestId = ++_listRequestId;
     final keywordSnapshot = _keyword;
+    final cohortSnapshot = List<String>.from(_selectedCohorts);
 
     setState(() {
       _items.clear();
@@ -115,9 +151,10 @@ class _UserSessionPickerPanelState
     });
 
     try {
-      if (keywordSnapshot.isNotEmpty) {
+      if (keywordSnapshot.isNotEmpty || cohortSnapshot.isNotEmpty) {
         final result = await _repo.searchUserSuggestions(
-          keyword: keywordSnapshot,
+          keyword: keywordSnapshot.isNotEmpty ? keywordSnapshot : null,
+          cohorts: cohortSnapshot,
           page: next,
           pageSize: _pageSize,
         );
@@ -130,6 +167,7 @@ class _UserSessionPickerPanelState
                 name: e.name,
                 createdAt: e.createdAt,
                 updatedAt: e.createdAt,
+                cohort: e.cohort,
               ),
             ),
           );
@@ -286,7 +324,7 @@ class _UserSessionPickerPanelState
       _isPreviewLoading = false;
       _page = 1;
       _totalPages = 0;
-      // keyword 非空時改走 /users/search（支援分頁）。
+      // keyword/cohort 有任一存在時改走 /users/search（支援分頁）。
       _hasMore = true;
       _isLoading = true;
       _error = null;
@@ -296,11 +334,13 @@ class _UserSessionPickerPanelState
   Future<void> _fetchFirstPageForCurrentQuery() async {
     final requestId = _listRequestId;
     final keywordSnapshot = _keyword;
+    final cohortSnapshot = List<String>.from(_selectedCohorts);
 
     try {
-      if (keywordSnapshot.isNotEmpty) {
+      if (keywordSnapshot.isNotEmpty || cohortSnapshot.isNotEmpty) {
         final result = await _repo.searchUserSuggestions(
-          keyword: keywordSnapshot,
+          keyword: keywordSnapshot.isNotEmpty ? keywordSnapshot : null,
+          cohorts: cohortSnapshot,
           page: 1,
           pageSize: _pageSize,
         );
@@ -313,6 +353,7 @@ class _UserSessionPickerPanelState
                 name: e.name,
                 createdAt: e.createdAt,
                 updatedAt: e.createdAt,
+                cohort: e.cohort,
               ),
             ),
           );
@@ -355,10 +396,12 @@ class _UserSessionPickerPanelState
     try {
       final requestId = _listRequestId;
       final keywordSnapshot = _keyword;
+      final cohortSnapshot = List<String>.from(_selectedCohorts);
 
-      if (keywordSnapshot.isNotEmpty) {
+      if (keywordSnapshot.isNotEmpty || cohortSnapshot.isNotEmpty) {
         final result = await _repo.searchUserSuggestions(
-          keyword: keywordSnapshot,
+          keyword: keywordSnapshot.isNotEmpty ? keywordSnapshot : null,
+          cohorts: cohortSnapshot,
           page: _page,
           pageSize: _pageSize,
         );
@@ -372,6 +415,7 @@ class _UserSessionPickerPanelState
                 name: e.name,
                 createdAt: e.createdAt,
                 updatedAt: e.createdAt,
+                cohort: e.cohort,
               ),
             ),
           );
@@ -496,6 +540,38 @@ class _UserSessionPickerPanelState
     final colors = context.colorScheme;
     final isWide = context.isTabletWide;
     final showPagingInfo = _items.isNotEmpty && _totalPages > 0;
+    final cohortsAsync = ref.watch(userCohortsProvider(false));
+    final cohortStats = cohortsAsync.maybeWhen(
+      data: (r) => r.cohorts,
+      orElse: () => const <UserCohortStat>[],
+    );
+    final suggested = [...cohortStats]
+      ..sort((a, b) => b.userCount.compareTo(a.userCount));
+    final topCohorts = suggested.take(10).toList(growable: false);
+    final isDark = context.isDark;
+
+    FilterChip buildCohortChip(String label, {int? count}) {
+      final selected = _selectedCohorts.contains(label);
+      final bg = isDark ? colors.surfaceContainerLow : colors.surface;
+      final selectedBg = colors.primary.withValues(alpha: isDark ? 0.18 : 0.12);
+      final fg = selected ? colors.onSurface : colors.onSurfaceVariant;
+      return FilterChip(
+        label: Text(count != null ? '$label ($count)' : label),
+        selected: selected,
+        onSelected: (_) => _toggleCohort(label),
+        backgroundColor: bg,
+        selectedColor: selectedBg,
+        showCheckmark: true,
+        checkmarkColor: colors.primary,
+        labelStyle: TextStyle(
+          color: fg,
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+        ),
+        side: BorderSide(
+          color: selected ? colors.primary : colors.outlineVariant,
+        ),
+      );
+    }
 
     final searchBar = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -503,10 +579,63 @@ class _UserSessionPickerPanelState
         UserAutocompleteField(
           controller: _searchController,
           labelText: '使用者姓名',
-          hintText: '輸入姓名以搜尋，點選使用者後可預覽其 sessions',
-          helperText: '提示：輸入姓名可縮小範圍；點選左側使用者可預覽右側 sessions；用下方頁碼切換頁數。',
+          hintText: '輸入姓名以搜尋，或用族群篩選',
+          helperText: _selectedCohorts.isEmpty
+              ? '提示：輸入姓名可縮小範圍；也可用族群篩選（最多 3 個）；點選左側使用者可預覽右側 sessions；用下方頁碼切換頁數。'
+              : '目前篩選：${_selectedCohorts.join('、')}（最多 3 個）',
           maxSuggestions: 10,
         ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Icon(
+              Icons.groups_rounded,
+              size: 16,
+              color: colors.onSurfaceVariant.withValues(alpha: 0.75),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                '族群篩選（最多 3 個）',
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: colors.onSurfaceVariant.withValues(alpha: 0.8),
+                ),
+              ),
+            ),
+            if (_selectedCohorts.isNotEmpty)
+              TextButton.icon(
+                onPressed: _clearCohorts,
+                icon: const Icon(Icons.clear, size: 16),
+                label: const Text('清除'),
+              ),
+            if (cohortsAsync.isLoading)
+              const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (topCohorts.isNotEmpty)
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final s in topCohorts)
+                buildCohortChip(s.cohort, count: s.userCount),
+            ],
+          )
+        else
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              buildCohortChip('正常人'),
+              buildCohortChip('中風'),
+              buildCohortChip('高齡'),
+            ],
+          ),
       ],
     );
 
@@ -613,14 +742,30 @@ class _UserSessionPickerPanelState
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        subtitle: Text(
-                          item.userCode,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: colors.onSurfaceVariant,
-                            fontFamily: 'monospace',
-                          ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.userCode,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.textTheme.bodySmall?.copyWith(
+                                color: colors.onSurfaceVariant,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                            if (item.cohort.isNotEmpty)
+                              Text(
+                                item.cohort.join('、'),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.textTheme.bodySmall?.copyWith(
+                                  color: colors.onSurfaceVariant.withValues(
+                                    alpha: 0.85,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         trailing: Icon(
                           selected ? Icons.check_circle : Icons.chevron_right,
@@ -727,6 +872,7 @@ class _UserSessionsPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
     final sessions = detail.sessions;
+    final cohort = detail.user.cohort;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -776,6 +922,16 @@ class _UserSessionsPreview extends StatelessWidget {
             fontFamily: 'monospace',
           ),
         ),
+        if (cohort.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final c in cohort) Chip(label: Text(c)),
+            ],
+          ),
+        ],
         const SizedBox(height: 12),
         if (sessions.isEmpty)
           Expanded(

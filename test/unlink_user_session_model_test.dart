@@ -10,11 +10,11 @@ void main() {
       );
     });
 
-    test('builds payload for sessionName', () {
+    test('builds payload for sessionNames', () {
       final payload = const UnlinkUserSessionRequest(
-        sessionName: 'S_001',
+        sessionNames: ['S_001'],
       ).toJson();
-      expect(payload['session_name'], 'S_001');
+      expect(payload['session_names'], ['S_001']);
       expect(payload['unlink_all'], false);
     });
 
@@ -25,7 +25,7 @@ void main() {
       expect(
         () => const UnlinkUserSessionRequest(
           unlinkAll: true,
-          sessionName: 'S_001',
+          sessionNames: ['S_001'],
         ).toJson(),
         throwsArgumentError,
       );
@@ -33,37 +33,29 @@ void main() {
   });
 
   group('UnlinkUserSessionResponse.fromJson', () {
-    test('parses single mode with session', () {
+    test('parses batch mode with failed list', () {
       final response = UnlinkUserSessionResponse.fromJson(const {
         'user_code': 'u1',
-        'mode': 'single',
-        'unlinked_sessions': 1,
-        'session': {
-          'session_name': 'S_001',
-          'user_code': null,
-          'npy_path': 'x.npy',
-          'bag_path': 'x.bag',
-          'bag_hash': 'h',
-          'created_at': '2025-01-01T00:00:00Z',
-          'updated_at': '2025-01-01T00:00:00Z',
-        },
+        'mode': 'batch',
+        'unlinked_sessions': 2,
+        'failed': ['S_003'],
       });
       expect(response.userCode, 'u1');
-      expect(response.mode, 'single');
-      expect(response.unlinkedSessions, 1);
-      expect(response.session?.sessionName, 'S_001');
+      expect(response.mode, 'batch');
+      expect(response.unlinkedSessions, 2);
+      expect(response.failed, ['S_003']);
     });
 
-    test('parses all mode without session', () {
+    test('defaults missing fields gracefully', () {
       final response = UnlinkUserSessionResponse.fromJson(const {
         'user_code': 'u1',
-        'mode': 'all',
+        'mode': 'batch',
         'unlinked_sessions': 3,
-        'session': null,
+        'failed': null,
       });
-      expect(response.mode, 'all');
+      expect(response.mode, 'batch');
       expect(response.unlinkedSessions, 3);
-      expect(response.session, isNull);
+      expect(response.failed, isEmpty);
     });
   });
 }

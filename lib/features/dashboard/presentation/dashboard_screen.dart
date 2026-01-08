@@ -15,7 +15,9 @@ import 'package:gait_charts/features/dashboard/domain/feature_availability.dart'
 import 'package:gait_charts/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:gait_charts/features/dashboard/presentation/views/dashboard_analysis_view.dart';
+import 'package:gait_charts/features/dashboard/presentation/views/dashboard_cohort_benchmark_view.dart';
 import 'package:gait_charts/features/dashboard/presentation/views/dashboard_extraction_view.dart';
+import 'package:gait_charts/features/dashboard/presentation/views/dashboard_session_management_view.dart';
 import 'package:gait_charts/features/dashboard/presentation/views/dashboard_users_view.dart';
 import 'package:gait_charts/features/dashboard/presentation/views/frequency_analysis_view.dart';
 import 'package:gait_charts/features/dashboard/presentation/views/speed_heatmap_view.dart';
@@ -38,6 +40,7 @@ class DashboardScreen extends ConsumerStatefulWidget {
 /// 定義儀表板的主視圖分區。
 enum _DashboardSection {
   analysis,
+  cohortBenchmark,
   perLapOffset,
   speedHeatmap,
   swingHeatmap,
@@ -47,6 +50,7 @@ enum _DashboardSection {
   yHeightDiff,
   apkDownloads,
   extraction,
+  sessionManagement,
   users,
   admins,
 }
@@ -331,6 +335,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           onLoadSession: _loadSession,
         );
         break;
+      case _DashboardSection.cohortBenchmark:
+        content = const DashboardCohortBenchmarkView(
+          key: ValueKey('cohort-benchmark-view'),
+        );
+        break;
       case _DashboardSection.perLapOffset:
         content = PerLapOffsetView(
           key: const ValueKey('per-lap-view'),
@@ -398,6 +407,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 .setSession(result.sessionName);
             ref.invalidate(stageDurationsProvider);
           },
+        );
+        break;
+      case _DashboardSection.sessionManagement:
+        content = const DashboardSessionManagementView(
+          key: ValueKey('session-management-view'),
         );
         break;
       case _DashboardSection.users:
@@ -590,6 +604,14 @@ const List<_DashboardNavItem> _navItems = [
     sidebarGroup: '分析',
   ),
   _DashboardNavItem(
+    section: _DashboardSection.cohortBenchmark,
+    icon: Icons.groups_outlined,
+    selectedIcon: Icons.groups,
+    sidebarLabel: '族群基準',
+    bottomLabel: '族群基準',
+    sidebarGroup: '分析',
+  ),
+  _DashboardNavItem(
     section: _DashboardSection.perLapOffset,
     icon: Icons.waves_outlined,
     selectedIcon: Icons.waves,
@@ -661,6 +683,14 @@ const List<_DashboardNavItem> _navItems = [
     sidebarLabel: '安裝包下載',
     bottomLabel: '下載',
     sidebarGroup: '工具',
+  ),
+  _DashboardNavItem(
+    section: _DashboardSection.sessionManagement,
+    icon: Icons.folder_delete_outlined,
+    selectedIcon: Icons.folder_delete,
+    sidebarLabel: 'Session 管理',
+    bottomLabel: 'Sessions',
+    sidebarGroup: '管理',
   ),
   _DashboardNavItem(
     section: _DashboardSection.users,

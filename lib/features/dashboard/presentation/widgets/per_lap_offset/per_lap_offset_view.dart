@@ -9,7 +9,6 @@ import 'package:gait_charts/core/widgets/slider_tiles.dart';
 import 'package:gait_charts/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/per_lap_offset/per_lap_offset_content.dart';
-import 'package:gait_charts/features/dashboard/presentation/widgets/shared/controls/fft_periodogram_settings.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/shared/controls/projection_planes.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/shared/dialogs/session_picker_sheet.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/shared/fields/session_autocomplete_field.dart';
@@ -190,13 +189,16 @@ class _PerLapOffsetHeader extends ConsumerWidget {
                   current: config.projection,
                   onChanged: notifier.updateProjection,
                 ),
-                AppIntSliderTile(
-                  label: '平滑視窗',
-                  value: config.smoothWindow,
-                  min: 1,
-                  max: 15,
-                  onChanged: notifier.updateSmoothWindow,
-                  tooltip: '移動平均視窗大小，用於平滑原始軌跡數據',
+                AppDoubleSliderTile(
+                  label: 'smooth_window_s',
+                  value: config.smoothWindowSeconds,
+                  min: 0,
+                  max: 0.8,
+                  step: 0.05,
+                  width: 340,
+                  suffix: 's',
+                  onChanged: notifier.updateSmoothWindowSeconds,
+                  tooltip: '平滑視窗（秒）。後端已移除 per-lap FFT，本參數僅影響時域平滑。',
                 ),
                 AppIntSliderTile(
                   label: 'k-smooth',
@@ -204,14 +206,14 @@ class _PerLapOffsetHeader extends ConsumerWidget {
                   min: 1,
                   max: 10,
                   onChanged: notifier.updateKSmooth,
-                  tooltip: 'FFT 結果的平滑係數，降低頻譜雜訊',
+                  tooltip: '平滑係數（k_smooth）。後端已移除 per-lap FFT，本參數僅影響時域/區段偵測的平滑。',
                 ),
                 AppDoubleSliderTile(
                   label: 'min_v_abs',
                   value: config.minVAbs,
-                  min: 5,
-                  max: 40,
-                  step: 1,
+                  min: 0,
+                  max: 0.3,
+                  step: 0.01,
                   width: 340,
                   suffix: 'm/s',
                   onChanged: notifier.updateMinVAbs,
@@ -220,22 +222,11 @@ class _PerLapOffsetHeader extends ConsumerWidget {
                 AppDoubleSliderTile(
                   label: 'flat_frac',
                   value: config.flatFrac,
-                  min: 0.3,
+                  min: 0,
                   max: 1,
                   step: 0.05,
                   onChanged: notifier.updateFlatFrac,
                   tooltip: '平坦比例：用於判斷平坦區段的比例閾值',
-                ),
-                AppRangeSliderTile(
-                  label: 'FFT Band',
-                  low: config.fftBandLow,
-                  high: config.fftBandHigh,
-                  min: 0,
-                  max: 5,
-                  divisions: 50,
-                  suffix: 'Hz',
-                  onChanged: notifier.updateFftBand,
-                  tooltip: 'FFT 頻帶範圍：分析的頻率範圍',
                 ),
                 TextButton.icon(
                   onPressed: notifier.reset,
@@ -246,11 +237,6 @@ class _PerLapOffsetHeader extends ConsumerWidget {
                   label: const Text('重置設定'),
                 ),
               ],
-            ),
-            const SizedBox(height: 16),
-            FftPeriodogramSettings(
-              params: config.fftParams,
-              onChanged: notifier.updateFftParams,
             ),
           ],
         );

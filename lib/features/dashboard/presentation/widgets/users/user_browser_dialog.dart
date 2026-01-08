@@ -687,6 +687,11 @@ class _UserBrowserDialogState extends ConsumerState<UserBrowserDialog> {
           ),
         );
       }
+      if (user.cohort.isNotEmpty) {
+        for (final c in user.cohort) {
+          chips.add(Chip(label: Text('族群：$c')));
+        }
+      }
 
       return Padding(
         padding: const EdgeInsets.all(20),

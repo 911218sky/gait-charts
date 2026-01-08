@@ -70,8 +70,9 @@ class _TrajectoryPlayerCardState extends ConsumerState<TrajectoryPlayerCard>
       return;
     }
     final dt = (elapsed - last).inMicroseconds / 1e6;
-    final fps =
-        widget.payload.meta.fpsOut <= 0 ? 24 : widget.payload.meta.fpsOut;
+    final fps = widget.payload.meta.fpsOut <= 0
+        ? 24
+        : widget.payload.meta.fpsOut;
     final next = _playheadKNotifier.value + dt * fps * _playbackSpeed;
 
     if (next >= _maxK) {
@@ -109,9 +110,11 @@ class _TrajectoryPlayerCardState extends ConsumerState<TrajectoryPlayerCard>
     final colors = context.colorScheme;
     final isDark = context.isDark;
     final accent = DashboardAccentColors.of(context);
+    final heatmapPalette = DashboardHeatmapPalette.of(context);
     final payload = widget.payload;
     final config = ref.watch(trajectoryPayloadConfigProvider);
     final overlayUi = ref.watch(trajectoryOverlayUiProvider);
+    final overlayNotifier = ref.read(trajectoryOverlayUiProvider.notifier);
 
     final fps = payload.meta.fpsOut <= 0 ? 24 : payload.meta.fpsOut;
 
@@ -120,7 +123,9 @@ class _TrajectoryPlayerCardState extends ConsumerState<TrajectoryPlayerCard>
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E1E1E) : colors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.outlineVariant.withValues(alpha: isDark ? 0 : 0.5)),
+        border: Border.all(
+          color: colors.outlineVariant.withValues(alpha: isDark ? 0 : 0.5),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
@@ -140,14 +145,18 @@ class _TrajectoryPlayerCardState extends ConsumerState<TrajectoryPlayerCard>
             painter: _TrajectoryPainter(
               payload: payload,
               playheadListenable: _playheadKNotifier,
-              trailColor: colors.primary.withValues(alpha: 0.8),
-              faintTrailColor:
-                  colors.primary.withValues(alpha: 0.15),
+              trailColor: colors.primary.withValues(alpha: 0.8), // fallback
               markerColor: isDark ? Colors.white : colors.onSurface,
               chairColor: accent.success,
               coneColor: accent.warning,
-              gridColor: (isDark ? Colors.white : colors.onSurface).withValues(alpha: 0.05),
-              axisColor: (isDark ? Colors.white : colors.onSurface).withValues(alpha: 0.3),
+              gridColor: (isDark ? Colors.white : colors.onSurface).withValues(
+                alpha: 0.05,
+              ),
+              axisColor: (isDark ? Colors.white : colors.onSurface).withValues(
+                alpha: 0.3,
+              ),
+              heatmapColors: heatmapPalette.colors,
+              showFullTrail: overlayUi.showFullTrail,
               showChairArea: overlayUi.showChairArea,
               showConeArea: overlayUi.showConeArea,
             ),
@@ -180,7 +189,9 @@ class _TrajectoryPlayerCardState extends ConsumerState<TrajectoryPlayerCard>
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         fontFeatures: const [FontFeature.tabularFigures()],
-                        shadows: isDark ? [const Shadow(blurRadius: 4, color: Colors.black)] : null,
+                        shadows: isDark
+                            ? [const Shadow(blurRadius: 4, color: Colors.black)]
+                            : null,
                       ),
                     ),
                     Text(
@@ -188,7 +199,9 @@ class _TrajectoryPlayerCardState extends ConsumerState<TrajectoryPlayerCard>
                       style: TextStyle(
                         color: colors.onSurfaceVariant,
                         fontSize: 12,
-                        shadows: isDark ? const [Shadow(blurRadius: 2, color: Colors.black)] : null,
+                        shadows: isDark
+                            ? const [Shadow(blurRadius: 2, color: Colors.black)]
+                            : null,
                       ),
                     ),
                   ],
@@ -205,7 +218,7 @@ class _TrajectoryPlayerCardState extends ConsumerState<TrajectoryPlayerCard>
               chairColor: accent.success,
               coneColor: accent.warning,
               markerColor: isDark ? Colors.white : colors.onSurface,
-              trailColor: colors.primary,
+              heatmapColors: heatmapPalette.colors,
             ),
           ),
 
@@ -222,10 +235,14 @@ class _TrajectoryPlayerCardState extends ConsumerState<TrajectoryPlayerCard>
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.black.withValues(alpha: 0.6) : colors.surface.withValues(alpha: 0.8),
+                      color: isDark
+                          ? Colors.black.withValues(alpha: 0.6)
+                          : colors.surface.withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: colors.onSurface.withValues(alpha: isDark ? 0.1 : 0.08),
+                        color: colors.onSurface.withValues(
+                          alpha: isDark ? 0.1 : 0.08,
+                        ),
                       ),
                     ),
                     child: Column(
@@ -241,11 +258,14 @@ class _TrajectoryPlayerCardState extends ConsumerState<TrajectoryPlayerCard>
                                 data: SliderThemeData(
                                   trackHeight: 3, // 讓軌道細一點
                                   thumbShape: const RoundSliderThumbShape(
-                                      enabledThumbRadius: 5), // 讓 thumb 小一點
+                                    enabledThumbRadius: 5,
+                                  ), // 讓 thumb 小一點
                                   overlayShape: const RoundSliderOverlayShape(
-                                      overlayRadius: 12),
+                                    overlayRadius: 12,
+                                  ),
                                   activeTrackColor: colors.primary,
-                                  inactiveTrackColor: colors.onSurface.withValues(alpha: 0.12),
+                                  inactiveTrackColor: colors.onSurface
+                                      .withValues(alpha: 0.12),
                                   thumbColor: colors.primary,
                                 ),
                                 child: Slider(
@@ -270,7 +290,9 @@ class _TrajectoryPlayerCardState extends ConsumerState<TrajectoryPlayerCard>
                           children: [
                             _ControlIconButton(
                               onPressed: _togglePlay,
-                              icon: _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                              icon: _isPlaying
+                                  ? Icons.pause_rounded
+                                  : Icons.play_arrow_rounded,
                               tooltip: _isPlaying ? '暫停' : '播放',
                               isActive: true,
                             ),
@@ -299,13 +321,27 @@ class _TrajectoryPlayerCardState extends ConsumerState<TrajectoryPlayerCard>
                             _ControlTextButton(
                               onPressed: () {
                                 ref
-                                    .read(trajectoryPayloadConfigProvider.notifier)
+                                    .read(
+                                      trajectoryPayloadConfigProvider.notifier,
+                                    )
                                     .updateRotate180(!config.rotate180);
                               },
                               icon: Icons.rotate_right_rounded,
                               label: 'Rotate',
                               isActive: config.rotate180,
                               tooltip: '旋轉 180° (需重新載入)',
+                            ),
+                            const SizedBox(width: 12),
+                            _ControlTextButton(
+                              onPressed: () => overlayNotifier.toggleFullTrail(
+                                !overlayUi.showFullTrail,
+                              ),
+                              icon: Icons.timeline_rounded,
+                              label: overlayUi.showFullTrail ? 'Full' : 'Lap',
+                              isActive: overlayUi.showFullTrail,
+                              tooltip: overlayUi.showFullTrail
+                                  ? '顯示全部軌跡（從開始→目前 frame，新→舊熱力圖）'
+                                  : '只顯示當圈軌跡（新→舊熱力圖）',
                             ),
                             const SizedBox(width: 12),
                             // Speed Menu
@@ -325,27 +361,33 @@ class _TrajectoryPlayerCardState extends ConsumerState<TrajectoryPlayerCard>
                                   ),
                                 ),
                               ),
-                              onSelected: (v) => setState(() => _playbackSpeed = v),
-                              itemBuilder: (context) => [0.25, 0.5, 1.0, 1.5, 2.0]
-                                  .map(
-                                    (s) => PopupMenuItem(
-                                      value: s,
-                                      height: 36,
-                                      child: Text(
-                                        '${s}x',
-                                        style: TextStyle(
-                                            color: isDark
-                                                ? Colors.white
-                                                : colors.onSurface,
-                                            fontWeight: s == _playbackSpeed ? FontWeight.bold : FontWeight.normal
+                              onSelected: (v) =>
+                                  setState(() => _playbackSpeed = v),
+                              itemBuilder: (context) =>
+                                  [0.25, 0.5, 1.0, 1.5, 2.0]
+                                      .map(
+                                        (s) => PopupMenuItem(
+                                          value: s,
+                                          height: 36,
+                                          child: Text(
+                                            '${s}x',
+                                            style: TextStyle(
+                                              color: isDark
+                                                  ? Colors.white
+                                                  : colors.onSurface,
+                                              fontWeight: s == _playbackSpeed
+                                                  ? FontWeight.bold
+                                                  : FontWeight.normal,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
+                                      )
+                                      .toList(),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 6),
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
                                 decoration: BoxDecoration(
                                   color: isDark
                                       ? Colors.white.withValues(alpha: 0.1)
@@ -409,8 +451,12 @@ class _ControlIconButton extends StatelessWidget {
     return IconButton(
       onPressed: onPressed,
       style: IconButton.styleFrom(
-        backgroundColor: isActive ? (context.isDark ? Colors.white : colors.primary) : Colors.transparent,
-        foregroundColor: isActive ? (context.isDark ? Colors.black : Colors.white) : colors.onSurface,
+        backgroundColor: isActive
+            ? (context.isDark ? Colors.white : colors.primary)
+            : Colors.transparent,
+        foregroundColor: isActive
+            ? (context.isDark ? Colors.black : Colors.white)
+            : colors.onSurface,
         hoverColor: colors.onSurface.withValues(alpha: 0.1),
         padding: const EdgeInsets.all(8),
         minimumSize: const Size(36, 36),
@@ -440,8 +486,10 @@ class _ControlTextButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
-    final color = isActive ? colors.primary : colors.onSurface.withValues(alpha: 0.7);
-    
+    final color = isActive
+        ? colors.primary
+        : colors.onSurface.withValues(alpha: 0.7);
+
     return Tooltip(
       message: tooltip ?? label,
       child: InkWell(
@@ -475,13 +523,13 @@ class _LegendOverlay extends StatelessWidget {
     required this.chairColor,
     required this.coneColor,
     required this.markerColor,
-    required this.trailColor,
+    required this.heatmapColors,
   });
 
   final Color chairColor;
   final Color coneColor;
   final Color markerColor;
-  final Color trailColor;
+  final List<Color> heatmapColors;
 
   @override
   Widget build(BuildContext context) {
@@ -491,7 +539,9 @@ class _LegendOverlay extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: isDark ? Colors.black.withValues(alpha: 0.6) : colors.surfaceContainerLow.withValues(alpha: 0.8),
+        color: isDark
+            ? Colors.black.withValues(alpha: 0.6)
+            : colors.surfaceContainerLow.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: colors.onSurface.withValues(alpha: isDark ? 0.1 : 0.08),
@@ -512,7 +562,7 @@ class _LegendOverlay extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           _LegendItem(
-            icon: Icon(Icons.timeline, size: 14, color: trailColor),
+            icon: _HeatmapLegendSwatch(colors: heatmapColors),
             label: 'Trajectory',
           ),
           const SizedBox(height: 12),
@@ -525,7 +575,7 @@ class _LegendOverlay extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-           _LegendItem(
+          _LegendItem(
             icon: Icon(Icons.circle_outlined, size: 14, color: coneColor),
             label: 'Start (Cone)',
           ),
@@ -535,7 +585,7 @@ class _LegendOverlay extends StatelessWidget {
             label: 'End (Cone)',
           ),
           const SizedBox(height: 6),
-           _LegendItem(
+          _LegendItem(
             icon: _DiamondIcon(color: chairColor, size: 10),
             label: 'Start (Chair)',
           ),
@@ -545,6 +595,29 @@ class _LegendOverlay extends StatelessWidget {
             label: 'End (Chair)',
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HeatmapLegendSwatch extends StatelessWidget {
+  const _HeatmapLegendSwatch({required this.colors});
+
+  final List<Color> colors;
+
+  @override
+  Widget build(BuildContext context) {
+    final effective = colors.isEmpty ? [context.colorScheme.primary] : colors;
+    return Container(
+      width: 14,
+      height: 14,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        gradient: LinearGradient(
+          begin: Alignment.bottomLeft,
+          end: Alignment.topRight,
+          colors: effective,
+        ),
       ),
     );
   }
@@ -590,9 +663,7 @@ class _DiamondIcon extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(
-          border: Border.all(color: color, width: 1.5),
-        ),
+        decoration: BoxDecoration(border: Border.all(color: color, width: 1.5)),
       ),
     );
   }
@@ -603,58 +674,53 @@ class _TrajectoryPainter extends CustomPainter {
     required this.payload,
     required this.playheadListenable,
     required this.trailColor,
-    required this.faintTrailColor,
     required this.markerColor,
     required this.chairColor,
     required this.coneColor,
     required this.gridColor,
     required this.axisColor,
+    required this.heatmapColors,
+    required this.showFullTrail,
     required this.showChairArea,
     required this.showConeArea,
-  })  : _faintPaint = Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round
-          ..color = faintTrailColor,
-        _solidPaint = Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 3.0
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round
-          ..color = trailColor,
-        _markerPaint = Paint()..color = markerColor,
-        _axisPaint = Paint()
-          ..color = axisColor
-          ..strokeWidth = 1.5,
-        _gridPaint = Paint()
-          ..color = gridColor
-          ..strokeWidth = 1.0,
-        _borderPaint = Paint()
-          ..style = PaintingStyle.stroke
-          ..color = gridColor
-          ..strokeWidth = 2,
-        _textPainter = TextPainter(
-          textDirection: TextDirection.ltr,
-          textAlign: TextAlign.right,
-        ),
-        super(repaint: playheadListenable);
+  }) : _trailPaint = Paint()
+         ..style = PaintingStyle.stroke
+         ..strokeWidth = 3.0
+         ..strokeCap = StrokeCap.round
+         ..strokeJoin = StrokeJoin.round
+         ..color = trailColor,
+       _markerPaint = Paint()..color = markerColor,
+       _axisPaint = Paint()
+         ..color = axisColor
+         ..strokeWidth = 1.5,
+       _gridPaint = Paint()
+         ..color = gridColor
+         ..strokeWidth = 1.0,
+       _borderPaint = Paint()
+         ..style = PaintingStyle.stroke
+         ..color = gridColor
+         ..strokeWidth = 2,
+       _textPainter = TextPainter(
+         textDirection: TextDirection.ltr,
+         textAlign: TextAlign.right,
+       ),
+       super(repaint: playheadListenable);
 
   final TrajectoryDecodedPayload payload;
   final ValueListenable<double> playheadListenable;
   final Color trailColor;
-  final Color faintTrailColor;
   final Color markerColor;
   final Color chairColor;
   final Color coneColor;
   final Color gridColor;
   final Color axisColor;
+  final List<Color> heatmapColors;
+  final bool showFullTrail;
   final bool showChairArea;
   final bool showConeArea;
 
   // Paints/Text painter reuse避免每幀重建
-  final Paint _faintPaint;
-  final Paint _solidPaint;
+  final Paint _trailPaint;
   final Paint _markerPaint;
   final Paint _axisPaint;
   final Paint _gridPaint;
@@ -673,7 +739,7 @@ class _TrajectoryPainter extends CustomPainter {
   double? _offsetX;
   double? _offsetY;
   Rect? _contentRect;
-  Path? _faintPath;
+  List<Offset>? _centerCanvasPoints;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -682,12 +748,15 @@ class _TrajectoryPainter extends CustomPainter {
     }
 
     _ensureLayout(size);
-    final currentK = playheadListenable.value.round().clamp(0, payload.nFrames - 1);
+    final currentK = playheadListenable.value.round().clamp(
+      0,
+      payload.nFrames - 1,
+    );
     final center = payload.centerXy;
 
     var currentLapIndex = -1;
     var lapStartK = 0;
-    
+
     // 找出當前圈
     for (final lap in payload.laps) {
       if (lap.payloadStartK != null &&
@@ -703,21 +772,13 @@ class _TrajectoryPainter extends CustomPainter {
     // 1. 網格背景與座標軸
     _drawGridAndAxis(canvas);
 
-    // 2. 完整路徑 (Faint) - 只算一次
-    final faintPath = _faintPath;
-    if (faintPath != null) {
-      canvas.drawPath(faintPath, _faintPaint);
-    }
-
-    // 3. Active Trail (Current Lap Only)
+    // 2. Active Trail (Full or Current Lap)
     if (currentLapIndex != -1) {
-      canvas.drawPath(
-        _buildPath(
-          center: center,
-          startInclusive: lapStartK,
-          endInclusive: currentK,
-        ),
-        _solidPaint,
+      final startK = showFullTrail ? 0 : lapStartK;
+      _drawHeatTrail(
+        canvas: canvas,
+        startInclusive: startK,
+        endInclusive: currentK,
       );
     }
 
@@ -763,7 +824,7 @@ class _TrajectoryPainter extends CustomPainter {
     if (currentLapIndex != -1) {
       final lap = payload.laps.firstWhere((l) => l.lapIndex == currentLapIndex);
       final m = lap.markers;
-      
+
       void drawMark(int k, Color c, String type) {
         if (k < 0 || k >= payload.nFrames) return;
         final idx = k * 2;
@@ -771,9 +832,13 @@ class _TrajectoryPainter extends CustomPainter {
         _drawMarkerShape(canvas, p, c, type);
       }
 
-      if (m.coneStartK != null) drawMark(m.coneStartK!, coneColor, 'cone_start');
+      if (m.coneStartK != null) {
+        drawMark(m.coneStartK!, coneColor, 'cone_start');
+      }
       if (m.coneEndK != null) drawMark(m.coneEndK!, coneColor, 'cone_end');
-      if (m.chairStartK != null) drawMark(m.chairStartK!, chairColor, 'chair_start');
+      if (m.chairStartK != null) {
+        drawMark(m.chairStartK!, chairColor, 'chair_start');
+      }
       if (m.chairEndK != null) drawMark(m.chairEndK!, chairColor, 'chair_end');
     }
   }
@@ -808,11 +873,14 @@ class _TrajectoryPainter extends CustomPainter {
       size.height - _padTop - _padBottom,
     );
 
-    // cache faint path
-    _faintPath = _buildPath(
-      center: payload.centerXy,
-      startInclusive: 0,
-      endInclusive: payload.nFrames - 1,
+    // cache canvas points for heat trail
+    _centerCanvasPoints = List.generate(
+      payload.nFrames,
+      (k) {
+        final i = k * 2;
+        return _toCanvas(payload.centerXy[i], payload.centerXy[i + 1]);
+      },
+      growable: false,
     );
   }
 
@@ -826,21 +894,51 @@ class _TrajectoryPainter extends CustomPainter {
     return Offset(cx, cy);
   }
 
-  Path _buildPath({
-    required List<double> center,
+  void _drawHeatTrail({
+    required Canvas canvas,
     required int startInclusive,
     required int endInclusive,
   }) {
-    final path = Path();
-    if (startInclusive > endInclusive) return path;
-    final first = _toCanvas(center[startInclusive * 2], center[startInclusive * 2 + 1]);
-    path.moveTo(first.dx, first.dy);
-    for (var k = startInclusive + 1; k <= endInclusive; k++) {
-      final i = k * 2;
-      final p = _toCanvas(center[i], center[i + 1]);
-      path.lineTo(p.dx, p.dy);
+    final points = _centerCanvasPoints;
+    if (points == null || points.isEmpty) return;
+
+    final start = startInclusive.clamp(0, points.length - 1);
+    final end = endInclusive.clamp(0, points.length - 1);
+    if (end <= start) return;
+
+    final segCount = (end - start).clamp(1, 1 << 30);
+    // 讓最後一段 (k=end-1) 對應到 t=1.0（避免永遠不到最亮顏色）。
+    final denom = ((segCount as num) - 1).abs() < 1e-9 ? 1.0 : (segCount - 1).toDouble();
+    final colors = heatmapColors;
+    final paletteCount = colors.length;
+
+    Color colorAt(double t) {
+      if (paletteCount <= 0) {
+        return trailColor;
+      }
+      if (paletteCount == 1) {
+        return colors.first;
+      }
+      final clamped = t.clamp(0.0, 1.0);
+      final scaled = clamped * (paletteCount - 1);
+      final i = scaled.floor();
+      final frac = scaled - i;
+      if (i >= paletteCount - 1) {
+        return colors.last;
+      }
+      return Color.lerp(colors[i], colors[i + 1], frac) ?? colors[i];
     }
-    return path;
+
+    // 用 alpha 的漸層讓「舊」更淡、「新」更亮。
+    const alphaOld = 0.18;
+    const alphaNew = 0.95;
+
+    for (var k = start; k < end; k++) {
+      final t = segCount <= 1 ? 1.0 : (k - start) / denom;
+      final a = lerpDouble(alphaOld, alphaNew, t) ?? alphaNew;
+      _trailPaint.color = colorAt(t).withValues(alpha: a);
+      canvas.drawLine(points[k], points[k + 1], _trailPaint);
+    }
   }
 
   void _drawGridAndAxis(Canvas canvas) {
@@ -868,16 +966,26 @@ class _TrajectoryPainter extends CustomPainter {
         final cy = _offsetY! + (bounds.ymax - y) * scale;
         if (cy < rect.top || cy > rect.bottom) continue;
 
-        canvas.drawLine(Offset(rect.left, cy), Offset(rect.left - 6, cy), _axisPaint);
+        canvas.drawLine(
+          Offset(rect.left, cy),
+          Offset(rect.left - 6, cy),
+          _axisPaint,
+        );
 
         _textPainter.text = TextSpan(
           text: '${y.toStringAsFixed(1)}m',
-          style: TextStyle(color: axisColor.withValues(alpha: 0.8), fontSize: 10),
+          style: TextStyle(
+            color: axisColor.withValues(alpha: 0.8),
+            fontSize: 10,
+          ),
         );
         _textPainter.layout();
         _textPainter.paint(
           canvas,
-          Offset(rect.left - 8 - _textPainter.width, cy - _textPainter.height / 2),
+          Offset(
+            rect.left - 8 - _textPainter.width,
+            cy - _textPainter.height / 2,
+          ),
         );
       }
     }
@@ -891,11 +999,18 @@ class _TrajectoryPainter extends CustomPainter {
         final cx = _offsetX! + (x - bounds.xmin) * scale;
         if (cx < rect.left || cx > rect.right) continue;
 
-        canvas.drawLine(Offset(cx, rect.bottom), Offset(cx, rect.bottom + 6), _axisPaint);
+        canvas.drawLine(
+          Offset(cx, rect.bottom),
+          Offset(cx, rect.bottom + 6),
+          _axisPaint,
+        );
 
         _textPainter.text = TextSpan(
           text: '${x.toStringAsFixed(1)}m',
-          style: TextStyle(color: axisColor.withValues(alpha: 0.8), fontSize: 10),
+          style: TextStyle(
+            color: axisColor.withValues(alpha: 0.8),
+            fontSize: 10,
+          ),
         );
         _textPainter.layout();
         _textPainter.paint(
@@ -974,12 +1089,14 @@ class _TrajectoryPainter extends CustomPainter {
       ..color = color
       ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke;
-    
+
     // Glow
     canvas.drawCircle(
-      p, 
-      10, 
-      Paint()..color = color.withValues(alpha: 0.3)..style = PaintingStyle.fill,
+      p,
+      10,
+      Paint()
+        ..color = color.withValues(alpha: 0.3)
+        ..style = PaintingStyle.fill,
     );
 
     if (type.contains('cone')) {
@@ -989,8 +1106,16 @@ class _TrajectoryPainter extends CustomPainter {
       } else {
         // X
         const d = 5.0;
-        canvas.drawLine(p + const Offset(-d, -d), p + const Offset(d, d), paint);
-        canvas.drawLine(p + const Offset(-d, d), p + const Offset(d, -d), paint);
+        canvas.drawLine(
+          p + const Offset(-d, -d),
+          p + const Offset(d, d),
+          paint,
+        );
+        canvas.drawLine(
+          p + const Offset(-d, d),
+          p + const Offset(d, -d),
+          paint,
+        );
       }
     } else {
       if (type.contains('start')) {
@@ -1016,12 +1141,13 @@ class _TrajectoryPainter extends CustomPainter {
   bool shouldRepaint(covariant _TrajectoryPainter oldDelegate) {
     return oldDelegate.payload != payload ||
         oldDelegate.trailColor != trailColor ||
-        oldDelegate.faintTrailColor != faintTrailColor ||
         oldDelegate.markerColor != markerColor ||
         oldDelegate.chairColor != chairColor ||
         oldDelegate.coneColor != coneColor ||
         oldDelegate.gridColor != gridColor ||
         oldDelegate.axisColor != axisColor ||
+        oldDelegate.heatmapColors != heatmapColors ||
+        oldDelegate.showFullTrail != showFullTrail ||
         oldDelegate.playheadListenable != playheadListenable;
   }
 }

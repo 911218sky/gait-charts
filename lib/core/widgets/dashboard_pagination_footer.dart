@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gait_charts/app/theme.dart';
 
-/// 共用分頁列（頁碼按鈕 + 上一頁/下一頁）。
+/// 共用分頁列元件。
 ///
-/// - `totalPages <= 0` 會自動隱藏。
-/// - `onSelectPage` 由外部決定怎麼載入資料。
+/// 顯示頁碼按鈕與上一頁/下一頁導航。`totalPages <= 0` 時自動隱藏。
 class DashboardPaginationFooter extends StatelessWidget {
   const DashboardPaginationFooter({
     required this.currentPage,
