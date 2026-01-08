@@ -10,6 +10,7 @@ export 'analysis/swing_info_heatmap_state.dart';
 export 'analysis/trajectory_overlay_state.dart';
 export 'analysis/trajectory_payload_state.dart';
 export 'analysis/y_height_diff_state.dart';
+export 'cohort_benchmark/cohort_benchmark_state.dart';
 export 'extraction/bag_list_state.dart';
 export 'extraction/extraction_state.dart';
 export 'sessions/active_session_provider.dart';

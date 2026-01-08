@@ -832,11 +832,13 @@ class _TrajectoryPainter extends CustomPainter {
         _drawMarkerShape(canvas, p, c, type);
       }
 
-      if (m.coneStartK != null)
+      if (m.coneStartK != null) {
         drawMark(m.coneStartK!, coneColor, 'cone_start');
+      }
       if (m.coneEndK != null) drawMark(m.coneEndK!, coneColor, 'cone_end');
-      if (m.chairStartK != null)
+      if (m.chairStartK != null) {
         drawMark(m.chairStartK!, chairColor, 'chair_start');
+      }
       if (m.chairEndK != null) drawMark(m.chairEndK!, chairColor, 'chair_end');
     }
   }

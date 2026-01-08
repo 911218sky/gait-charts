@@ -15,6 +15,7 @@ import 'package:gait_charts/features/dashboard/domain/feature_availability.dart'
 import 'package:gait_charts/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:gait_charts/features/dashboard/presentation/views/dashboard_analysis_view.dart';
+import 'package:gait_charts/features/dashboard/presentation/views/dashboard_cohort_benchmark_view.dart';
 import 'package:gait_charts/features/dashboard/presentation/views/dashboard_extraction_view.dart';
 import 'package:gait_charts/features/dashboard/presentation/views/dashboard_session_management_view.dart';
 import 'package:gait_charts/features/dashboard/presentation/views/dashboard_users_view.dart';
@@ -39,6 +40,7 @@ class DashboardScreen extends ConsumerStatefulWidget {
 /// 定義儀表板的主視圖分區。
 enum _DashboardSection {
   analysis,
+  cohortBenchmark,
   perLapOffset,
   speedHeatmap,
   swingHeatmap,
@@ -333,6 +335,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           onLoadSession: _loadSession,
         );
         break;
+      case _DashboardSection.cohortBenchmark:
+        content = const DashboardCohortBenchmarkView(
+          key: ValueKey('cohort-benchmark-view'),
+        );
+        break;
       case _DashboardSection.perLapOffset:
         content = PerLapOffsetView(
           key: const ValueKey('per-lap-view'),
@@ -594,6 +601,14 @@ const List<_DashboardNavItem> _navItems = [
     selectedIcon: Icons.analytics,
     sidebarLabel: '分析總覽',
     bottomLabel: '分析',
+    sidebarGroup: '分析',
+  ),
+  _DashboardNavItem(
+    section: _DashboardSection.cohortBenchmark,
+    icon: Icons.groups_outlined,
+    selectedIcon: Icons.groups,
+    sidebarLabel: '族群基準',
+    bottomLabel: '族群基準',
     sidebarGroup: '分析',
   ),
   _DashboardNavItem(

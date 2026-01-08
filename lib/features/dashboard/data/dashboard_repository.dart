@@ -1,12 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:gait_charts/core/network/errors/api_exception.dart';
 import 'package:gait_charts/features/dashboard/data/services/analysis/stage_analysis_api_service.dart';
+import 'package:gait_charts/features/dashboard/data/services/cohort_benchmark/cohort_benchmark_api_service.dart';
 import 'package:gait_charts/features/dashboard/data/services/extraction/bag_list_api_service.dart';
 import 'package:gait_charts/features/dashboard/data/services/extraction/extraction_api_service.dart';
 import 'package:gait_charts/features/dashboard/data/services/sessions/session_api_service.dart';
 import 'package:gait_charts/features/dashboard/data/services/users/users_api_service.dart';
 import 'package:gait_charts/features/dashboard/domain/models/bag_file.dart';
+import 'package:gait_charts/features/dashboard/domain/models/cohort_benchmark.dart';
 import 'package:gait_charts/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:gait_charts/features/dashboard/domain/models/realsense_session.dart';
 import 'package:gait_charts/features/dashboard/domain/models/user_profile.dart';
@@ -14,17 +15,20 @@ import 'package:gait_charts/features/dashboard/domain/models/user_profile.dart';
 /// 儀表板的資料存取層，封裝 API 呼叫與簡易轉換。
 class DashboardRepository {
   DashboardRepository({
+    required CohortBenchmarkApiService cohortBenchmarkApi,
     required StageAnalysisApiService stageAnalysisApi,
     required BagListApiService bagListApi,
     required ExtractionApiService extractionApi,
     required SessionApiService sessionApi,
     required UsersApiService usersApi,
-  }) : _stageAnalysisApi = stageAnalysisApi,
+  }) : _cohortBenchmarkApi = cohortBenchmarkApi,
+       _stageAnalysisApi = stageAnalysisApi,
        _bagListApi = bagListApi,
        _extractionApi = extractionApi,
        _sessionApi = sessionApi,
        _usersApi = usersApi;
 
+  final CohortBenchmarkApiService _cohortBenchmarkApi;
   final StageAnalysisApiService _stageAnalysisApi;
   final BagListApiService _bagListApi;
   final ExtractionApiService _extractionApi;
@@ -373,11 +377,67 @@ class DashboardRepository {
       deletedSessions: detail.deletedSessions,
     );
   }
+
+  // ===========================================================================
+  // Cohort Benchmark API
+  // ===========================================================================
+
+  Future<CohortBenchmarkListResponse> fetchCohortBenchmarkList() {
+    return _cohortBenchmarkApi.fetchCohortList();
+  }
+
+  Future<CohortUsersResponse> fetchCohortUsers({
+    required CohortUsersRequest request,
+  }) {
+    return _cohortBenchmarkApi.fetchCohortUsers(request: request);
+  }
+
+  /// 取得指定 cohort 的基準值 detail（已計算）。
+  ///
+  /// 注意：後端若回 404 代表該 cohort 尚未有基準值（屬於可預期狀態），
+  /// 此處回傳 null 讓 UI 顯示「需要逕行計算」，而不是顯示錯誤卡片。
+  Future<CohortBenchmarkDetail?> fetchCohortBenchmarkDetail({
+    required String cohortName,
+  }) async {
+    try {
+      return await _cohortBenchmarkApi.fetchBenchmarkDetail(cohortName: cohortName);
+    } on ApiException catch (e) {
+      if (e.statusCode == 404) return null;
+      rethrow;
+    }
+  }
+
+  Future<CohortBenchmarkDetail> calculateCohortBenchmark({
+    required String cohortName,
+    bool forceRecalculate = false,
+  }) {
+    return _cohortBenchmarkApi.calculateBenchmark(
+      cohortName: cohortName,
+      forceRecalculate: forceRecalculate,
+    );
+  }
+
+  Future<CohortBenchmarkCompareResponse> compareCohortBenchmark({
+    required String sessionName,
+    required String cohortName,
+  }) {
+    return _cohortBenchmarkApi.compare(
+      sessionName: sessionName,
+      cohortName: cohortName,
+    );
+  }
+
+  Future<CohortBenchmarkDeleteBatchResponse> deleteCohortBenchmarks({
+    required List<String> cohortNames,
+  }) {
+    return _cohortBenchmarkApi.deleteBenchmarks(cohortNames: cohortNames);
+  }
 }
 
 /// 提供儀表板 repository 的 Riverpod Provider。
 final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
   return DashboardRepository(
+    cohortBenchmarkApi: ref.watch(cohortBenchmarkApiServiceProvider),
     stageAnalysisApi: ref.watch(stageAnalysisApiServiceProvider),
     bagListApi: ref.watch(bagListApiServiceProvider),
     extractionApi: ref.watch(extractionApiServiceProvider),
