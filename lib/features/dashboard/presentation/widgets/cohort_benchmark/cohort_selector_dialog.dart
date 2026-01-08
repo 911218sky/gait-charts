@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gait_charts/app/theme.dart';
+import 'package:gait_charts/core/widgets/initial_avatar.dart';
 import 'package:gait_charts/features/dashboard/domain/models/cohort_benchmark.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -240,9 +241,7 @@ class _CohortSelectorDialogState extends ConsumerState<CohortSelectorDialog> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: context.isDark
-                  ? const Color(0xFF222222)
-                  : colors.surfaceContainerHighest,
+              color: context.surfaceLight,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
@@ -293,11 +292,10 @@ class _CohortGridCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
-    final isDark = context.isDark;
     final hasBenchmark = benchmark != null;
 
     return Material(
-      color: isDark ? const Color(0xFF111111) : colors.surfaceContainerLow,
+      color: context.surfaceDark,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
@@ -319,24 +317,10 @@ class _CohortGridCard extends StatelessWidget {
               // 頂部：首字母 + 已計算標記
               Row(
                 children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF1A1A1A)
-                          : colors.surfaceContainerHighest.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      cohortName.isNotEmpty ? cohortName[0].toUpperCase() : '?',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: isSelected ? colors.primary : colors.onSurfaceVariant,
-                      ),
-                    ),
+                  InitialAvatar(
+                    text: cohortName,
+                    size: 36,
+                    isSelected: isSelected,
                   ),
                   const Spacer(),
                   if (hasBenchmark)

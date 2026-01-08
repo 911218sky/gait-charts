@@ -72,7 +72,7 @@ class MetricHighlightCard extends StatelessWidget {
                   MetricStatusBadge(
                     status: status,
                     label: _statusLabel(status),
-                    size: MetricStatusBadgeSize.small,
+                    size: MetricBadgeSize.small,
                   ),
                 ],
               ),
@@ -125,7 +125,7 @@ class MetricHighlightCard extends StatelessWidget {
                 MetricPerformanceBadge(
                   label: performanceLabel!,
                   variant: performanceVariant!,
-                  size: MetricStatusBadgeSize.small,
+                  size: MetricBadgeSize.small,
                 ),
               ],
               if (subtitle != null) ...[
