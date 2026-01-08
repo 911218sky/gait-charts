@@ -227,23 +227,27 @@ class _VideoPlaybackViewState extends ConsumerState<VideoPlaybackView> {
   }
 
   Widget _buildCompactToolbar(BuildContext context, ColorScheme colors) {
+    final isDark = context.isDark;
+    
     return SizedBox(
-      height: 56,
+      height: 52,
       child: Row(
         children: [
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: colors.surfaceContainerHighest.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.5)),
+                color: isDark 
+                    ? const Color(0xFF111111)
+                    : colors.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: colors.outlineVariant),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Row(
                 children: [
-                  const SizedBox(width: 16),
-                  Icon(Icons.search, color: colors.onSurfaceVariant),
                   const SizedBox(width: 12),
+                  Icon(Icons.search, color: colors.onSurfaceVariant, size: 20),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: SessionAutocompleteField(
                       controller: widget.sessionController,
@@ -263,7 +267,7 @@ class _VideoPlaybackViewState extends ConsumerState<VideoPlaybackView> {
                   ),
                   if (widget.sessionController.text.isNotEmpty)
                     IconButton(
-                      icon: const Icon(Icons.clear),
+                      icon: const Icon(Icons.clear, size: 18),
                       onPressed: () {
                         widget.sessionController.clear();
                         setState(() => _currentSession = null);
@@ -271,7 +275,7 @@ class _VideoPlaybackViewState extends ConsumerState<VideoPlaybackView> {
                     ),
                   IconButton(
                     onPressed: _loadSession,
-                    icon: const Icon(Icons.arrow_forward_rounded),
+                    icon: const Icon(Icons.arrow_forward_rounded, size: 20),
                     tooltip: '載入',
                     color: colors.primary,
                   ),
@@ -283,12 +287,12 @@ class _VideoPlaybackViewState extends ConsumerState<VideoPlaybackView> {
           const SizedBox(width: 12),
           FilledButton.icon(
             onPressed: _showSessionPicker,
-            icon: const Icon(Icons.folder_open_rounded),
+            icon: const Icon(Icons.folder_open_rounded, size: 18),
             label: const Text('瀏覽'),
             style: FilledButton.styleFrom(
-              minimumSize: const Size(0, 56),
+              minimumSize: const Size(0, 52),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
           ),
