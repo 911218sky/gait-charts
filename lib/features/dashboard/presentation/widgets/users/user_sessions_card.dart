@@ -276,12 +276,11 @@ class _UserSessionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
-    final isDark = context.isDark;
     final accent = DashboardAccentColors.of(context);
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF111111) : colors.surfaceContainerLow,
+        color: context.surfaceDark,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: colors.outlineVariant),
       ),
@@ -294,7 +293,7 @@ class _UserSessionTile extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF222222) : colors.surfaceContainerHighest.withValues(alpha: 0.1),
+              color: context.surfaceLight,
               borderRadius: BorderRadius.circular(10),
             ),
             alignment: Alignment.center,
@@ -352,10 +351,10 @@ class _UserSessionTile extends StatelessWidget {
                     onPressed: isBusy ? null : onPlayVideo,
                     icon: Icon(
                       Icons.play_circle_filled,
-                      color: isDark ? Colors.white : colors.primary,
+                      color: context.isDark ? Colors.white : colors.primary,
                     ),
                     style: IconButton.styleFrom(
-                      backgroundColor: isDark ? const Color(0xFF222222) : colors.surfaceContainer,
+                      backgroundColor: context.surfaceLight,
                       padding: const EdgeInsets.all(8),
                     ),
                   ),
@@ -367,10 +366,10 @@ class _UserSessionTile extends StatelessWidget {
                   onPressed: isBusy ? null : () => onActivateSession(item.sessionName),
                   icon: Icon(
                     Icons.play_circle_outline,
-                    color: isDark ? Colors.white : colors.primary,
+                    color: context.isDark ? Colors.white : colors.primary,
                   ),
                   style: IconButton.styleFrom(
-                    backgroundColor: isDark ? const Color(0xFF222222) : colors.surfaceContainer,
+                    backgroundColor: context.surfaceLight,
                     padding: const EdgeInsets.all(8),
                   ),
                 ),

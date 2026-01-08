@@ -68,8 +68,6 @@ class AppConfig {
 
 /// 本地開發預設設定。
 const defaultAppConfig = AppConfig(
-  // baseUrl 不以 `/` 結尾，避免與 service path 拼接時產生 `//`
-  // 2026-01 起新版後端以 `/api/v1` 為前綴；舊版可能仍使用 `/v1`
   baseUrl: 'https://nycu-realsense-pose.sky1218.com/api/v1',
   // baseUrl: 'http://localhost:8100/api/v1',
   requestTimeout: Duration(seconds: 20),

@@ -194,8 +194,7 @@ class _SessionOverviewChartState extends ConsumerState<SessionOverviewChart> {
                                 color:
                                     stageDurationPalette[i %
                                         stageDurationPalette.length],
-                                isSelected:
-                                    filter.selectedStages.isEmpty ||
+                                isSelected: filter.selectedStages.isNotEmpty &&
                                     filter.selectedStages.contains(
                                       vm.stageLabels[i],
                                     ),
@@ -628,8 +627,14 @@ class _SessionOverviewChartState extends ConsumerState<SessionOverviewChart> {
         : lap.totalDurationSeconds;
 
     final isHighlighted = vm.isHighlightedByLapIndex[lap.lapIndex] ?? true;
-    // 選中圈永遠不變暗，避免互動上「選了但看不清」的割裂感
-    final dim = !isSelected && vm.dimNonMatching && !isHighlighted;
+    // 有開啟過濾時，選中圈也要變暗
+    final dim = vm.dimNonMatching && !isHighlighted;
+
+    // 判斷是否有開啟過濾（不是預設的 0-100）
+    final hasFilter = vm.highlightRangePct.start > 0 ||
+        vm.highlightRangePct.end < 100;
+    // 有過濾時不顯示選中框框
+    final showSelectedBorder = isSelected && !hasFilter;
 
     var acc = 0.0;
     final items = <BarChartRodStackItem>[];
@@ -670,11 +675,11 @@ class _SessionOverviewChartState extends ConsumerState<SessionOverviewChart> {
       ), // 只圓上面
       rodStackItems: items,
       backDrawRodData: BackgroundBarChartRodData(
-        show: isSelected,
+        show: showSelectedBorder,
         color: colors.primary.withValues(alpha: 0.1),
-        toY: chartMaxY, // Highlight background full height
+        toY: chartMaxY,
       ),
-      borderSide: isSelected
+      borderSide: showSelectedBorder
           ? BorderSide(color: colors.primary, width: 2)
           : BorderSide.none,
     );

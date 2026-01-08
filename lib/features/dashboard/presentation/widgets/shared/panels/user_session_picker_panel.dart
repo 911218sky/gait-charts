@@ -991,10 +991,9 @@ class _SimpleSessionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
-    final isDark = context.isDark;
 
     return Material(
-      color: isDark ? const Color(0xFF111111) : colors.surfaceContainerLow,
+      color: context.surfaceDark,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: colors.outlineVariant),
@@ -1012,9 +1011,7 @@ class _SimpleSessionCard extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF222222)
-                      : colors.surfaceContainerHighest.withValues(alpha: 0.1),
+                  color: context.surfaceLight,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 alignment: Alignment.center,

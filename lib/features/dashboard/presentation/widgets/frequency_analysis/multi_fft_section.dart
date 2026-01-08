@@ -262,15 +262,14 @@ class _ComponentPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
-    final isDark = context.isDark;
     final accent = DashboardAccentColors.of(context);
 
     final bgColor = selected
         ? accent.success.withValues(alpha: 0.12)
-        : (isDark ? const Color(0xFF111111) : colors.surfaceContainerLow);
+        : context.surfaceDark;
     final borderColor = selected
         ? accent.success
-        : (isDark ? const Color(0xFF444444) : colors.outlineVariant);
+        : (context.isDark ? const Color(0xFF444444) : colors.outlineVariant);
     final fgColor = selected
         ? colors.onSurface
         : colors.onSurfaceVariant;

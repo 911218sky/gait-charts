@@ -227,8 +227,6 @@ class _VideoPlaybackViewState extends ConsumerState<VideoPlaybackView> {
   }
 
   Widget _buildCompactToolbar(BuildContext context, ColorScheme colors) {
-    final isDark = context.isDark;
-    
     return SizedBox(
       height: 52,
       child: Row(
@@ -236,9 +234,7 @@ class _VideoPlaybackViewState extends ConsumerState<VideoPlaybackView> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: isDark 
-                    ? const Color(0xFF111111)
-                    : colors.surfaceContainerLow,
+                color: context.surfaceDark,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: colors.outlineVariant),
               ),
