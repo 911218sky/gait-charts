@@ -307,6 +307,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 監聽全域 session 變化，同步更新本地 controller
+    ref.listen<String>(activeSessionProvider, (previous, next) {
+      if (_sessionController.text != next) {
+        _sessionController.text = next;
+      }
+    });
+
     // 寬螢幕時使用側邊欄
     final useRail = context.useDashboardSidebar;
     // 只要不是側邊欄模式，就使用「主 tab + 更多」的底部導覽（避免 9 個 tab 擠爆）。

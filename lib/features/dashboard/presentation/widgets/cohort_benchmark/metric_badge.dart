@@ -43,7 +43,7 @@ class MetricBadge extends StatelessWidget {
 
     final (bgColor, borderColor, textColor, icon) = status != null
         ? _getStatusStyle(status!, colors, palette)
-        : _getPerformanceStyle(performanceVariant!, colors);
+        : _getPerformanceStyle(performanceVariant!, colors, palette);
 
     final iconSize = switch (size) {
       MetricBadgeSize.small => 12.0,
@@ -132,6 +132,7 @@ class MetricBadge extends StatelessWidget {
   (Color, Color, Color, IconData) _getPerformanceStyle(
     MetricPerformanceVariant variant,
     ColorScheme colors,
+    DashboardBenchmarkCompareColors palette,
   ) {
     return switch (variant) {
       MetricPerformanceVariant.better => (
@@ -146,10 +147,11 @@ class MetricBadge extends StatelessWidget {
           colors.error,
           Icons.trending_down_rounded,
         ),
+      // 正常狀態使用 inRange 顏色，與 status 模式一致
       MetricPerformanceVariant.normal => (
-          colors.outline.withValues(alpha: 0.15),
-          colors.outline.withValues(alpha: 0.4),
-          colors.outline,
+          palette.inRange.withValues(alpha: 0.15),
+          palette.inRange.withValues(alpha: 0.4),
+          palette.inRange,
           Icons.remove_rounded,
         ),
     };

@@ -5,7 +5,7 @@ import 'package:gait_charts/core/network/client/api_client.dart';
 import 'package:gait_charts/core/network/errors/api_exception.dart';
 import 'package:gait_charts/features/dashboard/domain/models/dashboard_overview.dart';
 
-/// 影像姿態萃取相關 API
+/// 影像姿態擷取相關 API
 class ExtractionApiService {
   ExtractionApiService(this._dio);
 
@@ -14,10 +14,10 @@ class ExtractionApiService {
   /// Realsense Pose Extractor 相關 API 的 base endpoint。
   static const _kRealsensePoseExtractorEndpoint = '/realsense-pose-extractor';
 
-  /// 觸發姿態萃取（建立背景 job，`POST /realsense-pose-extractor/extract`）。
+  /// 觸發姿態擷取（建立背景 job，`POST /realsense-pose-extractor/extract`）。
   static const _extractEndpoint = '$_kRealsensePoseExtractorEndpoint/extract';
 
-  /// 查詢姿態萃取 job 狀態（`GET /realsense-pose-extractor/extract/jobs/{job_id}`）。
+  /// 查詢姿態擷取 job 狀態（`GET /realsense-pose-extractor/extract/jobs/{job_id}`）。
   static const _extractJobEndpoint =
       '$_kRealsensePoseExtractorEndpoint/extract/jobs';
 

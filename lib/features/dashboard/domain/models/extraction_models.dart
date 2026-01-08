@@ -1,6 +1,6 @@
 part of 'dashboard_overview.dart';
 
-/// 控制姿態萃取流程的參數設定。
+/// 控制姿態擷取流程的參數設定。
 class ExtractConfig {
   const ExtractConfig({
     this.force = false,
@@ -14,7 +14,7 @@ class ExtractConfig {
     this.saveVideo = true,
   });
 
-  final bool force; // 是否強制重新萃取
+  final bool force; // 是否強制重新擷取
   final int skipFrames; // 跳過幀數
   final int maxFrames; // 最大幀數
   final int modelComplexity; // 模型複雜度
@@ -62,7 +62,7 @@ class ExtractConfig {
   };
 }
 
-/// 代表一次萃取作業的結果資料。
+/// 代表一次擷取作業的結果資料。
 class ExtractResult {
   const ExtractResult({
     required this.sessionName,

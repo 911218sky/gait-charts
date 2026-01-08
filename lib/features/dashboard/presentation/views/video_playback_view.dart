@@ -354,7 +354,7 @@ class _VideoPlaybackViewState extends ConsumerState<VideoPlaybackView> {
             colors,
             icon: Icons.videocam_off_outlined,
             title: '此 Session 未生成影片',
-            message: '此 Session 在萃取時未啟用影片儲存',
+            message: '此 Session 在擷取時未啟用影片儲存',
           );
         }
         

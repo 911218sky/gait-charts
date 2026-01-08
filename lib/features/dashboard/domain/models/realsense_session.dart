@@ -261,7 +261,7 @@ class VideoAvailability {
 
   final String sessionName;
   
-  /// 是否有影片路徑（session 在萃取時有啟用 save_video）。
+  /// 是否有影片路徑（session 在擷取時有啟用 save_video）。
   final bool hasVideo;
   
   /// 影片檔案是否實際存在於磁碟上。

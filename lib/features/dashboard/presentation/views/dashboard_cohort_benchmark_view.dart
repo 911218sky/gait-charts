@@ -27,7 +27,6 @@ class DashboardCohortBenchmarkView extends ConsumerStatefulWidget {
 
 class _DashboardCohortBenchmarkViewState
     extends ConsumerState<DashboardCohortBenchmarkView> {
-  String? _selectedCohortName;
   bool _isCalculating = false;
   bool _isDeletingBenchmarks = false;
   CohortBenchmarkCompareBasis _compareBasis = CohortBenchmarkCompareBasis.p50;
@@ -41,7 +40,9 @@ class _DashboardCohortBenchmarkViewState
   @override
   void initState() {
     super.initState();
-    _sessionNameController = TextEditingController();
+    // 初始化時從全域 activeSessionProvider 取得目前 session
+    final initialSession = ref.read(activeSessionProvider);
+    _sessionNameController = TextEditingController(text: initialSession);
   }
 
   @override
@@ -69,7 +70,7 @@ class _DashboardCohortBenchmarkViewState
   }
 
   Future<void> _calculateSelected({required bool force}) async {
-    final cohortName = _selectedCohortName?.trim() ?? '';
+    final cohortName = ref.read(selectedCohortProvider)?.trim() ?? '';
     if (cohortName.isEmpty) {
       _toast('請先選擇 cohort', variant: DashboardToastVariant.warning);
       return;
@@ -118,8 +119,9 @@ class _DashboardCohortBenchmarkViewState
             ? DashboardToastVariant.success
             : DashboardToastVariant.danger,
       );
-      if (_selectedCohortName == name) {
-        setState(() => _selectedCohortName = null);
+      // 如果刪除的是目前選擇的 cohort，清除選擇
+      if (ref.read(selectedCohortProvider) == name) {
+        ref.read(selectedCohortProvider.notifier).select(null);
       }
       ref.invalidate(cohortBenchmarkListProvider);
     } catch (e) {
@@ -133,7 +135,10 @@ class _DashboardCohortBenchmarkViewState
   Future<void> _browseSessions() async {
     final selected = await SessionPickerDialog.show(context);
     if (!mounted || selected == null || selected.trim().isEmpty) return;
-    _sessionNameController.text = selected.trim();
+    final sessionName = selected.trim();
+    _sessionNameController.text = sessionName;
+    // 同步更新全域 activeSessionProvider
+    ref.read(activeSessionProvider.notifier).setSession(sessionName);
   }
 
   Future<void> _copyToClipboard(String label, String value) async {
@@ -188,6 +193,13 @@ class _DashboardCohortBenchmarkViewState
 
     final compareAsync = ref.watch(cohortBenchmarkCompareControllerProvider);
 
+    // 監聽全域 session 變化，同步更新本地 controller
+    ref.listen<String>(activeSessionProvider, (previous, next) {
+      if (_sessionNameController.text != next) {
+        _sessionNameController.text = next;
+      }
+    });
+
     // compare API 失敗時：只跳通知，不用錯誤卡片蓋住整個內容
     ref.listen<AsyncValue<CohortBenchmarkCompareResponse?>>(
       cohortBenchmarkCompareControllerProvider,
@@ -211,7 +223,7 @@ class _DashboardCohortBenchmarkViewState
       },
     );
 
-    final selectedCohortName = _selectedCohortName?.trim();
+    final selectedCohortName = ref.watch(selectedCohortProvider)?.trim();
     final hasSelectedCohort =
         selectedCohortName != null && selectedCohortName.isNotEmpty;
 
@@ -243,16 +255,16 @@ class _DashboardCohortBenchmarkViewState
                   ),
                   const SizedBox(height: 24),
                   CohortConfigurationSection(
-                    selectedCohortName: _selectedCohortName,
+                    selectedCohortName: selectedCohortName,
                     sessionController: _sessionNameController,
                     isCalculating: _isCalculating,
                     compareIsLoading: compareAsync.isLoading,
                     hasSelectedCohort: hasSelectedCohort,
                     onCohortChanged: (val) =>
-                        setState(() => _selectedCohortName = val),
+                        ref.read(selectedCohortProvider.notifier).select(val),
                     onCalculate: (force) => _calculateSelected(force: force),
                     onCompare: () =>
-                        _submitCompare(cohortName: _selectedCohortName),
+                        _submitCompare(cohortName: selectedCohortName),
                     onBrowseSessions: _browseSessions,
                     onManageCohorts: _showManageCohortsDialog,
                   ),
