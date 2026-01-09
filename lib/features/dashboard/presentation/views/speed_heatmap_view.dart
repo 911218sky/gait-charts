@@ -6,6 +6,7 @@ import 'package:gait_charts/core/providers/request_failure_store.dart';
 import 'package:gait_charts/core/widgets/async_request_view.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/shared/layout/dashboard_page_padding.dart';
+import 'package:gait_charts/features/dashboard/presentation/widgets/shared/layout/scrollable_chart_container.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/speed_heatmap/speed_heatmap_chart.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/speed_heatmap/speed_heatmap_header.dart';
 
@@ -67,10 +68,13 @@ class _SpeedHeatmapViewState extends ConsumerState<SpeedHeatmapView> {
           isEmpty: (response) => response.isEmpty,
           emptyBuilder: (_) => const _SpeedHeatmapEmpty(),
           onRetry: () => ref.invalidate(speedHeatmapProvider),
-          dataBuilder: (context, response) => SpeedHeatmapChart(
-            response: response,
-            vmin: vmin,
-            vmax: vmax,
+          dataBuilder: (context, response) => ScrollableChartContainer(
+            minWidth: 700,
+            child: SpeedHeatmapChart(
+              response: response,
+              vmin: vmin,
+              vmax: vmax,
+            ),
           ),
         ),
       ],

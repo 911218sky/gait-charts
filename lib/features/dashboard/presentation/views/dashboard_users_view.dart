@@ -405,10 +405,8 @@ class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
     // 設置 active session 以便影片播放頁面可以載入
     ref.read(activeSessionProvider.notifier).setSession(session.sessionName);
     ref.invalidate(stageDurationsProvider);
-    _toast(
-      '已切換到 ${session.sessionName}，請前往「影片播放」頁面觀看',
-      variant: DashboardToastVariant.success,
-    );
+    // 切換到影片播放頁面
+    ref.read(dashboardSectionProvider.notifier).select(DashboardSection.videoPlayback);
   }
 
   Future<void> _openUserBrowser({String? initialQuery}) async {
@@ -427,58 +425,107 @@ class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
   Widget build(BuildContext context) {
     final userState = ref.watch(userDetailProvider);
     final textTheme = context.textTheme;
+    final isMobile = context.isMobile;
 
     return ListView(
       padding: dashboardPagePadding(context),
       children: [
         Card(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(isMobile ? 16 : 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '使用者 / 個案管理',
-                            style: textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            '建立使用者、更新基本資料，並將 session(bag) 綁定到指定個案。',
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: textTheme.bodyMedium?.color
-                                  ?.withValues(alpha: 0.72),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    OutlinedButton.icon(
-                      onPressed: userState.isBusy
-                          ? null
-                          : () => BatchDeleteUsersDialog.show(
-                                context,
-                                initialQuery: _userNameController.text.trim(),
+                // 標題區塊
+                if (!isMobile)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '使用者 / 個案管理',
+                              style: textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w700,
                               ),
-                      icon: const Icon(Icons.delete_sweep_outlined),
-                      label: const Text('批量刪除'),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              '建立使用者、更新基本資料，並將 session(bag) 綁定到指定個案。',
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: textTheme.bodyMedium?.color
+                                    ?.withValues(alpha: 0.72),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      OutlinedButton.icon(
+                        onPressed: userState.isBusy
+                            ? null
+                            : () => BatchDeleteUsersDialog.show(
+                                  context,
+                                  initialQuery: _userNameController.text.trim(),
+                                ),
+                        icon: const Icon(Icons.delete_sweep_outlined),
+                        label: const Text('批量刪除'),
+                      ),
+                      const SizedBox(width: 12),
+                      FilledButton.icon(
+                        onPressed: userState.isBusy ? null : _openCreateDialog,
+                        icon: const Icon(Icons.person_add_alt_1_outlined),
+                        label: const Text('新增使用者'),
+                      ),
+                    ],
+                  )
+                else ...[
+                  Text(
+                    '使用者 / 個案管理',
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
-                    const SizedBox(width: 12),
-                    FilledButton.icon(
-                      onPressed: userState.isBusy ? null : _openCreateDialog,
-                      icon: const Icon(Icons.person_add_alt_1_outlined),
-                      label: const Text('新增使用者'),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '建立使用者、更新基本資料，並將 session(bag) 綁定到指定個案。',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: textTheme.bodyMedium?.color?.withValues(alpha: 0.72),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: userState.isBusy
+                              ? null
+                              : () => BatchDeleteUsersDialog.show(
+                                    context,
+                                    initialQuery: _userNameController.text.trim(),
+                                  ),
+                          icon: const Icon(Icons.delete_sweep_outlined, size: 18),
+                          label: const Text('批量刪除'),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(0, 44),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: userState.isBusy ? null : _openCreateDialog,
+                          icon: const Icon(Icons.person_add_alt_1_outlined, size: 18),
+                          label: const Text('新增'),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size(0, 44),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 20),
                 LayoutBuilder(
                   builder: (context, constraints) {
@@ -491,13 +538,17 @@ class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         SizedBox(
-                          width: maxWidth.clamp(0.0, 340.0),
+                          width: isMobile 
+                              ? constraints.maxWidth 
+                              : maxWidth.clamp(0.0, 340.0),
                           child: UserAutocompleteField(
                             controller: _userNameController,
                             labelText: '使用者名稱',
-                            hintText: '輸入姓名後按 Enter，或用右側按鈕瀏覽/預覽',
+                            hintText: isMobile 
+                                ? '輸入姓名' 
+                                : '輸入姓名後按 Enter，或用右側按鈕瀏覽/預覽',
                             helperText: _selectedUserCode == null
-                                ? '提示：輸入可縮小範圍；點選下拉建議可直接載入。'
+                                ? (isMobile ? null : '提示：輸入可縮小範圍；點選下拉建議可直接載入。')
                                 : 'user_code：$_selectedUserCode',
                             maxSuggestions: 10,
                             onSubmitted: (_) => _loadUser(),
@@ -519,7 +570,7 @@ class _DashboardUsersViewState extends ConsumerState<DashboardUsersView> {
                               initialQuery: _userNameController.text.trim(),
                             ),
                       icon: const Icon(Icons.search),
-                      label: const Text('瀏覽 / 預覽使用者'),
+                      label: Text(isMobile ? '瀏覽' : '瀏覽 / 預覽使用者'),
                     ),
                     FilledButton.icon(
                       onPressed: userState.isBusy ? null : _loadUser,

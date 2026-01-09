@@ -36,7 +36,7 @@ class CohortUsersDialog extends ConsumerWidget {
                   children: [
                     title,
                     const SizedBox(height: 12),
-                    const Center(child: CircularProgressIndicator(value: 0.25)),
+                    const Center(child: CircularProgressIndicator()),
                   ],
                 );
               }

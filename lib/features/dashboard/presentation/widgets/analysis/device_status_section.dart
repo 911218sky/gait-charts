@@ -9,10 +9,59 @@ class StageDetailsSection extends StatelessWidget {
 
   final LapSummary lap; // 單圈摘要
 
+  /// 建立時間與距離統計容器
+  Widget _buildStatsContainer(ColorScheme colors, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: colors.onSurface.withValues(alpha: isDark ? 0.08 : 0.04),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: colors.onSurface.withValues(alpha: isDark ? 0.2 : 0.12),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.timer_outlined, size: 18, color: colors.onSurfaceVariant),
+          const SizedBox(width: 8),
+          Text(
+            _formatDuration(lap.totalDurationSeconds),
+            style: TextStyle(
+              color: colors.onSurface,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'RobotoMono',
+            ),
+          ),
+          const SizedBox(width: 16),
+          Container(
+            width: 1,
+            height: 14,
+            color: colors.onSurface.withValues(alpha: 0.12),
+          ),
+          const SizedBox(width: 16),
+          Icon(Icons.straighten, size: 18, color: colors.onSurfaceVariant),
+          const SizedBox(width: 8),
+          Text(
+            '${lap.totalDistanceMeters.toStringAsFixed(2)} m',
+            style: TextStyle(
+              color: colors.onSurface,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'RobotoMono',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
     final isDark = context.isDark;
+    final isNarrow = MediaQuery.sizeOf(context).width < 450;
 
     return Card(
       child: Padding(
@@ -20,68 +69,29 @@ class StageDetailsSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Text(
-                  'Lap ${lap.lapIndex} 詳細資訊',
-                  style: context.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+            // 窄螢幕時垂直堆疊，寬螢幕時水平排列
+            if (isNarrow) ...[
+              Text(
+                'Lap ${lap.lapIndex} 詳細資訊',
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colors.onSurface.withValues(alpha: isDark ? 0.08 : 0.04),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: colors.onSurface.withValues(alpha: isDark ? 0.2 : 0.12),
+              ),
+              const SizedBox(height: 12),
+              _buildStatsContainer(colors, isDark),
+            ] else
+              Row(
+                children: [
+                  Text(
+                    'Lap ${lap.lapIndex} 詳細資訊',
+                    style: context.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.timer_outlined,
-                        size: 18,
-                        color: colors.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        _formatDuration(lap.totalDurationSeconds),
-                        style: TextStyle(
-                          color: colors.onSurface,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'RobotoMono',
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Container(width: 1, height: 14, color: colors.onSurface.withValues(alpha: 0.12)),
-                      const SizedBox(width: 16),
-                      Icon(
-                        Icons.straighten,
-                        size: 18,
-                        color: colors.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${lap.totalDistanceMeters.toStringAsFixed(2)} m',
-                        style: TextStyle(
-                          color: colors.onSurface,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'RobotoMono',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+                  const Spacer(),
+                  _buildStatsContainer(colors, isDark),
+                ],
+              ),
             const SizedBox(height: 16),
             Table(
               columnWidths: const {

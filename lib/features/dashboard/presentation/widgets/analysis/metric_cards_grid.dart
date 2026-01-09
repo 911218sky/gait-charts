@@ -42,12 +42,14 @@ class MetricCardsGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
-        // 根據寬度決定欄數
+        // 根據寬度決定欄數：手機版 1 欄，平板 2-3 欄，桌面 4 欄
         final columns = availableWidth > 1000
             ? 4
             : availableWidth > 720
             ? 3
-            : 2;
+            : availableWidth > 500
+            ? 2
+            : 1;
 
         final cards = [
           _MetricCard(

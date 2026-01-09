@@ -49,6 +49,7 @@ class CohortConfigurationSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colorScheme;
+    final isMobile = context.isMobile;
 
 
     // 取得選中 cohort 的使用者數量（用於顯示）
@@ -62,7 +63,7 @@ class CohortConfigurationSection extends ConsumerWidget {
     );
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(isMobile ? 16 : 20),
       decoration: BoxDecoration(
         color: context.surfaceDeepest,
         borderRadius: BorderRadius.circular(12),
@@ -71,9 +72,9 @@ class CohortConfigurationSection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildCohortRow(context, colors, selectedCohortStat),
+          _buildCohortRow(context, colors, selectedCohortStat, isMobile),
           const SizedBox(height: 16),
-          _buildSessionRow(context, colors),
+          _buildSessionRow(context, colors, isMobile),
         ],
       ),
     );
@@ -83,29 +84,45 @@ class CohortConfigurationSection extends ConsumerWidget {
     BuildContext context,
     ColorScheme colors,
     UserCohortStat selectedCohortStat,
+    bool isMobile,
   ) {
+    final cohortSelector = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '基準族群 (Cohort)',
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: colors.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _buildCohortSelector(context, colors, selectedCohortStat),
+      ],
+    );
+
+    final actionButtons = _buildActionButtons(context, colors, isMobile);
+
+    // 手機版：垂直堆疊
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          cohortSelector,
+          const SizedBox(height: 12),
+          actionButtons,
+        ],
+      );
+    }
+
+    // 桌面版：水平排列
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '基準族群 (Cohort)',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _buildCohortSelector(context, colors, selectedCohortStat),
-            ],
-          ),
-        ),
+        Expanded(child: cohortSelector),
         const SizedBox(width: 12),
-        _buildActionButtons(context, colors),
+        actionButtons,
       ],
     );
   }
@@ -190,99 +207,137 @@ class CohortConfigurationSection extends ConsumerWidget {
   }
 
 
-  Widget _buildActionButtons(BuildContext context, ColorScheme colors) {
-    return Row(
-      children: [
-        OutlinedButton.icon(
-          onPressed: onManageCohorts,
-          icon: const Icon(Icons.settings_outlined, size: 16),
-          label: const Text('管理'),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: colors.onSurface,
-            side: BorderSide(color: colors.outlineVariant),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+  Widget _buildActionButtons(BuildContext context, ColorScheme colors, bool isMobile) {
+    final buttons = [
+      OutlinedButton.icon(
+        onPressed: onManageCohorts,
+        icon: const Icon(Icons.settings_outlined, size: 16),
+        label: const Text('管理'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: colors.onSurface,
+          side: BorderSide(color: colors.outlineVariant),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
-        const SizedBox(width: 8),
-        FilledButton.icon(
-          onPressed: hasSelectedCohort && !isCalculating
-              ? () => onCalculate(true)
-              : null,
-          style: FilledButton.styleFrom(
-            backgroundColor: context.surfaceMedium,
-            foregroundColor: colors.onSurface,
-            disabledBackgroundColor: context.surfaceDark,
-            disabledForegroundColor: colors.onSurface.withValues(alpha: 0.3),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+      ),
+      FilledButton.icon(
+        onPressed: hasSelectedCohort && !isCalculating
+            ? () => onCalculate(true)
+            : null,
+        style: FilledButton.styleFrom(
+          backgroundColor: context.surfaceMedium,
+          foregroundColor: colors.onSurface,
+          disabledBackgroundColor: context.surfaceDark,
+          disabledForegroundColor: colors.onSurface.withValues(alpha: 0.3),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
           ),
-          icon: isCalculating
-              ? const SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.refresh_rounded, size: 16),
-          label: const Text('重新計算'),
         ),
-      ],
-    );
+        icon: isCalculating
+            ? const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.refresh_rounded, size: 16),
+        label: const Text('重新計算'),
+      ),
+    ];
+
+    // 手機版：使用 Wrap 讓按鈕自動換行
+    if (isMobile) {
+      return Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        alignment: WrapAlignment.end,
+        children: buttons,
+      );
+    }
+
+    return Row(children: [
+      buttons[0],
+      const SizedBox(width: 8),
+      buttons[1],
+    ]);
   }
 
-  Widget _buildSessionRow(BuildContext context, ColorScheme colors) {
+  Widget _buildSessionRow(BuildContext context, ColorScheme colors, bool isMobile) {
+    final sessionField = SessionAutocompleteField(
+      controller: sessionController,
+      labelText: '比對 Session',
+      hintText: '輸入 session_name',
+      onSubmitted: (_) => onCompare(),
+    );
+
+    final browseButton = OutlinedButton(
+      onPressed: onBrowseSessions,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: colors.onSurface,
+        side: BorderSide(color: colors.outlineVariant),
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: const Icon(Icons.list, size: 20),
+    );
+
+    final analyzeButton = FilledButton.icon(
+      onPressed: compareIsLoading ? null : onCompare,
+      icon: compareIsLoading
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            )
+          : const Icon(Icons.arrow_forward, size: 18),
+      label: const Text('開始分析'),
+      style: FilledButton.styleFrom(
+        padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 16 : 24,
+          vertical: 18,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+
+    // 手機版：垂直堆疊
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          sessionField,
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.end,
+            children: [browseButton, analyzeButton],
+          ),
+        ],
+      );
+    }
+
+    // 桌面版：水平排列
     return Row(
       children: [
-        Expanded(
-          child: SessionAutocompleteField(
-            controller: sessionController,
-            labelText: '比對 Session',
-            hintText: '輸入 session_name',
-            onSubmitted: (_) => onCompare(),
-          ),
-        ),
+        Expanded(child: sessionField),
         const SizedBox(width: 8),
-        OutlinedButton(
-          onPressed: onBrowseSessions,
-          style: OutlinedButton.styleFrom(
-            foregroundColor: colors.onSurface,
-            side: BorderSide(color: colors.outlineVariant),
-            padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          child: const Icon(Icons.list, size: 20),
-        ),
+        browseButton,
         const SizedBox(width: 12),
-        FilledButton.icon(
-          onPressed: compareIsLoading ? null : onCompare,
-          icon: compareIsLoading
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : const Icon(Icons.arrow_forward, size: 18),
-          label: const Text('開始分析'),
-          style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+        analyzeButton,
       ],
     );
   }

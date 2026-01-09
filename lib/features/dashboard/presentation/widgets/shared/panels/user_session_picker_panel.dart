@@ -8,6 +8,7 @@ import 'package:gait_charts/features/dashboard/data/dashboard_repository.dart';
 import 'package:gait_charts/features/dashboard/domain/models/user_profile.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/users/users_state.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/shared/fields/user_autocomplete_field.dart';
+import 'package:gait_charts/features/dashboard/presentation/widgets/shared/panels/user_session_picker/user_session_picker.dart';
 import 'package:gait_charts/features/dashboard/presentation/widgets/users/delete_user_dialog.dart';
 
 /// 在 Session Picker 內嵌的「依使用者挑選 session」面板。
@@ -822,7 +823,7 @@ class _UserSessionPickerPanelState
                   ),
                 ),
               )
-            : _UserSessionsPreview(
+            : UserSessionsPreview(
                 detail: _preview!,
                 onSelectSession: widget.onSelectSession,
                 onDeleteUser: _isDeleteUserBusy ? null : _deleteSelectedUser,
@@ -853,206 +854,6 @@ class _UserSessionPickerPanelState
                 ),
         ),
       ],
-    );
-  }
-}
-
-class _UserSessionsPreview extends StatelessWidget {
-  const _UserSessionsPreview({
-    required this.detail,
-    required this.onSelectSession,
-    required this.onDeleteUser,
-  });
-
-  final UserDetailResponse detail;
-  final ValueChanged<String> onSelectSession;
-  final VoidCallback? onDeleteUser;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colorScheme;
-    final sessions = detail.sessions;
-    final cohort = detail.user.cohort;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                detail.user.name,
-                style: context.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: colors.outlineVariant),
-              ),
-              child: Text(
-                '${sessions.length} sessions',
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              tooltip: '刪除使用者',
-              onPressed: onDeleteUser,
-              icon: const Icon(Icons.delete_outline),
-              style: IconButton.styleFrom(
-                foregroundColor: DashboardAccentColors.of(context).danger,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        SelectableText(
-          detail.user.userCode,
-          style: context.textTheme.bodySmall?.copyWith(
-            color: colors.onSurfaceVariant,
-            fontFamily: 'monospace',
-          ),
-        ),
-        if (cohort.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final c in cohort) Chip(label: Text(c)),
-            ],
-          ),
-        ],
-        const SizedBox(height: 12),
-        if (sessions.isEmpty)
-          Expanded(
-            child: Center(
-              child: Text(
-                '此使用者尚未綁定任何 session(bag)。',
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-            ),
-          )
-        else
-          Expanded(
-            child: GridView.builder(
-              padding: EdgeInsets.zero,
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 320,
-                mainAxisExtent: 160,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-              ),
-              itemCount: sessions.length,
-              itemBuilder: (context, index) {
-                final item = sessions[index];
-                return _SimpleSessionCard(
-                  sessionName: item.sessionName,
-                  bagPath: item.bagPath,
-                  bagFilename: item.bagFilename,
-                  createdAt: item.createdAt,
-                  onTap: () => onSelectSession(item.sessionName),
-                );
-              },
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _SimpleSessionCard extends StatelessWidget {
-  const _SimpleSessionCard({
-    required this.sessionName,
-    required this.bagPath,
-    required this.bagFilename,
-    required this.createdAt,
-    required this.onTap,
-  });
-
-  final String sessionName;
-  final String bagPath;
-  /// BAG 檔案名稱。
-  final String bagFilename;
-  final DateTime createdAt;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colorScheme;
-
-    return Material(
-      color: context.surfaceDark,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: colors.outlineVariant),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        hoverColor: colors.onSurface.withValues(alpha: 0.05),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: context.surfaceLight,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.description_outlined,
-                  size: 18,
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                sessionName,
-                style: context.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                bagFilename,
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: colors.onSurfaceVariant,
-                  height: 1.4,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const Spacer(),
-              Text(
-                '${createdAt.toLocal()}'.split('.').first,
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: colors.onSurfaceVariant.withValues(alpha: 0.7),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
