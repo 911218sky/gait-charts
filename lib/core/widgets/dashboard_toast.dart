@@ -252,7 +252,7 @@ class _DashboardToastOverlayState extends State<_DashboardToastOverlay>
       DashboardToastVariant.info => colors.primary,
     };
 
-    final background = isDark ? const Color(0xFF111111) : Colors.white;
+    final background = context.surfaceDark;
     final borderColor = isDark
         ? Colors.white.withValues(alpha: 0.08)
         : Colors.black.withValues(alpha: 0.06);

@@ -17,8 +17,7 @@ class AsyncLoadingView extends StatelessWidget {
           const SizedBox(
             height: 56,
             width: 56,
-            // 使用 determinate indicator 避免 widget_test pumpAndSettle timeout
-            child: CircularProgressIndicator(value: 0.25),
+            child: CircularProgressIndicator(),
           ),
           // 如果有提示文字則顯示
           if (label != null) ...[

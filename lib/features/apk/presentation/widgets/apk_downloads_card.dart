@@ -496,6 +496,7 @@ class _ApkFileRow extends ConsumerWidget {
               backgroundColor: isDark ? Colors.white : colors.primary,
               foregroundColor: isDark ? Colors.black : colors.onPrimary,
               padding: EdgeInsets.all(isProminent ? 12 : 8),
+              minimumSize: const Size(44, 44),
             ),
             icon: Icon(
               Icons.download_rounded, 
@@ -578,12 +579,18 @@ class _ApkDownloadsDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colorScheme;
     final isDark = colors.brightness == Brightness.dark;
+    final isMobile = context.isMobile;
 
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
+      // 手機版：接近全螢幕
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 16 : 40,
+        vertical: isMobile ? 24 : 40,
+      ),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 720),
+        constraints: BoxConstraints(maxWidth: isMobile ? double.infinity : 720),
         child: Container(
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF0A0A0A) : colors.surface,
@@ -599,7 +606,7 @@ class _ApkDownloadsDialog extends ConsumerWidget {
               ),
             ],
           ),
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(isMobile ? 12 : 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -621,6 +628,9 @@ class _ApkDownloadsDialog extends ConsumerWidget {
                     tooltip: '關閉',
                     onPressed: () => context.navigator.pop(),
                     icon: Icon(Icons.close, color: colors.onSurfaceVariant),
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size(44, 44),
+                    ),
                   ),
                 ],
               ),

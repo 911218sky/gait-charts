@@ -40,46 +40,101 @@ class _MinutelyCadenceBarsCardState extends State<MinutelyCadenceBarsCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            // 響應式 header：窄螢幕時垂直堆疊
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow = constraints.maxWidth < 500;
+                
+                if (isNarrow) {
+                  // 窄螢幕：垂直佈局
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '每分鐘步頻 / 步長',
+                        style: context.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '觀察復健過程中各分鐘的步頻、步長與步數變化',
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: Colors.white60,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // 使用 SingleChildScrollView 讓 SegmentedButton 可水平捲動
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: SegmentedButton<_MinutelyMetric>(
+                          segments: _MinutelyMetric.values
+                              .map(
+                                (metric) => ButtonSegment<_MinutelyMetric>(
+                                  value: metric,
+                                  label: Text(metric.label),
+                                ),
+                              )
+                              .toList(),
+                          selected: {_selectedMetric},
+                          onSelectionChanged: (value) {
+                            final metric = value.first;
+                            if (_selectedMetric != metric) {
+                              setState(() => _selectedMetric = metric);
+                            }
+                          },
+                          showSelectedIcon: false,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                
+                // 寬螢幕：水平佈局
+                return Row(
                   children: [
-                    Text(
-                      '每分鐘步頻 / 步長',
-                      style: context.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '每分鐘步頻 / 步長',
+                            style: context.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '觀察復健過程中各分鐘的步頻、步長與步數變化',
+                            style: context.textTheme.bodySmall?.copyWith(
+                              color: Colors.white60,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '觀察復健過程中各分鐘的步頻、步長與步數變化',
-                      style: context.textTheme.bodySmall?.copyWith(
-                        color: Colors.white60,
-                      ),
+                    const SizedBox(width: 16),
+                    SegmentedButton<_MinutelyMetric>(
+                      segments: _MinutelyMetric.values
+                          .map(
+                            (metric) => ButtonSegment<_MinutelyMetric>(
+                              value: metric,
+                              label: Text(metric.label),
+                            ),
+                          )
+                          .toList(),
+                      selected: {_selectedMetric},
+                      onSelectionChanged: (value) {
+                        final metric = value.first;
+                        if (_selectedMetric != metric) {
+                          setState(() => _selectedMetric = metric);
+                        }
+                      },
+                      showSelectedIcon: false,
                     ),
                   ],
-                ),
-                const Spacer(),
-                SegmentedButton<_MinutelyMetric>(
-                  segments: _MinutelyMetric.values
-                      .map(
-                        (metric) => ButtonSegment<_MinutelyMetric>(
-                          value: metric,
-                          label: Text(metric.label),
-                        ),
-                      )
-                      .toList(),
-                  selected: {_selectedMetric},
-                  onSelectionChanged: (value) {
-                    final metric = value.first;
-                    if (_selectedMetric != metric) {
-                      setState(() => _selectedMetric = metric);
-                    }
-                  },
-                  showSelectedIcon: false,
-                ),
-              ],
+                );
+              },
             ),
             const SizedBox(height: 24),
             SizedBox(
