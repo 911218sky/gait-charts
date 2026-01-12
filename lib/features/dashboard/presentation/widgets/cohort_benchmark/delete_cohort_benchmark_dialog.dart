@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gait_charts/app/theme.dart';
+import 'package:gait_charts/core/widgets/initial_avatar.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// 刪除單一 Cohort Benchmark 的確認對話框。
@@ -22,10 +23,9 @@ class DeleteCohortBenchmarkDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
     final accent = DashboardAccentColors.of(context);
-    final isDark = context.isDark;
 
     return Dialog(
-      backgroundColor: isDark ? const Color(0xFF0A0A0A) : colors.surfaceContainer,
+      backgroundColor: context.surfaceDeepest,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: colors.outlineVariant),
@@ -77,35 +77,16 @@ class DeleteCohortBenchmarkDialog extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF111111)
-                    : colors.surfaceContainerLow,
+                color: context.surfaceDark,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: colors.outlineVariant),
               ),
               child: Row(
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF1A1A1A)
-                          : colors.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: Text(
-                        cohortName.isNotEmpty
-                            ? cohortName[0].toUpperCase()
-                            : '?',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: colors.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
+                  InitialAvatar(
+                    text: cohortName,
+                    size: 44,
+                    borderRadius: 10,
                   ),
                   const SizedBox(width: 16),
                   Expanded(

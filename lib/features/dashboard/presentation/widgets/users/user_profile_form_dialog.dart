@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gait_charts/app/theme.dart';
-import 'package:gait_charts/core/widgets/app_dropdown.dart';
 import 'package:gait_charts/core/widgets/app_tooltip.dart';
 import 'package:gait_charts/features/dashboard/domain/models/user_profile.dart';
 import 'package:gait_charts/features/dashboard/presentation/providers/users/users_state.dart';
+import 'package:gait_charts/features/dashboard/presentation/widgets/users/user_profile_form/widgets/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -794,7 +794,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                   children: [
                     Expanded(
                       flex: 4,
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: 'User Code',
                         controller: _userCodeController,
                         enabled: !_isEdit,
@@ -805,7 +805,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                     const SizedBox(width: 16),
                     Expanded(
                       flex: 6,
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '姓名',
                         controller: _nameController,
                         labelStyle: labelStyle,
@@ -818,7 +818,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                 const SizedBox(height: 20),
 
                 // Row 1.5: Cohort tags
-                _CohortEditor(
+                CohortEditor(
                   labelStyle: labelStyle,
                   items: _cohortTags,
                   onChanged: (next) => setState(() {
@@ -834,7 +834,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '性別',
                         controller: _sexController,
                         labelStyle: labelStyle,
@@ -842,7 +842,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '年齡',
                         controller: _ageController,
                         keyboardType: TextInputType.number,
@@ -859,7 +859,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '教育程度',
                         controller: _educationController,
                         labelStyle: labelStyle,
@@ -874,7 +874,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '身高 (cm)',
                         controller: _heightController,
                         keyboardType: const TextInputType.numberWithOptions(
@@ -893,7 +893,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '體重 (kg)',
                         controller: _weightController,
                         keyboardType: const TextInputType.numberWithOptions(
@@ -912,7 +912,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: 'BMI',
                         controller: _bmiController,
                         keyboardType: const TextInputType.numberWithOptions(
@@ -935,7 +935,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                 const SizedBox(height: 20),
 
                 // Row 4: Date
-                _VercelInput(
+                VercelInput(
                   label: '收案日期',
                   controller: _dateDisplayController,
                   readOnly: true,
@@ -951,7 +951,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                 const SizedBox(height: 20),
 
                 // Row 5: Notes
-                _VercelInput(
+                VercelInput(
                   label: '備註',
                   controller: _notesController,
                   maxLines: 4,
@@ -960,7 +960,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
 
                 const SizedBox(height: 24),
 
-                _SectionCard(
+                SectionCard(
                   title: '診斷資訊',
                   subtitle: '診斷、患側與發病時間（可不填）',
                   initiallyExpanded: true,
@@ -969,7 +969,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: _VercelInput(
+                          child: VercelInput(
                             label: '診斷',
                             controller: _diagDiagnosisController,
                             labelStyle: labelStyle,
@@ -977,7 +977,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: _VercelInput(
+                          child: VercelInput(
                             label: '類型',
                             controller: _diagDiagnosisTypeController,
                             labelStyle: labelStyle,
@@ -990,7 +990,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: _VercelInput(
+                          child: VercelInput(
                             label: '部位',
                             controller: _diagBodyPartController,
                             labelStyle: labelStyle,
@@ -998,7 +998,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: _VercelInput(
+                          child: VercelInput(
                             label: '疾病/疫病',
                             controller: _diagDiseaseController,
                             labelStyle: labelStyle,
@@ -1011,7 +1011,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: _VercelInput(
+                          child: VercelInput(
                             label: '患側',
                             controller: _diagAffectedSideController,
                             labelStyle: labelStyle,
@@ -1020,14 +1020,14 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: _VercelInput(
+                          child: VercelInput(
                             label: '發病日期',
                             controller: _diagOnsetDateController,
                             readOnly: true,
                             onTap: _pickDiagnosisOnsetDate,
                             placeholder: '未指定',
                             labelStyle: labelStyle,
-                            suffixIcon:                         _DateSuffixIcon(
+                            suffixIcon:                         DateSuffixIcon(
                           hasValue: _diagOnsetDate != null,
                           onClear: () => setState(() {
                             _diagOnsetDate = null;
@@ -1043,14 +1043,14 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                   spacing: 16,
                   runSpacing: 16,
                   children: [
-                    _TriBoolField(
+                    TriBoolField(
                       label: '是否復發',
                       value: _diagIsRecurrent,
                       onChanged: (v) =>
                           setState(() => _diagIsRecurrent = v),
                       labelStyle: labelStyle,
                     ),
-                    _TriBoolField(
+                    TriBoolField(
                       label: '是否失語症',
                       value: _diagHasAphasia,
                       onChanged: (v) => setState(() => _diagHasAphasia = v),
@@ -1071,12 +1071,12 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
 
             const SizedBox(height: 16),
 
-            _SectionCard(
+            SectionCard(
               title: '症狀',
               subtitle: '疼痛、跌倒與目前困擾症狀（可不填）',
               initiallyExpanded: true,
               children: [
-                _ChipsEditor(
+                ChipsEditor(
                   label: '目前困擾症狀',
                   labelStyle: labelStyle,
                   hintText: '輸入後按 Enter 或「加入」',
@@ -1088,7 +1088,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '疼痛部位',
                         controller: _painLocationController,
                         labelStyle: labelStyle,
@@ -1096,7 +1096,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '疼痛側別',
                         controller: _painSideController,
                         labelStyle: labelStyle,
@@ -1110,7 +1110,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '疼痛分數 (0-10)',
                         controller: _painScoreController,
                         labelStyle: labelStyle,
@@ -1127,7 +1127,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '跌倒次數',
                         controller: _fallCountController,
                         labelStyle: labelStyle,
@@ -1145,14 +1145,14 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                _VercelInput(
+                VercelInput(
                   label: '最近一次跌倒日期',
                   controller: _lastFallDateController,
                   readOnly: true,
                   onTap: _pickLastFallDate,
                   placeholder: '未指定',
                   labelStyle: labelStyle,
-                  suffixIcon: _DateSuffixIcon(
+                  suffixIcon: DateSuffixIcon(
                     hasValue: _lastFallDate != null,
                     onClear: () => setState(() {
                       _lastFallDate = null;
@@ -1177,32 +1177,32 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
 
             const SizedBox(height: 16),
 
-            _SectionCard(
+            SectionCard(
               title: '醫療史 / 用藥 / 復健',
               subtitle: '檢查、手術、治療與用藥（可不填）',
               children: [
-                _VercelInput(
+                VercelInput(
                   label: '相關醫學檢查',
                   controller: _relevantExamsController,
                   labelStyle: labelStyle,
                   maxLines: 2,
                 ),
                 const SizedBox(height: 16),
-                _VercelInput(
+                VercelInput(
                   label: '檢查備註',
                   controller: _examNotesController,
                   labelStyle: labelStyle,
                   maxLines: 2,
                 ),
                 const SizedBox(height: 16),
-                _VercelInput(
+                VercelInput(
                   label: '其它疾病史',
                   controller: _otherDiseasesController,
                   labelStyle: labelStyle,
                   maxLines: 2,
                 ),
                 const SizedBox(height: 16),
-                _ChipsEditor(
+                ChipsEditor(
                   label: '目前服用藥物',
                   labelStyle: labelStyle,
                   hintText: '輸入藥名後按 Enter 或「加入」',
@@ -1215,7 +1215,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                   runSpacing: 16,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    _TriBoolField(
+                    TriBoolField(
                       label: '是否規律服藥',
                       value: _medicationAdherence,
                       onChanged: (v) =>
@@ -1224,7 +1224,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                     ),
                     SizedBox(
                       width: 320,
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '家族病史',
                         controller: _familyHistoryController,
                         labelStyle: labelStyle,
@@ -1249,7 +1249,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                   runSpacing: 16,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    _TriBoolField(
+                    TriBoolField(
                       label: '是否有開刀史',
                       value: _hadSurgery,
                       onChanged: (v) => setState(() {
@@ -1264,7 +1264,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                     ),
                     SizedBox(
                       width: 240,
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '開刀日期',
                         controller: _surgeryDateController,
                         readOnly: true,
@@ -1276,7 +1276,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                             ? '未指定'
                             : '（需先設定為「是」）',
                         labelStyle: labelStyle,
-                        suffixIcon: _DateSuffixIcon(
+                        suffixIcon: DateSuffixIcon(
                           hasValue: _surgeryDate != null,
                           enabled: _hadSurgery == true,
                           onClear: () => setState(() {
@@ -1288,7 +1288,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                     ),
                     SizedBox(
                       width: 320,
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '開刀類型',
                         controller: _surgeryTypeController,
                         enabled: _hadSurgery == true,
@@ -1314,21 +1314,21 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                   runSpacing: 16,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    _TriBoolField(
+                    TriBoolField(
                       label: 'PT',
                       value: _pt,
                       onChanged: (v) => setState(() => _pt = v),
                       labelStyle: labelStyle,
                       width: 140,
                     ),
-                    _TriBoolField(
+                    TriBoolField(
                       label: 'OT',
                       value: _ot,
                       onChanged: (v) => setState(() => _ot = v),
                       labelStyle: labelStyle,
                       width: 140,
                     ),
-                    _TriBoolField(
+                    TriBoolField(
                       label: 'ST',
                       value: _st,
                       onChanged: (v) => setState(() => _st = v),
@@ -1337,7 +1337,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                     ),
                     SizedBox(
                       width: 320,
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '自費項目',
                         controller: _selfPayItemsController,
                         labelStyle: labelStyle,
@@ -1345,7 +1345,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                     ),
                     SizedBox(
                       width: 320,
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '其它項目',
                         controller: _otherItemsController,
                         labelStyle: labelStyle,
@@ -1366,7 +1366,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
 
             const SizedBox(height: 16),
 
-            _SectionCard(
+            SectionCard(
               title: '生活習慣',
               subtitle: '抽菸喝酒、運動與健康檢查（可不填）',
               children: [
@@ -1375,28 +1375,28 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                   runSpacing: 16,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    _TriBoolField(
+                    TriBoolField(
                       label: '定期健康檢查',
                       value: _regularHealthCheck,
                       onChanged: (v) =>
                           setState(() => _regularHealthCheck = v),
                       labelStyle: labelStyle,
                     ),
-                    _TriBoolField(
+                    TriBoolField(
                       label: '定期牙科檢查',
                       value: _regularDentalCheck,
                       onChanged: (v) =>
                           setState(() => _regularDentalCheck = v),
                       labelStyle: labelStyle,
                     ),
-                    _TriBoolField(
+                    TriBoolField(
                       label: '抽菸',
                       value: _smoking,
                       onChanged: (v) => setState(() => _smoking = v),
                       labelStyle: labelStyle,
                       width: 140,
                     ),
-                    _TriBoolField(
+                    TriBoolField(
                       label: '喝酒',
                       value: _drinking,
                       onChanged: (v) => setState(() {
@@ -1416,7 +1416,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '喝酒頻率',
                         controller: _drinkingFrequencyController,
                         enabled: _drinking == true,
@@ -1428,7 +1428,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '喝酒量',
                         controller: _drinkingAmountController,
                         enabled: _drinking == true,
@@ -1441,14 +1441,14 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                _VercelInput(
+                VercelInput(
                   label: '運動習慣（簡述）',
                   controller: _exerciseHabitController,
                   labelStyle: labelStyle,
                   maxLines: 2,
                 ),
                 const SizedBox(height: 16),
-                _ChipsEditor(
+                ChipsEditor(
                   label: '運動類型',
                   labelStyle: labelStyle,
                   hintText: '例如：走路、游泳、瑜珈…',
@@ -1462,7 +1462,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                   runSpacing: 16,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    _TriBoolField(
+                    TriBoolField(
                       label: '費力運動 ≥10 分鐘',
                       value: _vigorous10min,
                       onChanged: (v) => setState(() {
@@ -1473,7 +1473,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                       }),
                       labelStyle: labelStyle,
                     ),
-                    _TriBoolField(
+                    TriBoolField(
                       label: '每週累積 ≥60 分鐘',
                       value: _vigorous60minPerWeek,
                       enabled: _vigorous10min == true,
@@ -1481,7 +1481,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                           setState(() => _vigorous60minPerWeek = v),
                       labelStyle: labelStyle,
                     ),
-                    _TriBoolField(
+                    TriBoolField(
                       label: '中等費力 ≥10 分鐘',
                       value: _moderate10min,
                       onChanged: (v) => setState(() {
@@ -1500,7 +1500,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '中等費力每週天數 (0-7)',
                         controller: _moderateDaysPerWeekController,
                         enabled: _moderate10min == true,
@@ -1518,7 +1518,7 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _VercelInput(
+                      child: VercelInput(
                         label: '中等費力每日分鐘',
                         controller: _moderateMinutesPerDayController,
                         enabled: _moderate10min == true,
@@ -1590,506 +1590,5 @@ class _UserProfileFormDialogState extends ConsumerState<UserProfileFormDialog> {
     ),
   ),
 );
-  }
-}
-
-class _CohortEditor extends StatelessWidget {
-  const _CohortEditor({
-    required this.labelStyle,
-    required this.items,
-    required this.onChanged,
-    required this.cohortsAsync,
-  });
-
-  final TextStyle labelStyle;
-  final List<String> items;
-  final ValueChanged<List<String>> onChanged;
-  final AsyncValue<UserCohortsResponse> cohortsAsync;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colorScheme;
-
-    final stats = cohortsAsync.maybeWhen(
-      data: (r) => r.cohorts,
-      orElse: () => const <UserCohortStat>[],
-    );
-    final suggested = [...stats]..sort((a, b) => b.userCount.compareTo(a.userCount));
-    final top = suggested.take(12).toList(growable: false);
-
-    void addCohort(String label) {
-      final v = label.trim();
-      if (v.isEmpty) return;
-      if (items.contains(v)) return;
-      onChanged([...items, v]);
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _ChipsEditor(
-          label: '族群 (cohort)',
-          labelStyle: labelStyle,
-          hintText: '輸入後按 Enter 或「加入」',
-          items: items,
-          onChanged: onChanged,
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Icon(
-              Icons.info_outline,
-              size: 14,
-              color: colors.onSurfaceVariant.withValues(alpha: 0.75),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                '可多選；若未指定，預設為「正常人」。',
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: colors.onSurfaceVariant.withValues(alpha: 0.75),
-                ),
-              ),
-            ),
-            if (cohortsAsync.isLoading)
-              const SizedBox(
-                width: 14,
-                height: 14,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-          ],
-        ),
-        if (top.isNotEmpty) ...[
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final s in top)
-                ActionChip(
-                  onPressed: () => addCohort(s.cohort),
-                  avatar: Icon(
-                    Icons.add_circle_outline,
-                    size: 18,
-                    color: colors.onSurfaceVariant,
-                  ),
-                  label: Text('${s.cohort} (${s.userCount})'),
-                ),
-            ],
-          ),
-        ],
-        if (cohortsAsync.hasError) ...[
-          const SizedBox(height: 8),
-          Text(
-            '（族群清單載入失敗：${cohortsAsync.error}）',
-            style: context.textTheme.bodySmall?.copyWith(
-              color: colors.error,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-/// 仿 Vercel 風格的輸入框元件：標籤在上方，輸入框簡潔。
-class _VercelInput extends StatelessWidget {
-  const _VercelInput({
-    required this.label,
-    required this.controller,
-    required this.labelStyle,
-    this.placeholder,
-    this.validator,
-    this.keyboardType,
-    this.enabled = true,
-    this.readOnly = false,
-    this.onTap,
-    this.maxLines = 1,
-    this.suffixIcon,
-  });
-
-  final String label;
-  final TextEditingController controller;
-  final TextStyle labelStyle;
-  final String? placeholder;
-  final FormFieldValidator<String>? validator;
-  final TextInputType? keyboardType;
-  final bool enabled;
-  final bool readOnly;
-  final VoidCallback? onTap;
-  final int maxLines;
-  final Widget? suffixIcon;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colorScheme;
-    final isDark = context.isDark;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: labelStyle),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          enabled: enabled,
-          readOnly: readOnly,
-          onTap: onTap,
-          validator: validator,
-          keyboardType: keyboardType,
-          maxLines: maxLines,
-          style: TextStyle(color: colors.onSurface, fontSize: 14),
-          cursorColor: colors.primary,
-          decoration: InputDecoration(
-            hintText: placeholder,
-            hintStyle: TextStyle(
-              color: colors.onSurfaceVariant.withValues(alpha: 0.5),
-              fontSize: 14,
-            ),
-            filled: true,
-            fillColor: isDark ? const Color(0xFF111111) : colors.surface,
-            hoverColor: Colors.transparent,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 12,
-            ),
-            suffixIcon: suffixIcon,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-              borderSide: BorderSide(color: colors.outlineVariant),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-              borderSide: BorderSide(color: colors.outlineVariant),
-            ),
-            disabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-              borderSide: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.5)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-              borderSide: BorderSide(color: colors.primary),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-              borderSide: BorderSide(color: colors.error),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-              borderSide: BorderSide(color: colors.error),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({
-    required this.title,
-    required this.subtitle,
-    required this.children,
-    this.initiallyExpanded = false,
-  });
-
-  final String title;
-  final String subtitle;
-  final List<Widget> children;
-  final bool initiallyExpanded;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colorScheme;
-    final isDark = context.isDark;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0D0D0D) : colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.fromBorderSide(
-          BorderSide(color: colors.outlineVariant),
-        ),
-      ),
-        child: Theme(
-          data: context.theme.copyWith(dividerColor: Colors.transparent),
-          child: ExpansionTile(
-          initiallyExpanded: initiallyExpanded,
-          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          title: Text(
-            title,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: colors.onSurface,
-            ),
-          ),
-          subtitle: Text(
-            subtitle,
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: colors.onSurfaceVariant,
-            ),
-          ),
-          iconColor: colors.onSurfaceVariant,
-          collapsedIconColor: colors.onSurfaceVariant,
-          children: children,
-        ),
-      ),
-    );
-  }
-}
-
-class _TriBoolField extends StatelessWidget {
-  const _TriBoolField({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-    required this.labelStyle,
-    this.width = 200,
-    this.enabled = true,
-  });
-
-  final String label;
-  final bool? value;
-  final ValueChanged<bool?> onChanged;
-  final TextStyle labelStyle;
-  final double width;
-  final bool enabled;
-
-  @override
-  Widget build(BuildContext context) {
-    final current = value == null
-        ? _TriBoolValue.unset
-        : (value! ? _TriBoolValue.yes : _TriBoolValue.no);
-
-    return SizedBox(
-      width: width,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: labelStyle),
-          const SizedBox(height: 8),
-          // 統一使用共用下拉組件，避免 DropdownButtonFormField 在淺色模式出現
-          // 「字太淡 / 選取藍底」等不符合 dashboard 風格的預設行為。
-          AppSelect<_TriBoolValue>(
-            value: current,
-            items: const [
-              _TriBoolValue.unset,
-              _TriBoolValue.yes,
-              _TriBoolValue.no,
-            ],
-            enabled: enabled,
-            itemLabelBuilder: (item) {
-              switch (item) {
-                case _TriBoolValue.unset:
-                  return '未設定';
-                case _TriBoolValue.yes:
-                  return '是';
-                case _TriBoolValue.no:
-                  return '否';
-              }
-            },
-            onChanged: enabled
-                ? (next) {
-                    switch (next) {
-                      case _TriBoolValue.unset:
-                        onChanged(null);
-                        break;
-                      case _TriBoolValue.yes:
-                        onChanged(true);
-                        break;
-                      case _TriBoolValue.no:
-                        onChanged(false);
-                        break;
-                    }
-                  }
-                : null,
-            menuWidth: const BoxConstraints(minWidth: 140, maxWidth: 220),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-enum _TriBoolValue { unset, yes, no }
-
-class _ChipsEditor extends StatefulWidget {
-  const _ChipsEditor({
-    required this.label,
-    required this.labelStyle,
-    required this.items,
-    required this.onChanged,
-    this.hintText,
-  });
-
-  final String label;
-  final TextStyle labelStyle;
-  final List<String> items;
-  final ValueChanged<List<String>> onChanged;
-  final String? hintText;
-
-  @override
-  State<_ChipsEditor> createState() => _ChipsEditorState();
-}
-
-class _ChipsEditorState extends State<_ChipsEditor> {
-  final TextEditingController _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _addFromInput() {
-    final raw = _controller.text.trim();
-    if (raw.isEmpty) {
-      return;
-    }
-    final parts = raw
-        .split(RegExp(r'[,、]'))
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty);
-    final next = [...widget.items];
-    for (final part in parts) {
-      if (next.contains(part)) {
-        continue;
-      }
-      next.add(part);
-    }
-    widget.onChanged(next);
-    _controller.clear();
-    setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colorScheme;
-    final isDark = context.isDark;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(widget.label, style: widget.labelStyle),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final item in widget.items)
-              InputChip(
-                label: Text(item),
-                labelStyle: TextStyle(color: colors.onSurface, fontSize: 13),
-                onDeleted: () {
-                  widget.onChanged(
-                    widget.items
-                        .where((e) => e != item)
-                        .toList(growable: false),
-                  );
-                },
-              ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _controller,
-                style: TextStyle(color: colors.onSurface, fontSize: 14),
-                cursorColor: colors.primary,
-                decoration: InputDecoration(
-                  hintText: widget.hintText,
-                  hintStyle: TextStyle(
-                    color: colors.onSurfaceVariant.withValues(alpha: 0.5),
-                    fontSize: 14,
-                  ),
-                  filled: true,
-                  fillColor: isDark ? const Color(0xFF111111) : colors.surface,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 12,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6),
-                    borderSide: BorderSide(color: colors.outlineVariant),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6),
-                    borderSide: BorderSide(color: colors.outlineVariant),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6),
-                    borderSide: BorderSide(color: colors.primary),
-                  ),
-                ),
-                onSubmitted: (_) => _addFromInput(),
-              ),
-            ),
-            const SizedBox(width: 12),
-            FilledButton(
-              onPressed: _addFromInput,
-              style: FilledButton.styleFrom(
-                backgroundColor: colors.primary,
-                foregroundColor: colors.onPrimary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 14,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-              child: const Text('加入'),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _DateSuffixIcon extends StatelessWidget {
-  const _DateSuffixIcon({
-    required this.hasValue,
-    required this.onClear,
-    this.enabled = true,
-  });
-
-  final bool hasValue;
-  final VoidCallback onClear;
-  final bool enabled;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colorScheme;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (hasValue)
-          AppTooltip(
-            message: '清除日期',
-            child: IconButton(
-              onPressed: enabled ? onClear : null,
-              icon: Icon(Icons.close, size: 16, color: colors.onSurfaceVariant),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-            ),
-          ),
-        const SizedBox(width: 4),
-        Icon(
-          Icons.calendar_today,
-          size: 16,
-          color: enabled ? colors.onSurfaceVariant : colors.outlineVariant,
-        ),
-        const SizedBox(width: 8),
-      ],
-    );
   }
 }

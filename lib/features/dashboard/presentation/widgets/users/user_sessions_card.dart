@@ -276,135 +276,230 @@ class _UserSessionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
-    final isDark = context.isDark;
     final accent = DashboardAccentColors.of(context);
+    final isMobile = context.isMobile;
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF111111) : colors.surfaceContainerLow,
+        color: context.surfaceDark,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: colors.outlineVariant),
       ),
-      padding: const EdgeInsets.all(16),
-      child: Row(
+      padding: EdgeInsets.all(isMobile ? 12 : 16),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Icon Box
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF222222) : colors.surfaceContainerHighest.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.description_outlined,
-              size: 20,
-              color: colors.onSurfaceVariant,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Icon Box
+              Container(
+                width: isMobile ? 36 : 40,
+                height: isMobile ? 36 : 40,
+                decoration: BoxDecoration(
+                  color: context.surfaceLight,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.description_outlined,
+                  size: isMobile ? 18 : 20,
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.sessionName,
+                      style: GoogleFonts.inter(
+                        fontSize: isMobile ? 14 : 15,
+                        fontWeight: FontWeight.w700,
+                        color: colors.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // 顯示 bag 檔案名稱
+                    Text(
+                      item.bagFilename,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: colors.onSurfaceVariant,
+                        height: 1.4,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatDate(item.createdAt),
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: colors.onSurfaceVariant.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // 桌面版：垂直排列的操作按鈕
+              if (!isMobile) ...[
+                const SizedBox(width: 12),
+                Column(
+                  children: [
+                    if (item.hasVideo && onPlayVideo != null) ...[
+                      AppTooltip(
+                        message: '播放影片',
+                        child: IconButton(
+                          onPressed: isBusy ? null : onPlayVideo,
+                          icon: Icon(
+                            Icons.play_circle_filled,
+                            color: context.isDark ? Colors.white : colors.primary,
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: context.surfaceLight,
+                            padding: const EdgeInsets.all(8),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    AppTooltip(
+                      message: '設為目前 Session',
+                      child: IconButton(
+                        onPressed: isBusy ? null : () => onActivateSession(item.sessionName),
+                        icon: Icon(
+                          Icons.play_circle_outline,
+                          color: context.isDark ? Colors.white : colors.primary,
+                        ),
+                        style: IconButton.styleFrom(
+                          backgroundColor: context.surfaceLight,
+                          padding: const EdgeInsets.all(8),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    AppTooltip(
+                      message: '解除綁定（保留 session）',
+                      child: IconButton(
+                        onPressed: isBusy ? null : () => onUnlink(item),
+                        icon: Icon(
+                          Icons.link_off_rounded,
+                          size: 18,
+                          color: accent.danger,
+                        ),
+                        style: IconButton.styleFrom(
+                          backgroundColor: accent.danger.withValues(alpha: 0.12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    AppTooltip(
+                      message: '複製 bag_path',
+                      child: IconButton(
+                        onPressed: isBusy ? null : () => onCopy('bag_path', item.bagPath),
+                        icon: Icon(
+                          Icons.copy_rounded,
+                          size: 18,
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
           ),
-          const SizedBox(width: 16),
-          // Content
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // 手機版：水平排列的操作按鈕（放在底部）
+          if (isMobile) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                Text(
-                  item.sessionName,
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: colors.onSurface,
+                if (item.hasVideo && onPlayVideo != null)
+                  _MobileActionButton(
+                    onPressed: isBusy ? null : onPlayVideo,
+                    icon: Icons.play_circle_filled,
+                    label: '播放',
+                    color: context.isDark ? Colors.white : colors.primary,
+                    backgroundColor: context.surfaceLight,
                   ),
+                _MobileActionButton(
+                  onPressed: isBusy ? null : () => onActivateSession(item.sessionName),
+                  icon: Icons.play_circle_outline,
+                  label: '設為目前',
+                  color: context.isDark ? Colors.white : colors.primary,
+                  backgroundColor: context.surfaceLight,
                 ),
-                const SizedBox(height: 4),
-                // 顯示 bag 檔案名稱
-                Text(
-                  item.bagFilename,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: colors.onSurfaceVariant,
-                    height: 1.4,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                _MobileActionButton(
+                  onPressed: isBusy ? null : () => onUnlink(item),
+                  icon: Icons.link_off_rounded,
+                  label: '解除綁定',
+                  color: accent.danger,
+                  backgroundColor: accent.danger.withValues(alpha: 0.12),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  _formatDate(item.createdAt),
-                  style: GoogleFonts.inter(
-                    fontSize: 11,
-                    color: colors.onSurfaceVariant.withValues(alpha: 0.7),
-                  ),
+                _MobileActionButton(
+                  onPressed: isBusy ? null : () => onCopy('bag_path', item.bagPath),
+                  icon: Icons.copy_rounded,
+                  label: '複製路徑',
+                  color: colors.onSurfaceVariant,
+                  backgroundColor: context.surfaceLight,
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 12),
-          // Actions
-          Column(
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// 手機版操作按鈕：帶文字標籤，觸控區域至少 44px。
+class _MobileActionButton extends StatelessWidget {
+  const _MobileActionButton({
+    required this.onPressed,
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.backgroundColor,
+  });
+
+  final VoidCallback? onPressed;
+  final IconData icon;
+  final String label;
+  final Color color;
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: backgroundColor,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 44),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              if (item.hasVideo && onPlayVideo != null)
-                AppTooltip(
-                  message: '播放影片',
-                  child: IconButton(
-                    onPressed: isBusy ? null : onPlayVideo,
-                    icon: Icon(
-                      Icons.play_circle_filled,
-                      color: isDark ? Colors.white : colors.primary,
-                    ),
-                    style: IconButton.styleFrom(
-                      backgroundColor: isDark ? const Color(0xFF222222) : colors.surfaceContainer,
-                      padding: const EdgeInsets.all(8),
-                    ),
-                  ),
-                ),
-              if (item.hasVideo && onPlayVideo != null) const SizedBox(height: 8),
-              AppTooltip(
-                message: '設為目前 Session',
-                child: IconButton(
-                  onPressed: isBusy ? null : () => onActivateSession(item.sessionName),
-                  icon: Icon(
-                    Icons.play_circle_outline,
-                    color: isDark ? Colors.white : colors.primary,
-                  ),
-                  style: IconButton.styleFrom(
-                    backgroundColor: isDark ? const Color(0xFF222222) : colors.surfaceContainer,
-                    padding: const EdgeInsets.all(8),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              AppTooltip(
-                message: '解除綁定（保留 session）',
-                child: IconButton(
-                  onPressed: isBusy ? null : () => onUnlink(item),
-                  icon: Icon(
-                    Icons.link_off_rounded,
-                    size: 18,
-                    color: accent.danger,
-                  ),
-                  style: IconButton.styleFrom(
-                    backgroundColor: accent.danger.withValues(alpha: 0.12),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              AppTooltip(
-                message: '複製 bag_path',
-                child: IconButton(
-                  onPressed: isBusy ? null : () => onCopy('bag_path', item.bagPath),
-                  icon: Icon(
-                    Icons.copy_rounded,
-                    size: 18,
-                    color: colors.onSurfaceVariant,
-                  ),
+              Icon(icon, size: 18, color: color),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: color,
                 ),
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -135,7 +135,7 @@ class DashboardRepository {
     );
   }
 
-  /// 觸發姿態萃取流程。
+  /// 觸發姿態擷取流程。
   Future<ExtractResult> triggerExtraction({
     String? bagId,
     String? bagPath,

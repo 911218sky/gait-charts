@@ -26,6 +26,7 @@ class VideoPlayerControls extends StatelessWidget {
     required this.onVolumeChanged,
     required this.onSpeedChanged,
     this.onFullscreen,
+    this.compact = false,
     super.key,
   });
 
@@ -35,6 +36,8 @@ class VideoPlayerControls extends StatelessWidget {
   final ValueChanged<double> onVolumeChanged;
   final ValueChanged<double> onSpeedChanged;
   final VoidCallback? onFullscreen;
+  /// 是否使用緊湊模式（手機版）。
+  final bool compact;
 
   String _formatDuration(Duration d) {
     final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
@@ -50,6 +53,98 @@ class VideoPlayerControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
     
+    // 緊湊模式（手機版）
+    if (compact) {
+      return Container(
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.transparent,
+              _VideoControlColors.gradientEnd,
+            ],
+            stops: [0.0, 0.4],
+          ),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 進度條
+              SizedBox(
+                height: 16,
+                child: SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    trackHeight: 3,
+                    activeTrackColor: colors.primary,
+                    inactiveTrackColor: _VideoControlColors.foreground.withValues(alpha: 0.3),
+                    thumbColor: colors.primary,
+                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
+                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                    trackShape: _CustomTrackShape(),
+                  ),
+                  child: Slider(
+                    value: state.progress,
+                    onChanged: state.isInitialized
+                        ? (value) {
+                            final newPosition = Duration(
+                              milliseconds:
+                                  (value * state.duration.inMilliseconds).round(),
+                            );
+                            onSeek(newPosition);
+                          }
+                        : null,
+                  ),
+                ),
+              ),
+              
+              // 控制按鈕列（緊湊版）
+              Row(
+                children: [
+                  // 播放/暫停
+                  SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: IconButton(
+                      onPressed: state.isInitialized ? onPlayPause : null,
+                      icon: Icon(
+                        state.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                        color: _VideoControlColors.foreground,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                  
+                  // 時間顯示
+                  Text(
+                    '${_formatDuration(state.position)} / ${_formatDuration(state.duration)}',
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: _VideoControlColors.foregroundMuted,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                      fontWeight: FontWeight.w500,
+                      fontSize: 11,
+                    ),
+                  ),
+                  
+                  const Spacer(),
+                  
+                  // 播放速度（緊湊版）
+                  _CompactSpeedSelector(
+                    currentSpeed: state.playbackSpeed,
+                    onSpeedChanged: onSpeedChanged,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    // 標準模式
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       decoration: const BoxDecoration(
@@ -244,6 +339,64 @@ class _SpeedSelector extends StatelessWidget {
             const SizedBox(width: 4),
             const Icon(Icons.arrow_drop_up, size: 16, color: _VideoControlColors.foreground),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 緊湊版播放速度選擇器（手機版）。
+class _CompactSpeedSelector extends StatelessWidget {
+  const _CompactSpeedSelector({
+    required this.currentSpeed,
+    required this.onSpeedChanged,
+  });
+
+  final double currentSpeed;
+  final ValueChanged<double> onSpeedChanged;
+
+  static const _speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<double>(
+      initialValue: currentSpeed,
+      onSelected: onSpeedChanged,
+      tooltip: '播放速度',
+      constraints: const BoxConstraints(minWidth: 80),
+      position: PopupMenuPosition.over,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      color: Colors.black.withValues(alpha: 0.9),
+      itemBuilder: (context) => _speeds.map((speed) {
+        final isSelected = speed == currentSpeed;
+        return PopupMenuItem<double>(
+          value: speed,
+          height: 40,
+          child: Text(
+            speed == 1.0 ? '1x' : '${speed}x',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            ),
+          ),
+        );
+      }).toList(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: _VideoControlColors.controlBackground,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          currentSpeed == 1.0 ? '1x' : '${currentSpeed}x',
+          style: const TextStyle(
+            color: _VideoControlColors.foreground,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );

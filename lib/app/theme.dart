@@ -780,3 +780,38 @@ class DashboardHeatmapPalette extends ThemeExtension<DashboardHeatmapPalette> {
     );
   }
 }
+
+
+// ─────────────────────────────────────────────────────────────
+// Dashboard Surface Colors Extension
+// ─────────────────────────────────────────────────────────────
+
+/// 深色模式下的 surface 顏色層級。
+///
+/// 用於統一管理深色模式下常用的背景色，避免在各處硬編碼顏色值。
+/// 使用方式：`context.surfaceDeepest`、`context.surfaceDark`、`context.surfaceMedium`
+extension DashboardSurfaceColors on BuildContext {
+  /// 最深背景色（Dialog、主容器背景）。
+  /// 深色模式：0xFF0A0A0A，淺色模式：surfaceContainer
+  Color get surfaceDeepest => isDark 
+      ? const Color(0xFF0A0A0A) 
+      : colorScheme.surfaceContainer;
+
+  /// 深色背景（卡片、輸入框、列表項）。
+  /// 深色模式：0xFF111111，淺色模式：surfaceContainerLow
+  Color get surfaceDark => isDark 
+      ? const Color(0xFF111111) 
+      : colorScheme.surfaceContainerLow;
+
+  /// 中等背景（Icon 容器、次要按鈕、hover 狀態）。
+  /// 深色模式：0xFF1A1A1A，淺色模式：surfaceContainerHighest
+  Color get surfaceMedium => isDark 
+      ? const Color(0xFF1A1A1A) 
+      : colorScheme.surfaceContainerHighest;
+
+  /// 淺色背景（分隔線、禁用狀態）。
+  /// 深色模式：0xFF222222，淺色模式：surfaceContainerHighest with alpha
+  Color get surfaceLight => isDark 
+      ? const Color(0xFF222222) 
+      : colorScheme.surfaceContainerHighest;
+}
