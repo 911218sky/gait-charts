@@ -99,13 +99,11 @@ Summary of changes since v1.3.0:
 | Branch | Purpose |
 |--------|---------|
 | `main` | Production-ready releases |
-| `develop` | Integration branch for features |
-| `feature/*` | New feature development |
-| `fix/*` | Bug fixes |
+| `develop` | Development and integration branch |
 
 ## Merge Strategy
 
-1. Develop features on `develop` branch
+1. Develop on `develop` branch
 2. Squash related commits into meaningful groups before merging to `main`
 3. Use `--no-ff` merge to preserve branch history
 4. Tag releases on `main` with semantic versioning (e.g., `v1.3.0`)
