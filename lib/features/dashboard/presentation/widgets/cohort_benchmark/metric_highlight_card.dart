@@ -56,6 +56,7 @@ class MetricHighlightCard extends StatelessWidget {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Header: 標籤 + 狀態標籤
               Row(
@@ -67,27 +68,33 @@ class MetricHighlightCard extends StatelessWidget {
                         color: colors.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   MetricStatusBadge(
                     status: status,
                     label: _statusLabel(status),
-                    size: MetricStatusBadgeSize.small,
+                    size: MetricBadgeSize.small,
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               // 數值顯示
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Text(
-                    value,
-                    style: context.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      fontFamily: 'monospace',
-                      color: statusColor,
+                  Flexible(
+                    child: Text(
+                      value,
+                      style: context.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontFamily: 'monospace',
+                        color: statusColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -101,7 +108,7 @@ class MetricHighlightCard extends StatelessWidget {
                 ],
               ),
               if (percentile != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Row(
                   children: [
                     Icon(
@@ -110,26 +117,30 @@ class MetricHighlightCard extends StatelessWidget {
                       color: colors.onSurfaceVariant,
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      '百分位：${percentile!.toStringAsFixed(1)}%',
-                      style: context.textTheme.bodySmall?.copyWith(
-                        color: colors.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
+                    Expanded(
+                      child: Text(
+                        '百分位：${percentile!.toStringAsFixed(1)}%',
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: colors.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
               ],
               if (performanceLabel != null && performanceVariant != null) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 MetricPerformanceBadge(
                   label: performanceLabel!,
                   variant: performanceVariant!,
-                  size: MetricStatusBadgeSize.small,
+                  size: MetricBadgeSize.small,
                 ),
               ],
               if (subtitle != null) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 Text(
                   subtitle!,
                   style: context.textTheme.bodySmall?.copyWith(
