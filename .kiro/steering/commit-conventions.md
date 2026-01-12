@@ -108,6 +108,78 @@ Summary of changes since v1.3.0:
 3. Use `--no-ff` merge to preserve branch history
 4. Tag releases on `main` with semantic versioning (e.g., `v1.3.0`)
 
+## Version Tagging
+
+Follow [Semantic Versioning](https://semver.org/) (SemVer) for release tags.
+
+### Version Format
+
+```
+vMAJOR.MINOR.PATCH
+```
+
+| Version | When to Increment |
+|---------|-------------------|
+| **MAJOR** (v2.0.0) | Breaking changes, incompatible API changes |
+| **MINOR** (v1.1.0) | New features, backward-compatible |
+| **PATCH** (v1.0.1) | Bug fixes, backward-compatible |
+
+### Tag Format
+
+```bash
+git tag -a v1.0.0 -m "🚀 release: Version 1.0.0 - Description"
+```
+
+### Tag Message Format
+
+```
+🚀 release: Version X.Y.Z - Brief description
+
+Major changes:
+- Feature 1
+- Feature 2
+- Bug fix 3
+```
+
+### Examples
+
+**Major Release (Breaking Changes)**
+```bash
+git tag -a v2.0.0 -m "🚀 release: Version 2.0.0 - Major architecture refactor
+
+Breaking changes:
+- Redesigned API endpoints
+- Updated authentication flow
+- Removed deprecated features"
+```
+
+**Minor Release (New Features)**
+```bash
+git tag -a v1.1.0 -m "🚀 release: Version 1.1.0 - Add cohort benchmark feature
+
+New features:
+- Cohort benchmark analysis
+- User cohort management
+- Trajectory heatmap visualization"
+```
+
+**Patch Release (Bug Fixes)**
+```bash
+git tag -a v1.0.1 -m "🚀 release: Version 1.0.1 - Bug fixes
+
+Fixes:
+- Fix video player state management
+- Fix session filter dropdown
+- Fix CI/CD workflow issues"
+```
+
+### Release Workflow
+
+1. Merge all changes to `main` from `develop`
+2. Create annotated tag on `main` branch
+3. Push tag to remote: `git push origin v1.0.0`
+4. GitHub Actions will automatically build and deploy
+
 ## Pre-Commit Checklist
 
 - [ ] Commit message follows format
@@ -115,3 +187,11 @@ Summary of changes since v1.3.0:
 - [ ] Scope accurately reflects changed area
 - [ ] Body explains significant changes (if needed)
 - [ ] All commits in English
+
+## Pre-Release Checklist
+
+- [ ] All tests passing
+- [ ] Version number follows SemVer
+- [ ] Tag message describes changes clearly
+- [ ] CHANGELOG updated (if applicable)
+- [ ] Documentation updated
