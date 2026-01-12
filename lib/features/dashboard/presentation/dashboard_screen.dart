@@ -37,28 +37,8 @@ class DashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-/// 定義儀表板的主視圖分區。
-enum _DashboardSection {
-  analysis,
-  cohortBenchmark,
-  perLapOffset,
-  speedHeatmap,
-  swingHeatmap,
-  trajectoryPlayback,
-  videoPlayback,
-  frequency,
-  yHeightDiff,
-  apkDownloads,
-  extraction,
-  sessionManagement,
-  users,
-  admins,
-}
-
 /// 管理儀表板導覽邏輯與 session 控制。
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  // 設定預設選擇的區塊
-  _DashboardSection _selectedSection = _DashboardSection.analysis;
   // 設定 session 控制器
   late final TextEditingController _sessionController;
   // 設定 stage 訂閱
@@ -111,10 +91,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   void _onSelectSection(
-    _DashboardSection next, {
+    DashboardSection next, {
     DashboardFeature? featureGate,
   }) {
-    if (next == _selectedSection) {
+    final current = ref.read(dashboardSectionProvider);
+    if (next == current) {
       return;
     }
 
@@ -130,7 +111,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       }
     }
 
-    setState(() => _selectedSection = next);
+    ref.read(dashboardSectionProvider.notifier).select(next);
   }
 
   // 載入指定的 Session 資料
@@ -182,6 +163,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       builder: (context) {
         final colors = context.colorScheme;
         final themeMode = ref.read(themeModeProvider);
+        final selectedSection = ref.read(dashboardSectionProvider);
 
         final itemsByGroup = <String, List<_DashboardNavItem>>{};
         for (final item in _navItems) {
@@ -233,7 +215,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         contentPadding: EdgeInsets.zero,
                         leading: Icon(item.icon),
                         title: Text(item.sidebarLabel),
-                        trailing: item.section == _selectedSection
+                        trailing: item.section == selectedSection
                             ? Icon(Icons.check, color: colors.primary)
                             : null,
                         onTap: () {
@@ -307,92 +289,102 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 監聯 dashboardSectionProvider 的變化
+    final selectedSection = ref.watch(dashboardSectionProvider);
+
+    // 監聽全域 session 變化，同步更新本地 controller
+    ref.listen<String>(activeSessionProvider, (previous, next) {
+      if (_sessionController.text != next) {
+        _sessionController.text = next;
+      }
+    });
+
     // 寬螢幕時使用側邊欄
     final useRail = context.useDashboardSidebar;
     // 只要不是側邊欄模式，就使用「主 tab + 更多」的底部導覽（避免 9 個 tab 擠爆）。
     final useCompactBottomNav = !useRail;
 
-    const compactSections = <_DashboardSection>[
-      _DashboardSection.analysis,
-      _DashboardSection.speedHeatmap,
-      _DashboardSection.swingHeatmap,
-      _DashboardSection.trajectoryPlayback,
+    const compactSections = <DashboardSection>[
+      DashboardSection.analysis,
+      DashboardSection.speedHeatmap,
+      DashboardSection.swingHeatmap,
+      DashboardSection.trajectoryPlayback,
     ];
     // 選擇的索引
     final selectedIndex = useCompactBottomNav
         ? () {
-            final idx = compactSections.indexOf(_selectedSection);
+            final idx = compactSections.indexOf(selectedSection);
             return idx >= 0 ? idx : compactSections.length;
           }()
-        : _navItems.indexWhere((it) => it.section == _selectedSection);
+        : _navItems.indexWhere((it) => it.section == selectedSection);
 
     final Widget content;
-    switch (_selectedSection) {
-      case _DashboardSection.analysis:
+    switch (selectedSection) {
+      case DashboardSection.analysis:
         content = DashboardAnalysisView(
           key: const ValueKey('analysis-view'),
           sessionController: _sessionController,
           onLoadSession: _loadSession,
         );
         break;
-      case _DashboardSection.cohortBenchmark:
+      case DashboardSection.cohortBenchmark:
         content = const DashboardCohortBenchmarkView(
           key: ValueKey('cohort-benchmark-view'),
         );
         break;
-      case _DashboardSection.perLapOffset:
+      case DashboardSection.perLapOffset:
         content = PerLapOffsetView(
           key: const ValueKey('per-lap-view'),
           sessionController: _sessionController,
           onLoadSession: _loadSession,
         );
         break;
-      case _DashboardSection.speedHeatmap:
+      case DashboardSection.speedHeatmap:
         content = SpeedHeatmapView(
           key: const ValueKey('speed-heatmap-view'),
           sessionController: _sessionController,
           onLoadSession: _loadSession,
         );
         break;
-      case _DashboardSection.swingHeatmap:
+      case DashboardSection.swingHeatmap:
         content = SwingInfoHeatmapView(
           key: const ValueKey('swing-heatmap-view'),
           sessionController: _sessionController,
           onLoadSession: _loadSession,
         );
         break;
-      case _DashboardSection.trajectoryPlayback:
+      case DashboardSection.trajectoryPlayback:
         content = TrajectoryPlaybackView(
           key: const ValueKey('trajectory-playback-view'),
           sessionController: _sessionController,
           onLoadSession: _loadSession,
         );
         break;
-      case _DashboardSection.videoPlayback:
+      case DashboardSection.videoPlayback:
         content = VideoPlaybackView(
           key: const ValueKey('video-playback-view'),
           sessionController: _sessionController,
           onLoadSession: _loadSession,
         );
         break;
-      case _DashboardSection.frequency:
+      case DashboardSection.frequency:
         content = FrequencyAnalysisView(
           key: const ValueKey('frequency-view'),
           sessionController: _sessionController,
           onLoadSession: _loadSession,
         );
         break;
-      case _DashboardSection.yHeightDiff:
+      case DashboardSection.yHeightDiff:
         content = YHeightDiffView(
           key: const ValueKey('y-height-view'),
           sessionController: _sessionController,
           onLoadSession: _loadSession,
         );
         break;
-      case _DashboardSection.apkDownloads:
+      case DashboardSection.apkDownloads:
         content = const ApkDownloadsView(key: ValueKey('apk-downloads-view'));
         break;
-      case _DashboardSection.extraction:
+      case DashboardSection.extraction:
         content = DashboardExtractionView(
           key: const ValueKey('extraction-view'),
           sessionValue: _sessionController.text.trim(),
@@ -409,15 +401,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           },
         );
         break;
-      case _DashboardSection.sessionManagement:
+      case DashboardSection.sessionManagement:
         content = const DashboardSessionManagementView(
           key: ValueKey('session-management-view'),
         );
         break;
-      case _DashboardSection.users:
+      case DashboardSection.users:
         content = const DashboardUsersView(key: ValueKey('users-view'));
         break;
-      case _DashboardSection.admins:
+      case DashboardSection.admins:
         content = const AdminManagementView(key: ValueKey('admins-view'));
         break;
     }
@@ -582,7 +574,7 @@ class _DashboardNavItem {
     this.featureGate,
   });
 
-  final _DashboardSection section;
+  final DashboardSection section;
   final IconData icon;
   final IconData selectedIcon;
   final String sidebarLabel;
@@ -596,7 +588,7 @@ class _DashboardNavItem {
 /// 單一真相來源：導覽順序 / icon / 文案 / 可用性 gate 都在這裡集中維護。
 const List<_DashboardNavItem> _navItems = [
   _DashboardNavItem(
-    section: _DashboardSection.analysis,
+    section: DashboardSection.analysis,
     icon: Icons.analytics_outlined,
     selectedIcon: Icons.analytics,
     sidebarLabel: '分析總覽',
@@ -604,7 +596,7 @@ const List<_DashboardNavItem> _navItems = [
     sidebarGroup: '分析',
   ),
   _DashboardNavItem(
-    section: _DashboardSection.cohortBenchmark,
+    section: DashboardSection.cohortBenchmark,
     icon: Icons.groups_outlined,
     selectedIcon: Icons.groups,
     sidebarLabel: '族群基準',
@@ -612,7 +604,7 @@ const List<_DashboardNavItem> _navItems = [
     sidebarGroup: '分析',
   ),
   _DashboardNavItem(
-    section: _DashboardSection.perLapOffset,
+    section: DashboardSection.perLapOffset,
     icon: Icons.waves_outlined,
     selectedIcon: Icons.waves,
     sidebarLabel: '偏移分析',
@@ -620,7 +612,7 @@ const List<_DashboardNavItem> _navItems = [
     sidebarGroup: '分析',
   ),
   _DashboardNavItem(
-    section: _DashboardSection.speedHeatmap,
+    section: DashboardSection.speedHeatmap,
     icon: Icons.local_fire_department_outlined,
     selectedIcon: Icons.local_fire_department,
     sidebarLabel: '速度熱圖',
@@ -628,7 +620,7 @@ const List<_DashboardNavItem> _navItems = [
     sidebarGroup: '分析',
   ),
   _DashboardNavItem(
-    section: _DashboardSection.swingHeatmap,
+    section: DashboardSection.swingHeatmap,
     icon: Icons.view_quilt_outlined,
     selectedIcon: Icons.view_quilt,
     sidebarLabel: '步態熱圖',
@@ -636,7 +628,7 @@ const List<_DashboardNavItem> _navItems = [
     sidebarGroup: '分析',
   ),
   _DashboardNavItem(
-    section: _DashboardSection.trajectoryPlayback,
+    section: DashboardSection.trajectoryPlayback,
     icon: Icons.movie_filter_outlined,
     selectedIcon: Icons.movie_filter,
     sidebarLabel: '軌跡影片',
@@ -644,7 +636,7 @@ const List<_DashboardNavItem> _navItems = [
     sidebarGroup: '分析',
   ),
   _DashboardNavItem(
-    section: _DashboardSection.videoPlayback,
+    section: DashboardSection.videoPlayback,
     icon: Icons.play_circle_outline,
     selectedIcon: Icons.play_circle,
     sidebarLabel: '影片播放',
@@ -652,7 +644,7 @@ const List<_DashboardNavItem> _navItems = [
     sidebarGroup: '分析',
   ),
   _DashboardNavItem(
-    section: _DashboardSection.frequency,
+    section: DashboardSection.frequency,
     icon: Icons.ssid_chart_outlined,
     selectedIcon: Icons.ssid_chart,
     sidebarLabel: '頻譜分析',
@@ -660,7 +652,7 @@ const List<_DashboardNavItem> _navItems = [
     sidebarGroup: '分析',
   ),
   _DashboardNavItem(
-    section: _DashboardSection.yHeightDiff,
+    section: DashboardSection.yHeightDiff,
     icon: Icons.auto_graph,
     selectedIcon: Icons.auto_graph,
     sidebarLabel: '高度差',
@@ -668,7 +660,7 @@ const List<_DashboardNavItem> _navItems = [
     sidebarGroup: '分析',
   ),
   _DashboardNavItem(
-    section: _DashboardSection.extraction,
+    section: DashboardSection.extraction,
     icon: Icons.construction_outlined,
     selectedIcon: Icons.construction,
     sidebarLabel: '資料提取',
@@ -677,7 +669,7 @@ const List<_DashboardNavItem> _navItems = [
     featureGate: DashboardFeature.extraction,
   ),
   _DashboardNavItem(
-    section: _DashboardSection.apkDownloads,
+    section: DashboardSection.apkDownloads,
     icon: Icons.android_outlined,
     selectedIcon: Icons.android,
     sidebarLabel: '安裝包下載',
@@ -685,7 +677,7 @@ const List<_DashboardNavItem> _navItems = [
     sidebarGroup: '工具',
   ),
   _DashboardNavItem(
-    section: _DashboardSection.sessionManagement,
+    section: DashboardSection.sessionManagement,
     icon: Icons.folder_delete_outlined,
     selectedIcon: Icons.folder_delete,
     sidebarLabel: 'Session 管理',
@@ -693,7 +685,7 @@ const List<_DashboardNavItem> _navItems = [
     sidebarGroup: '管理',
   ),
   _DashboardNavItem(
-    section: _DashboardSection.users,
+    section: DashboardSection.users,
     icon: Icons.people_alt_outlined,
     selectedIcon: Icons.people_alt,
     sidebarLabel: '使用者',
@@ -701,7 +693,7 @@ const List<_DashboardNavItem> _navItems = [
     sidebarGroup: '管理',
   ),
   _DashboardNavItem(
-    section: _DashboardSection.admins,
+    section: DashboardSection.admins,
     icon: Icons.admin_panel_settings_outlined,
     selectedIcon: Icons.admin_panel_settings,
     sidebarLabel: '管理員',

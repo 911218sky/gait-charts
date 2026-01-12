@@ -7,6 +7,17 @@ import 'package:gait_charts/features/dashboard/domain/models/cohort_benchmark.da
 const String _kCohortBenchmarkListRequestId = 'cohort_benchmark_list';
 const String _kCohortBenchmarkDetailRequestId = 'cohort_benchmark_detail';
 
+/// 儲存目前選擇的 cohort 名稱，切換頁面時保持狀態。
+class SelectedCohortNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void select(String? cohortName) => state = cohortName;
+}
+
+final selectedCohortProvider =
+    NotifierProvider<SelectedCohortNotifier, String?>(SelectedCohortNotifier.new);
+
 /// 列出所有已計算完成的 cohorts。
 final cohortBenchmarkListProvider =
     FutureProvider.autoDispose<CohortBenchmarkListResponse>((ref) async {

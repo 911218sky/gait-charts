@@ -114,6 +114,7 @@ class _DashboardSessionManagementViewState
     final colors = context.colorScheme;
     final state = ref.watch(sessionListProvider);
     final notifier = ref.read(sessionListProvider.notifier);
+    final isMobile = context.isMobile;
 
     final items = state.items;
     final canDelete = _selected.isNotEmpty && !_isBatchDeleting;
@@ -137,7 +138,9 @@ class _DashboardSessionManagementViewState
               ),
               const SizedBox(height: 8),
               Text(
-                '批量管理 sessions，支援多選刪除（DB / npy / video / bag）',
+                isMobile 
+                    ? '批量管理 sessions'
+                    : '批量管理 sessions，支援多選刪除（DB / npy / video / bag）',
                 style: context.textTheme.bodyMedium?.copyWith(
                   color: colors.onSurfaceVariant,
                 ),
@@ -147,7 +150,7 @@ class _DashboardSessionManagementViewState
         ),
         // 操作工具列
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(isMobile ? 12 : 16),
           decoration: BoxDecoration(
             color: colors.surfaceContainer,
             borderRadius: BorderRadius.circular(12),
@@ -155,42 +158,113 @@ class _DashboardSessionManagementViewState
           ),
           child: Column(
             children: [
-              Row(
-                children: [
-                  // 選取操作按鈕群組
-                  Expanded(
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        _ActionChip(
-                          icon: Icons.select_all_rounded,
-                          label: '全選',
-                          onPressed: items.isEmpty || _isBatchDeleting
-                              ? null
-                              : () => _selectAllOnPage(items),
-                        ),
-                        _ActionChip(
-                          icon: Icons.deselect_rounded,
-                          label: '清除',
-                          onPressed: _selected.isEmpty || _isBatchDeleting
-                              ? null
-                              : _clearSelection,
-                        ),
-                        _ActionChip(
-                          icon: Icons.refresh_rounded,
-                          label: '重整',
-                          onPressed: state.isLoading || _isBatchDeleting
-                              ? null
-                              : () => notifier.fetchFirstPage(force: true),
-                        ),
-                      ],
+              if (!isMobile)
+                Row(
+                  children: [
+                    // 選取操作按鈕群組
+                    Expanded(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          _ActionChip(
+                            icon: Icons.select_all_rounded,
+                            label: '全選',
+                            onPressed: items.isEmpty || _isBatchDeleting
+                                ? null
+                                : () => _selectAllOnPage(items),
+                          ),
+                          _ActionChip(
+                            icon: Icons.deselect_rounded,
+                            label: '清除',
+                            onPressed: _selected.isEmpty || _isBatchDeleting
+                                ? null
+                                : _clearSelection,
+                          ),
+                          _ActionChip(
+                            icon: Icons.refresh_rounded,
+                            label: '重整',
+                            onPressed: state.isLoading || _isBatchDeleting
+                                ? null
+                                : () => notifier.fetchFirstPage(force: true),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  // 刪除按鈕
-                  FilledButton.icon(
+                    const SizedBox(width: 16),
+                    // 刪除按鈕
+                    FilledButton.icon(
+                      onPressed: canDelete ? _batchDelete : null,
+                      icon: _isBatchDeleting
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.delete_outline_rounded, size: 18),
+                      label: Text(
+                        _isBatchDeleting
+                            ? '刪除中…'
+                            : '刪除${_selected.isEmpty ? '' : '（${_selected.length}）'}',
+                      ),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: canDelete
+                            ? accentColors.danger
+                            : colors.surfaceContainerHighest,
+                        foregroundColor: canDelete
+                            ? Colors.white
+                            : colors.onSurfaceVariant,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              else ...[
+                // 手機版：按鈕垂直排列
+                Row(
+                  children: [
+                    Expanded(
+                      child: _ActionChip(
+                        icon: Icons.select_all_rounded,
+                        label: '全選',
+                        onPressed: items.isEmpty || _isBatchDeleting
+                            ? null
+                            : () => _selectAllOnPage(items),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _ActionChip(
+                        icon: Icons.deselect_rounded,
+                        label: '清除',
+                        onPressed: _selected.isEmpty || _isBatchDeleting
+                            ? null
+                            : _clearSelection,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _ActionChip(
+                        icon: Icons.refresh_rounded,
+                        label: '重整',
+                        onPressed: state.isLoading || _isBatchDeleting
+                            ? null
+                            : () => notifier.fetchFirstPage(force: true),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
                     onPressed: canDelete ? _batchDelete : null,
                     icon: _isBatchDeleting
                         ? const SizedBox(
@@ -198,7 +272,6 @@ class _DashboardSessionManagementViewState
                             height: 16,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              value: 0.25,
                               color: Colors.white,
                             ),
                           )
@@ -215,35 +288,31 @@ class _DashboardSessionManagementViewState
                       foregroundColor: canDelete
                           ? Colors.white
                           : colors.onSurfaceVariant,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 14,
-                      ),
+                      minimumSize: const Size(0, 44),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
               const SizedBox(height: 12),
               // 狀態列
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   _StatusBadge(
                     icon: Icons.check_circle_outline_rounded,
                     label: '已選 ${_selected.length}',
                     isActive: _selected.isNotEmpty,
                   ),
-                  const SizedBox(width: 8),
                   _StatusBadge(
                     icon: Icons.list_rounded,
                     label: '本頁 ${items.length}',
                   ),
-                  if (state.totalPages > 0) ...[
-                    const SizedBox(width: 8),
+                  if (state.totalPages > 0)
                     _StatusBadge(
                       icon: Icons.auto_stories_rounded,
                       label: '${state.page <= 0 ? 1 : state.page} / ${state.totalPages} 頁',
                     ),
-                  ],
                 ],
               ),
             ],
@@ -263,7 +332,7 @@ class _DashboardSessionManagementViewState
               if (state.isInitialLoading)
                 const Padding(
                   padding: EdgeInsets.all(48),
-                  child: Center(child: CircularProgressIndicator(value: 0.25)),
+                  child: Center(child: CircularProgressIndicator()),
                 )
               else if (state.error != null && items.isEmpty)
                 _EmptyState(
