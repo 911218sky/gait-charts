@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       releaseTag:
+        description: 'Release tag name (e.g., v1.0.0). If set, all platforms will be built and released.'
         required: false
         default: ''
       buildWeb:
