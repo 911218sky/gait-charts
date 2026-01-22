@@ -103,15 +103,16 @@ Summary of changes since v1.3.0:
 
 | Branch | Purpose |
 |--------|---------|
-| `main` | Production-ready releases |
-| `develop` | Development and integration branch |
+| `main` | Release-only branch (merge target only) |
+| `develop` | Daily development and integration |
 
 ## Merge Strategy
 
-1. Develop on `develop` branch
-2. Squash related commits into meaningful groups before merging to `main`
-3. Use `--no-ff` merge to preserve branch history
-4. Tag releases on `main` with semantic versioning (e.g., `v1.3.0`)
+1. Always commit to `develop` during development
+2. `main` only receives merges from `develop`
+3. Squash multiple related commits into **one** before merging to `main`
+4. Use `--no-ff` merge to preserve branch history
+5. Tag releases on `main` with semantic versioning (e.g., `v1.3.0`)
 
 ## Version Tagging
 
