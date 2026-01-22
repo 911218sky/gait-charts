@@ -1,3 +1,8 @@
+---
+description: Git commit conventions for this repo
+alwaysApply: true
+---
+
 # Git Commit Conventions
 
 > Standardized commit message format for consistent and readable git history.
