@@ -44,40 +44,77 @@ permissions:
   contents: write
 
 jobs:
+  # 先決定 version tag
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            # 從 tag 取得版本 (v0.1.2 -> 0.1.2)
+            version="${{ github.ref_name }}"
+            version="${version#v}"
+          elif [ -n "${{ github.event.inputs.releaseTag }}" ]; then
+            version="${{ github.event.inputs.releaseTag }}"
+            version="${version#v}"
+          else
+            version="dev"
+          fi
+          echo "version=${version}" >> $GITHUB_OUTPUT
+          echo "Resolved version: ${version}"
+
   web:
+    needs: prepare
     if: |
       github.event_name == 'push' ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.releaseTag != '') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.buildWeb == 'true')
     uses: ./.github/workflows/reusable_build_web.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
 
   windows_setup_exe:
+    needs: prepare
     if: |
       github.event_name == 'push' ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.releaseTag != '') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.buildWindows == 'true')
     uses: ./.github/workflows/reusable_build_windows_setup_exe.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
 
   android_apk:
+    needs: prepare
     if: |
       github.event_name == 'push' ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.releaseTag != '') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.buildAndroid == 'true')
     uses: ./.github/workflows/reusable_build_android_apk.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
 
   linux:
+    needs: prepare
     if: |
       github.event_name == 'push' ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.releaseTag != '') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.buildLinux == 'true')
     uses: ./.github/workflows/reusable_build_linux.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
 
   macos:
+    needs: prepare
     if: |
       github.event_name == 'push' ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.releaseTag != '') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.buildMacos == 'true')
     uses: ./.github/workflows/reusable_build_macos.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
 
   release:
     name: Publish to GitHub Releases

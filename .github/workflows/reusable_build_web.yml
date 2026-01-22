@@ -2,6 +2,11 @@ name: (reusable) Build - Web
 
 on:
   workflow_call:
+    inputs:
+      version:
+        description: 'Version string (e.g., 0.1.2)'
+        required: true
+        type: string
 
 jobs:
   web:
@@ -24,14 +29,13 @@ jobs:
         run: flutter build web --release -O4 --no-wasm-dry-run --no-tree-shake-icons --wasm
 
       - name: Package web
+        env:
+          APP_VERSION: ${{ inputs.version }}
         run: |
-          # Extract version from pubspec.yaml (format: 1.0.12)
-          app_version=$(grep '^version:' pubspec.yaml | sed -E 's/^version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
-          
-          echo "Extracted version: ${app_version}"
+          echo "Using version: ${APP_VERSION}"
           
           mkdir -p dist
-          (cd build/web && zip -r ../../dist/GaitCharts-Web-v${app_version}.zip .)
+          (cd build/web && zip -r ../../dist/GaitCharts-Web-v${APP_VERSION}.zip .)
 
       - name: Upload artifact (web dist)
         uses: actions/upload-artifact@v4

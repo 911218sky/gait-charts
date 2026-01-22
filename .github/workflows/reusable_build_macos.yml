@@ -2,6 +2,11 @@ name: (reusable) Build - macOS
 
 on:
   workflow_call:
+    inputs:
+      version:
+        description: 'Version string (e.g., 0.1.2)'
+        required: true
+        type: string
 
 jobs:
   macos:
@@ -34,13 +39,12 @@ jobs:
 
       - name: Package .app
         shell: bash
+        env:
+          APP_VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
           
-          # Extract version from pubspec.yaml (format: 1.0.12)
-          app_version=$(grep '^version:' pubspec.yaml | sed -E 's/^version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
-          
-          echo "Extracted version: ${app_version}"
+          echo "Using version: ${APP_VERSION}"
           
           mkdir -p dist
           APP_PATH="$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' -print -quit)"
@@ -48,7 +52,7 @@ jobs:
             echo "No .app found under build/macos/Build/Products/Release"
             exit 1
           fi
-          OUTPUT_FILE="dist/GaitCharts-macOS-v${app_version}.zip"
+          OUTPUT_FILE="dist/GaitCharts-macOS-v${APP_VERSION}.zip"
           echo "Creating: ${OUTPUT_FILE}"
           ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$OUTPUT_FILE"
 

@@ -2,6 +2,11 @@ name: (reusable) Build - Android APK
 
 on:
   workflow_call:
+    inputs:
+      version:
+        description: 'Version string (e.g., 0.1.2)'
+        required: true
+        type: string
 
 jobs:
   android_apk:
@@ -45,23 +50,22 @@ jobs:
 
       - name: Rename APKs
         shell: bash
+        env:
+          APP_VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
           
-          # Extract version from pubspec.yaml (format: 1.0.12)
-          app_version=$(grep '^version:' pubspec.yaml | sed -E 's/^version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
-          
-          echo "Extracted version: ${app_version}"
+          echo "Using version: ${APP_VERSION}"
           
           mkdir -p dist
           cd build/app/outputs/flutter-apk
           for f in app-*-release.apk; do
             [ -f "$f" ] || continue
             abi="$(echo "$f" | sed -E 's/^app-([a-z0-9_-]+)-release\.apk$/\1/')"
-            cp "$f" "../../../../dist/GaitCharts-${abi}-v${app_version}.apk"
+            cp "$f" "../../../../dist/GaitCharts-${abi}-v${APP_VERSION}.apk"
           done
           if [ -f "app-release.apk" ]; then
-            cp "app-release.apk" "../../../../dist/GaitCharts-v${app_version}.apk"
+            cp "app-release.apk" "../../../../dist/GaitCharts-v${APP_VERSION}.apk"
           fi
 
       - name: Upload artifact (android dist)
