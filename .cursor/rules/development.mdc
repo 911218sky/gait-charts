@@ -1,5 +1,6 @@
 ---
-inclusion: always
+description: Gait Charts dashboard development guidelines
+alwaysApply: true
 ---
 
 # Gait Charts Dashboard Development Guidelines
