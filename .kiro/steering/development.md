@@ -1,0 +1,364 @@
+---
+inclusion: always
+---
+
+# Gait Charts Dashboard Development Guidelines
+
+> Enable AI and developers to extend features consistently without reading full history, maintaining UI/architecture consistency and avoiding performance/state management pitfalls.
+
+## 🚨 Core Principles (Violations = Unacceptable)
+
+1. **Layer Separation is Sacred**: `domain` = rules/calculations/models, `data` = IO/HTTP, `presentation` = UI & interactions
+2. **Riverpod 3 Only**: No other state management libraries allowed
+3. **No Side Effects in build()**: No recalculations, JSON parsing, sorting, aggregation, showSnackBar, or navigation in `build()`
+
+## 🌐 Language Guidelines
+
+- Comments, UI text, README in **Traditional Chinese**
+- Keep technical terms in English: `session`, `lap`, `offset`, `payload`, `debounce`
+
+## 📁 Directory Structure (DDD / Feature-based)
+
+```
+lib/
+├── app/                    # App-level (MaterialApp, theme, home entry)
+├── core/                   # Reusable shared layer
+│   ├── config/             # Cross-feature config (AppConfig)
+│   ├── network/            # dioProvider, API retry, exception mapping
+│   ├── providers/          # Global providers
+│   └── widgets/            # Cross-feature shared UI (AsyncRequestView)
+└── features/<feature>/     # Feature modules
+    ├── data/               # API service, repository
+    ├── domain/             # Pure models, calculation logic (no Flutter dependency)
+    └── presentation/
+        ├── providers/      # Notifier / AsyncNotifier
+        ├── views/          # Large view compositions
+        └── widgets/        # Small components
+```
+
+### 🔗 Dependency Direction (Enforced)
+
+| Direction | Allowed |
+|-----------|---------|
+| `presentation` → `domain`, `data` | ✅ |
+| `data` → `domain`, `core` | ✅ |
+| `domain` → Flutter / UI | ❌ |
+| `core` → Single feature business rule | ❌ |
+
+## 🌐 Network Guidelines (Dio)
+
+| Rule | Description |
+|------|-------------|
+| ❌ Forbidden | UI directly using `Dio()` or handling `DioException` |
+| ✅ Use | `dioProvider` (`lib/core/network/api_client.dart`) |
+| ✅ Errors | `mapDioError` (`lib/core/network/api_exception.dart`) |
+| ✅ Retry | `withApiRetry(...)` |
+| ✅ Base URL | `lib/core/config/app_config.dart` |
+
+## 🔄 Riverpod Guidelines
+
+### 📍 Placement
+
+| Type | Location |
+|------|----------|
+| Global | `lib/app` or `lib/core/providers` |
+| Feature-specific | `lib/features/<feature>/presentation/providers` |
+
+### 📝 Naming
+
+- Providers end with `...Provider`
+- Notifiers end with `...Notifier`
+- Provide `<feature>_providers.dart` barrel export
+
+### ⚠️ Error Handling
+
+- UI async state uses `AsyncRequestView`
+- Don't catch Dio exceptions in UI; convert to `ApiException` in data layer
+- Handle side effects with `ref.listen()`, not in `build()`
+
+## 🎨 UI / Theme
+
+| Rule | Description |
+|------|-------------|
+| Default | Dark mode (`ThemeMode.dark`) |
+| Colors | Use `context.colorScheme`, `context.theme` (ThemeContextExtension) |
+| ❌ Forbidden | Hardcoded color constants (except in `lib/app/theme.dart`) |
+| Wide screen | `NavigationRail` |
+| Small screen | `NavigationBar` |
+| Animations | 150–300ms |
+
+### 🎯 Dark Theme Style Guidelines
+
+This project uses a unified dark UI style. All new components should follow these design specifications:
+
+#### Background Color Hierarchy (Dark Mode)
+
+| Level | Color Code | Usage |
+|-------|------------|-------|
+| Deepest | `#0A0A0A` | Dialog background, main container background |
+| Dark | `#111111` | Card background, input field background, list items |
+| Medium | `#1A1A1A` | Icon containers, secondary button background, hover state |
+| Light | `#222222` | Dividers, disabled state background |
+
+#### Border Radius Specifications
+
+| Component Type | Border Radius |
+|----------------|---------------|
+| Dialog | `12px` |
+| Card (Grid Card) | `12px` |
+| Button | `8px` |
+| Input Field | `8px` |
+| Icon Container | `8px` ~ `10px` |
+| Badge / Tag | `6px` ~ `8px` |
+
+#### Dialog Design Specifications
+
+```dart
+Dialog(
+  backgroundColor: isDark ? const Color(0xFF0A0A0A) : colors.surfaceContainer,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+    side: BorderSide(color: colors.outlineVariant),
+  ),
+)
+```
+
+- Header: 24px padding, title uses `GoogleFonts.inter` 18-20px bold
+- Content: 24px horizontal padding
+- Footer: 24px padding, buttons aligned to the right
+
+#### Card Design Specifications (Grid Card)
+
+```dart
+Material(
+  color: isDark ? const Color(0xFF111111) : colors.surfaceContainerLow,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+    side: BorderSide(
+      color: isSelected ? colors.primary : colors.outlineVariant,
+      width: isSelected ? 2 : 1,
+    ),
+  ),
+  clipBehavior: Clip.antiAlias,
+)
+```
+
+- Internal padding: 16px
+- Icon container: 32-44px square, background `#1A1A1A`
+- Title: 15px bold
+- Subtitle / Stats: 12px, use `colors.onSurfaceVariant`
+
+#### Button Design Specifications
+
+```dart
+// Filled Button (Primary Action)
+FilledButton.styleFrom(
+  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+)
+
+// Outlined Button (Secondary Action)
+OutlinedButton.styleFrom(
+  foregroundColor: colors.onSurface,
+  side: BorderSide(color: colors.outlineVariant),
+  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+)
+```
+
+#### Input Field Design Specifications
+
+```dart
+Container(
+  decoration: BoxDecoration(
+    color: isDark ? const Color(0xFF111111) : colors.surfaceContainerLow,
+    borderRadius: BorderRadius.circular(8),
+    border: Border.all(color: colors.outlineVariant),
+  ),
+)
+```
+
+#### Typography Specifications
+
+- Use `GoogleFonts.inter` for consistency
+- Title: 18-20px, `FontWeight.w700`
+- Subtitle: 13-14px, `FontWeight.w500`
+- Body: 14-15px
+- Label / Badge: 11-13px, `FontWeight.w600`
+
+#### Status Badge Design
+
+```dart
+Container(
+  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+  decoration: BoxDecoration(
+    color: statusColor.withValues(alpha: 0.15),
+    borderRadius: BorderRadius.circular(8),
+    border: Border.all(color: statusColor.withValues(alpha: 0.4), width: 1.5),
+  ),
+)
+```
+
+#### List Item Design
+
+```dart
+Material(
+  color: isDark ? const Color(0xFF111111) : colors.surfaceContainerLow,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+    side: BorderSide(color: colors.outlineVariant),
+  ),
+  child: InkWell(
+    borderRadius: BorderRadius.circular(12),
+    hoverColor: colors.onSurface.withValues(alpha: 0.05),
+    // ...
+  ),
+)
+```
+
+#### Reference Implementation Files
+
+- Dialog example: `lib/features/dashboard/presentation/widgets/cohort_benchmark/cohort_selector_dialog.dart`
+- Delete confirmation dialog: `lib/features/dashboard/presentation/widgets/cohort_benchmark/delete_cohort_benchmark_dialog.dart`
+- Grid Card example: `lib/features/dashboard/presentation/widgets/shared/cards/session_grid_card.dart`
+- Status badge: `lib/features/dashboard/presentation/widgets/cohort_benchmark/metric_status_badge.dart`
+
+## 📦 Domain Model
+
+- **Immutable**: `final` fields, prefer `const` constructors
+- **JSON**: `factory Xxx.fromJson` with internal type safety
+- **Aggregation/sorting/filter**: Place in `domain` or derived providers
+
+## 💻 Code Style
+
+| Rule | Description |
+|------|-------------|
+| Indentation | 2-space |
+| Constants | Use `const` whenever possible |
+| Trailing commas | Keep for multi-line |
+| File names | `snake_case.dart` |
+| Public API | Use `///` doc comments |
+
+## 📝 Comment Guidelines
+
+Write comments like a human developer would - concise, practical, and helpful. Avoid robotic or overly formal language.
+
+### Comment Language
+
+- **UI text, user-facing strings**: Traditional Chinese
+- **Code comments**: Traditional Chinese (keep technical terms in English)
+- **Doc comments (`///`)**: Traditional Chinese
+
+### Good Comment Principles
+
+1. **Explain "why", not "what"** - The code shows what it does; comments explain the reasoning
+2. **Be concise** - One line is often enough
+3. **Use natural language** - Write like you're explaining to a colleague
+4. **Avoid obvious comments** - Don't comment self-explanatory code
+
+### Comment Examples
+
+```dart
+// ✅ Good: Explains the reasoning
+// 後端預設回傳 UTC，這裡轉成本地時間方便顯示
+final localTime = utcTime.toLocal();
+
+// ✅ Good: Warns about edge cases
+// 注意：cohort 可能為空陣列，需要 fallback 到預設值
+final cohort = user.cohort.isNotEmpty ? user.cohort : ['正常人'];
+
+// ✅ Good: Explains business logic
+// 只有 session 有影片時才顯示播放按鈕
+if (session.hasVideo) { ... }
+
+// ✅ Good: Documents non-obvious behavior
+// API 回傳的 page 是 1-based，但 UI 用 0-based index
+final pageIndex = response.page - 1;
+
+// ❌ Bad: States the obvious
+// 設定 isLoading 為 true
+setState(() => _isLoading = true);
+
+// ❌ Bad: Too verbose / robotic
+// This function is responsible for fetching the user data from the API
+// and returning it as a UserItem object for use in the presentation layer.
+Future<UserItem> fetchUser() { ... }
+```
+
+### Doc Comment Style (`///`)
+
+```dart
+/// 使用者族群選擇對話框。
+///
+/// 以 Grid 方式顯示所有可用族群，點選後回傳選中的 cohort 名稱。
+/// 若使用者取消則回傳 null。
+class CohortSelectorDialog extends ConsumerStatefulWidget { ... }
+
+/// 計算 BMI 值。
+///
+/// [heightCm] 身高（公分），[weightKg] 體重（公斤）。
+/// 回傳 BMI 值，若輸入無效則回傳 null。
+double? calculateBmi(double? heightCm, double? weightKg) { ... }
+
+/// 從 JSON 解析使用者資料。
+///
+/// 內部會處理型別轉換與預設值，呼叫端不需額外檢查。
+factory UserItem.fromJson(Map<String, Object?> json) { ... }
+```
+
+### Inline Comment Placement
+
+```dart
+// ✅ Good: Comment on its own line, above the code
+// 先檢查快取，避免重複請求
+final cached = _cache[key];
+if (cached != null) return cached;
+
+// ✅ Good: Short comment at end of line for simple cases
+final isDark = context.isDark; // 判斷深色模式
+
+// ❌ Bad: Long comment at end of line
+final result = await api.fetch(); // 這個 API 會回傳使用者資料，包含 sessions 列表和基本資訊
+```
+
+### Section Comments in Large Files
+
+```dart
+// ─────────────────────────────────────────────────────────────
+// Header
+// ─────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────
+// Content
+// ─────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────
+// Footer
+// ─────────────────────────────────────────────────────────────
+```
+
+### TODO Comments
+
+```dart
+// TODO: 之後要加上分頁功能
+// TODO(username): 等後端 API 更新後移除這個 workaround
+// FIXME: 這裡有 race condition，需要加 debounce
+```
+
+## 🔄 Development Workflow
+
+1. Identify feature (existing or new)
+2. Start with domain (models/calculations)
+3. Then data (API service → repository)
+4. Finally presentation (provider → view/widget)
+5. Reference existing patterns before extending
+
+## ✅ Pre-Change Checklist
+
+- [ ] domain/data/presentation boundaries are clear
+- [ ] Provider placement and naming are correct
+- [ ] No side effects triggered in `build()`
+- [ ] Network errors go through `mapDioError`
+- [ ] No hardcoded colors
+- [ ] No heavy calculations in `build()`
+- [ ] New logic has unit tests

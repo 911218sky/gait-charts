@@ -1,0 +1,74 @@
+name: gait_charts
+description: "A new Flutter project."
+
+# Do not publish to pub.dev
+publish_to: 'none'
+
+# Version format:
+# On Android, this maps to versionName
+# On iOS, this maps to CFBundleShortVersionString
+# On Windows, this maps to the product version
+version: 1.3.2
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  cupertino_icons: ^1.0.8              # iOS style icons
+  flutter_riverpod: ^3.0.3             # State management
+  dio: ^5.9.0                          # HTTP client for API calls
+  dio_cookie_manager: ^3.3.0           # Cookie manager
+  cookie_jar: ^4.0.8                   # Cookie storage
+  crypto: ^3.0.6                       # Encryption (SHA256, HMAC-SHA256, etc.)
+  flutter_secure_storage: ^10.0.0      # Secure storage (iOS Keychain / Android KeyStore)
+  archive: ^4.0.7                      # Compression (Zip/Tar)
+  fl_chart: ^1.1.1                     # Chart rendering
+  google_fonts: ^6.3.2                 # Google Fonts
+  intl: ^0.20.2                        # Internationalization
+  file_selector: ^1.1.0                # File picker
+  window_manager: ^0.5.1               # Window management
+  url_launcher: ^6.3.2                 # URL launcher (open browser or external apps)
+  web: ^1.1.1                          # Web API support
+  video_player: ^2.9.3                 # Cross-platform video player (iOS/Android/Web/macOS/Linux)
+  video_player_win: 3.2.2              # Windows video player implementation
+  path_provider: ^2.1.5                # Platform-specific paths (temp directory)
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_launcher_icons: ^0.14.4      # App icon generator
+  msix: ^3.16.12                       # Windows MSIX packaging
+  flutter_lints: ^6.0.0                # Flutter lint rules
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/icon/
+
+# App icon configuration
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  min_sdk_android: 21
+  
+  web:
+    generate: true
+    image_path: "assets/icon/app_icon.png"
+    background_color: "#0A0A0A"
+    theme_color: "#0A0A0A"
+  
+  windows:
+    generate: true
+    image_path: "assets/icon/app_icon.png"
+    icon_size: 256
+  
+  macos:
+    generate: true
+    image_path: "assets/icon/app_icon.png"
+
+

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>NYCU 步態辨識與分析儀表板 | Gait Recognition & Analysis Dashboard - 邱俊憲 Chun-Hsien Chiu</title>
+  
+  <meta name="description" content="國立陽明交通大學（NYCU）步態辨識與分析儀表板，由邱俊憲 (Chun-Hsien Chiu) 開發。聯絡資訊：sky1218@nycu.edu.tw。提供 Lateral Offset、FFT/PSD 頻譜及骨盆朝向分析。">
+  <meta name="keywords" content="NYCU, 步態辨識, 步態分析, Gait Recognition, Gait Analysis, 邱俊憲, Chun-Hsien Chiu, 陽明交通大學, sky1218@nycu.edu.tw, 復健評估, 數據視覺化">
+  <meta name="author" content="邱俊憲 (Chun-Hsien Chiu)">
+  <meta name="robots" content="index,follow">
+  <meta name="theme-color" content="#0b0f16">
+
+  <meta name="apple-mobile-web-app-title" content="NYCU 步態辨識">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://nycu-realsense-pose.sky1218.com">
+  <meta property="og:title" content="NYCU 步態辨識與分析儀表板 | Gait Analysis Dashboard">
+  <meta property="og:description" content="由邱俊憲 (Chun-Hsien Chiu) 開發之專業步態分析系統。聯絡信箱：sky1218@nycu.edu.tw">
+  <meta property="og:image" content="icons/Icon-512.png">
+
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    html, body { height: 100%; margin: 0; background: #0b0f16; }
+    .seo-content {
+      position: absolute;
+      left: -10000px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .gc-loader {
+      position: fixed; inset: 0; display: grid; place-items: center;
+      color: rgba(255, 255, 255, 0.78);
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .gc-loader__panel {
+      display: grid; gap: 12px; justify-items: center; padding: 18px 20px;
+      border-radius: 10px; background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.10); backdrop-filter: blur(6px);
+    }
+    .gc-loader__spinner {
+      width: 28px; height: 28px; border-radius: 999px;
+      border: 3px solid rgba(255, 255, 255, 0.18);
+      border-top-color: rgba(255, 255, 255, 0.78);
+      animation: gc-spin 0.9s linear infinite;
+    }
+    @keyframes gc-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="seo-content" role="main">
+    <h1>NYCU 步態辨識與步態分析儀表板 | Gait Recognition and Analysis Dashboard</h1>
+    <h2>開發者與聯絡資訊 (Developer & Contact)</h2>
+    <p>
+      作者：邱俊憲 (Chun-Hsien Chiu)<br>
+      聯絡信箱：<a href="mailto:sky1218@nycu.edu.tw">sky1218@nycu.edu.tw</a><br>
+      所屬機構：國立陽明交通大學 (National Yang Ming Chiao Tung University, NYCU)
+    </p>
+    <p>
+      本研究專案專注於 Realsense 姿態偵測技術應用於步態分析。
+      This project focuses on Gait Analysis using Realsense Pose Estimation at NYCU.
+    </p>
+    <ul>
+      <li>步態特徵提取 (Gait Feature Extraction)</li>
+      <li>每圈橫向偏移分析 (Lateral Offset Analysis)</li>
+      <li>頻譜分析 (FFT/PSD Spectrum Analysis)</li>
+      <li>骨盆朝向追蹤 (Pelvis Heading Tracking θ(t))</li>
+    </ul>
+    <p>Keywords: 步態辨識, Gait Recognition, 邱俊憲, Chun-Hsien Chiu, NYCU, sky1218@nycu.edu.tw.</p>
+  </div>
+
+  <div id="gc-loader" class="gc-loader">
+    <div class="gc-loader__panel">
+      <div class="gc-loader__spinner"></div>
+      <div class="gc-loader__title">載入中 Loading…</div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      var el = document.getElementById('gc-loader');
+      if (el) el.remove();
+    });
+  </script>
+
+  <script>
+    (function () {
+      var STORAGE_KEY = "__backend_boot_id";
+      function loadFlutter() {
+        var s = document.createElement("script");
+        s.src = "flutter_bootstrap.js"; s.async = true;
+        document.body.appendChild(s);
+      }
+      function bootJsonUrl() { try { return new URL("boot.json", document.baseURI).toString(); } catch (e) { return "boot.json"; } }
+      async function clearCachesAndServiceWorkers() {
+        try {
+          if ("serviceWorker" in navigator) {
+            var regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(function (r) { return r.unregister(); }));
+          }
+          if ("caches" in window) {
+            var names = await caches.keys();
+            await Promise.all(names.map(function (n) { return caches.delete(n); }));
+          }
+        } catch (e) {}
+      }
+
+      (async function () {
+        try {
+          var r = await fetch(bootJsonUrl(), { cache: "no-store" });
+          if (!r.ok) { loadFlutter(); return; }
+          var data = await r.json();
+          var bootId = data && data.boot_id ? String(data.boot_id) : "";
+          if (!bootId) { loadFlutter(); return; }
+          var prev = localStorage.getItem(STORAGE_KEY);
+          if (!prev) {
+            localStorage.setItem(STORAGE_KEY, bootId);
+            loadFlutter(); return;
+          }
+          if (prev !== bootId) {
+            await clearCachesAndServiceWorkers();
+            localStorage.setItem(STORAGE_KEY, bootId);
+            location.reload(); return;
+          }
+        } catch (e) {}
+        loadFlutter();
+      })();
+    })();
+  </script>
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "NYCU Gait Recognition Dashboard",
+      "alternateName": "NYCU 步態辨識與分析儀表板",
+      "url": "https://nycu-realsense-pose.sky1218.com",
+      "author": {
+        "@type": "Person",
+        "name": "Chun-Hsien Chiu",
+        "alternateName": "邱俊憲",
+        "email": "sky1218@nycu.edu.tw"
+      },
+      "description": "Professional gait analysis dashboard by Chun-Hsien Chiu at NYCU.",
+      "publisher": {
+        "@type": "Organization",
+        "name": "NYCU"
+      }
+    }
+  </script>
+</body>
+</html>

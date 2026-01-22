@@ -1,0 +1,166 @@
+# 🏷️ GitHub Labels Configuration
+# Use github-label-sync or manually configure in GitHub
+# Install: npm install -g github-label-sync
+# Run: github-label-sync --access-token <token> <owner>/<repo>
+
+# ═══════════════════════════════════════════════════════════════
+# 📌 Type Labels
+# ═══════════════════════════════════════════════════════════════
+- name: "bug"
+  color: "d73a4a"
+  description: "🐛 Something isn't working"
+
+- name: "enhancement"
+  color: "a2eeef"
+  description: "✨ New feature or improvement"
+
+- name: "documentation"
+  color: "0075ca"
+  description: "📚 Documentation related"
+
+- name: "question"
+  color: "d876e3"
+  description: "❓ Question or help needed"
+
+- name: "refactor"
+  color: "fbca04"
+  description: "♻️ Code refactoring"
+
+- name: "test"
+  color: "bfd4f2"
+  description: "🧪 Testing related"
+
+- name: "chore"
+  color: "fef2c0"
+  description: "🔧 Maintenance work"
+
+- name: "security"
+  color: "ee0701"
+  description: "🔒 Security issue"
+
+# ═══════════════════════════════════════════════════════════════
+# 🎯 Priority Labels
+# ═══════════════════════════════════════════════════════════════
+- name: "priority: critical"
+  color: "b60205"
+  description: "🔴 Needs immediate attention"
+
+- name: "priority: high"
+  color: "d93f0b"
+  description: "🟠 High priority"
+
+- name: "priority: medium"
+  color: "fbca04"
+  description: "🟡 Medium priority"
+
+- name: "priority: low"
+  color: "0e8a16"
+  description: "🟢 Low priority"
+
+# ═══════════════════════════════════════════════════════════════
+# 📊 Status Labels
+# ═══════════════════════════════════════════════════════════════
+- name: "triage"
+  color: "ededed"
+  description: "📥 Needs triage"
+
+- name: "needs-review"
+  color: "c5def5"
+  description: "🔍 Needs further review"
+
+- name: "help-wanted"
+  color: "008672"
+  description: "🆘 Community help needed"
+
+- name: "in-progress"
+  color: "0052cc"
+  description: "🚧 Currently being worked on"
+
+- name: "scheduled"
+  color: "5319e7"
+  description: "📅 Scheduled for development"
+
+- name: "on-hold"
+  color: "ffffff"
+  description: "⏸️ Temporarily on hold"
+
+- name: "cannot-reproduce"
+  color: "cfd3d7"
+  description: "🤷 Cannot reproduce the issue"
+
+- name: "wontfix"
+  color: "ffffff"
+  description: "🚫 Will not be fixed"
+
+- name: "duplicate"
+  color: "cfd3d7"
+  description: "♻️ Duplicate issue"
+
+# ═══════════════════════════════════════════════════════════════
+# 📱 Platform Labels
+# ═══════════════════════════════════════════════════════════════
+- name: "platform: android"
+  color: "3ddc84"
+  description: "🤖 Android platform"
+
+- name: "platform: ios"
+  color: "147efb"
+  description: "🍎 iOS platform"
+
+- name: "platform: web"
+  color: "ff7139"
+  description: "🌐 Web platform"
+
+- name: "platform: windows"
+  color: "00adef"
+  description: "🪟 Windows platform"
+
+- name: "platform: macos"
+  color: "999999"
+  description: "💻 macOS platform"
+
+- name: "platform: linux"
+  color: "fcc624"
+  description: "🐧 Linux platform"
+
+# ═══════════════════════════════════════════════════════════════
+# 🏗️ Area Labels
+# ═══════════════════════════════════════════════════════════════
+- name: "area: ui"
+  color: "c2e0c6"
+  description: "🎨 UI related"
+
+- name: "area: chart"
+  color: "bfdadc"
+  description: "📊 Chart related"
+
+- name: "area: data"
+  color: "d4c5f9"
+  description: "💾 Data processing related"
+
+- name: "area: network"
+  color: "f9d0c4"
+  description: "🌐 Network / API related"
+
+- name: "area: performance"
+  color: "fef2c0"
+  description: "⚡ Performance related"
+
+# ═══════════════════════════════════════════════════════════════
+# 🎁 Special Labels
+# ═══════════════════════════════════════════════════════════════
+- name: "good first issue"
+  color: "7057ff"
+  description: "👋 Good for newcomers"
+
+- name: "help wanted"
+  color: "008672"
+  description: "🙏 Extra attention is needed"
+
+- name: "breaking change"
+  color: "b60205"
+  description: "💥 Breaking change"
+
+- name: "dependencies"
+  color: "0366d6"
+  description: "📦 Dependency updates"

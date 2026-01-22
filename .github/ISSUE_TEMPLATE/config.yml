@@ -1,0 +1,6 @@
+# Issue template configuration
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/user/repo/discussions
+    about: Have a question? Let's discuss it in the Discussions section

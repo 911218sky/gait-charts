@@ -1,0 +1,65 @@
+name: ❓ Question
+description: Ask a question or seek help
+title: "[Question]: "
+labels: ["question", "help-wanted"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Got a question? We're happy to help! Please describe your question in detail 😊
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 📂 Category
+      description: What category does your question fall under?
+      options:
+        - 🚀 Installation / Setup
+        - 📖 Usage
+        - 🔧 Development / Contributing
+        - 📊 Data / Charts
+        - 🔗 API / Integration
+        - 🤷 Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: ❓ Your Question
+      description: Describe your question in detail
+      placeholder: |
+        Please describe your question...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 📋 Context
+      description: Provide relevant background information
+      placeholder: |
+        - What are you trying to achieve?
+        - What have you already tried?
+        - Any error messages?
+
+  - type: textarea
+    id: code
+    attributes:
+      label: 💻 Related Code
+      description: If there's relevant code, paste it here
+      render: dart
+      placeholder: |
+        // Paste related code here...
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✔️ Checklist
+      options:
+        - label: I have read the documentation and README
+          required: true
+        - label: I have searched existing issues
+          required: true

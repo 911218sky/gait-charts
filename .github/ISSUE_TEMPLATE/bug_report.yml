@@ -1,0 +1,127 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior
+title: "[Bug]: "
+labels: ["bug", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this issue! Please fill out the information below to help us investigate.
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 🔥 Severity
+      description: How severe is this bug?
+      options:
+        - 🟢 Low - Minor issue, doesn't affect main functionality
+        - 🟡 Medium - Affects some features but has workarounds
+        - 🔴 High - Major functionality is broken
+        - 💀 Critical - App crashes or data loss
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 📝 Description
+      description: Clearly describe the issue you encountered
+      placeholder: Tell us what happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 🔄 Steps to Reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: ✅ Expected Behavior
+      description: What did you expect to happen?
+      placeholder: Describe what should have happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: ❌ Actual Behavior
+      description: What actually happened?
+      placeholder: Describe what actually happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 📸 Screenshots / Videos
+      description: If applicable, add screenshots or videos to help explain the issue
+      placeholder: Drag and drop images here or paste links...
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 📱 Platform
+      description: Which platform(s) are affected?
+      multiple: true
+      options:
+        - Android
+        - iOS
+        - Web
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+
+  - type: input
+    id: flutter-version
+    attributes:
+      label: 🐦 Flutter Version
+      description: Run `flutter --version` to get this
+      placeholder: "e.g., 3.24.0"
+
+  - type: input
+    id: device
+    attributes:
+      label: 📲 Device Info
+      description: Device model and OS version
+      placeholder: "e.g., iPhone 15 Pro (iOS 17.2) / Pixel 8 (Android 14)"
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 📋 Error Logs
+      description: If there are any error messages, paste them here
+      render: shell
+      placeholder: |
+        Paste relevant error logs here...
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 💡 Additional Context
+      description: Any other information that might be helpful
+      placeholder: Any other relevant information...
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✔️ Checklist
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate
+          required: true
+        - label: I have updated to the latest version and the issue still exists
+          required: false

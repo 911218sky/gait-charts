@@ -1,0 +1,105 @@
+name: ✨ Feature Request
+description: Suggest a new feature or improvement
+title: "[Feature]: "
+labels: ["enhancement", "needs-review"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your suggestion! Great ideas make the product better 🚀
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: 🏷️ Feature Type
+      description: What type of request is this?
+      options:
+        - 🆕 New Feature - Something entirely new
+        - 🔧 Improvement - Enhance existing functionality
+        - 🎨 UI/UX - Interface or experience optimization
+        - ⚡ Performance - Performance improvements
+        - 🔒 Security - Security-related improvements
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 📊 Priority
+      description: How important do you think this feature is?
+      options:
+        - 🟢 Low - Nice to have
+        - 🟡 Medium - Would significantly improve experience
+        - 🔴 High - Really need this feature
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 🤔 Problem Statement
+      description: What problem does this feature solve?
+      placeholder: |
+        Describe the problem or pain point...
+        e.g., Every time I want to [...], I have to [...], which is frustrating.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 💡 Proposed Solution
+      description: How would you like this problem to be solved?
+      placeholder: |
+        Describe your ideal solution...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 Alternatives Considered
+      description: Have you considered any alternative solutions?
+      placeholder: |
+        Describe any alternative approaches you've considered...
+
+  - type: textarea
+    id: mockup
+    attributes:
+      label: 🎨 Mockups / References
+      description: If you have mockups, screenshots, or reference links, please attach them
+      placeholder: Drag and drop images here or paste links...
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 📱 Affected Platforms
+      description: Which platforms would this feature affect?
+      multiple: true
+      options:
+        - All Platforms
+        - Android
+        - iOS
+        - Web
+        - Windows
+        - macOS
+        - Linux
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 📝 Additional Context
+      description: Any other information you'd like to add
+      placeholder: Any other relevant information...
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 🤝 Contribution
+      options:
+        - label: I'm willing to help implement this feature
+          required: false
+        - label: I'm willing to help test this feature
+          required: false

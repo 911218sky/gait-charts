@@ -1,0 +1,74 @@
+name: (reusable) Build - Android APK
+
+on:
+  workflow_call:
+
+jobs:
+  android_apk:
+    name: Android (APK split per ABI)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: 911218sky/flutter-action@v1
+        with:
+          channel: stable
+          cache: true
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle (with cache)
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android licenses
+        run: yes 2>/dev/null | sdkmanager --licenses || true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build APK (flutter build apk)
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 30
+          max_attempts: 3
+          retry_wait_seconds: 60
+          command: flutter build apk --release --split-per-abi --no-tree-shake-icons
+
+      - name: Rename APKs
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          # Extract version from pubspec.yaml (format: 1.0.12)
+          app_version=$(grep '^version:' pubspec.yaml | sed -E 's/^version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
+          
+          echo "Extracted version: ${app_version}"
+          
+          mkdir -p dist
+          cd build/app/outputs/flutter-apk
+          for f in app-*-release.apk; do
+            [ -f "$f" ] || continue
+            abi="$(echo "$f" | sed -E 's/^app-([a-z0-9_-]+)-release\.apk$/\1/')"
+            cp "$f" "../../../../dist/GaitCharts-${abi}-v${app_version}.apk"
+          done
+          if [ -f "app-release.apk" ]; then
+            cp "app-release.apk" "../../../../dist/GaitCharts-v${app_version}.apk"
+          fi
+
+      - name: Upload artifact (android dist)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-android
+          path: dist/GaitCharts*-v*.apk
+          if-no-files-found: error
+
+

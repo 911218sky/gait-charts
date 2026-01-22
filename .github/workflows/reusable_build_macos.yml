@@ -1,0 +1,62 @@
+name: (reusable) Build - macOS
+
+on:
+  workflow_call:
+
+jobs:
+  macos:
+    name: macOS (.app)
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: 911218sky/flutter-action@v1
+        with:
+          channel: stable
+          cache: true
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            macos/Pods
+            ~/Library/Caches/CocoaPods
+          key: pods-${{ runner.os }}-${{ hashFiles('macos/Podfile.lock') }}
+          restore-keys: pods-${{ runner.os }}-
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build macOS (Release)
+        run: flutter build macos --release 
+
+      - name: Package .app
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          # Extract version from pubspec.yaml (format: 1.0.12)
+          app_version=$(grep '^version:' pubspec.yaml | sed -E 's/^version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
+          
+          echo "Extracted version: ${app_version}"
+          
+          mkdir -p dist
+          APP_PATH="$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' -print -quit)"
+          if [ -z "$APP_PATH" ]; then
+            echo "No .app found under build/macos/Build/Products/Release"
+            exit 1
+          fi
+          OUTPUT_FILE="dist/GaitCharts-macOS-v${app_version}.zip"
+          echo "Creating: ${OUTPUT_FILE}"
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$OUTPUT_FILE"
+
+      - name: Upload artifact (macos dist)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-macos
+          path: dist/GaitCharts-macOS-v*.zip
+          if-no-files-found: error
+
+

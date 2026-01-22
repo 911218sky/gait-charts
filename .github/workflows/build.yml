@@ -1,0 +1,147 @@
+name: Build & Release (Web / Windows setup.exe / Android APK / Linux / macOS)
+
+on:
+  workflow_dispatch:
+    inputs:
+      releaseTag:
+        description: 'Release tag name (e.g., v1.0.0). If set, all platforms will be built and released.'
+        required: false
+        default: ''
+      buildWeb:
+        description: 'Build Web (workflow_dispatch only; ignored when releaseTag is set)'
+        type: boolean
+        required: false
+        default: true
+      buildWindows:
+        description: 'Build Windows setup.exe (workflow_dispatch only; ignored when releaseTag is set)'
+        type: boolean
+        required: false
+        default: true
+      buildAndroid:
+        description: 'Build Android APK (workflow_dispatch only; ignored when releaseTag is set)'
+        type: boolean
+        required: false
+        default: true
+      buildLinux:
+        description: 'Build Linux bundle (workflow_dispatch only; ignored when releaseTag is set)'
+        type: boolean
+        required: false
+        default: true
+      buildMacos:
+        description: 'Build macOS .app zip (workflow_dispatch only; ignored when releaseTag is set)'
+        type: boolean
+        required: false
+        default: true
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
+
+permissions:
+  contents: write
+
+jobs:
+  web:
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.releaseTag != '') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.buildWeb == 'true')
+    uses: ./.github/workflows/reusable_build_web.yml
+
+  windows_setup_exe:
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.releaseTag != '') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.buildWindows == 'true')
+    uses: ./.github/workflows/reusable_build_windows_setup_exe.yml
+
+  android_apk:
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.releaseTag != '') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.buildAndroid == 'true')
+    uses: ./.github/workflows/reusable_build_android_apk.yml
+
+  linux:
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.releaseTag != '') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.buildLinux == 'true')
+    uses: ./.github/workflows/reusable_build_linux.yml
+
+  macos:
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.releaseTag != '') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.buildMacos == 'true')
+    uses: ./.github/workflows/reusable_build_macos.yml
+
+  release:
+    name: Publish to GitHub Releases
+    runs-on: ubuntu-latest
+    needs:
+      - web
+      - windows_setup_exe
+      - android_apk
+      - linux
+      - macos
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.releaseTag != '')
+    steps:
+      - name: Download all dist artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release_assets
+
+      - name: Flatten dist files
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          find release_assets -maxdepth 3 -type f -print -exec cp -f {} out/ \;
+          ls -la out
+
+      - name: Determine tag
+        id: tag
+        env:
+          DISPATCH_TAG: ${{ github.event.inputs.releaseTag }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            if [ -z "${DISPATCH_TAG:-}" ]; then
+              echo "Missing releaseTag input for workflow_dispatch"
+              exit 1
+            fi
+            echo "tag=${DISPATCH_TAG}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Delete existing release assets (replace latest)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="${{ steps.tag.outputs.tag }}"
+          echo "Target release tag: ${tag}"
+
+          if gh release view "${tag}" >/dev/null 2>&1; then
+            echo "Release exists. Deleting existing assets..."
+            gh release view "${tag}" --json assets -q '.assets[].name' | while read -r name; do
+              [ -z "${name}" ] && continue
+              echo "Deleting asset: ${name}"
+              gh release delete-asset "${tag}" "${name}" -y || true
+            done
+          else
+            echo "Release does not exist yet. Skip asset deletion."
+          fi
+
+      - name: Create/Update GitHub Release (attach assets)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: Gait Charts ${{ steps.tag.outputs.tag }}
+          generate_release_notes: ${{ github.event_name == 'push' }}
+          files: out/*

@@ -1,0 +1,133 @@
+# Dart/Flutter 分析器設定
+# 用於靜態分析程式碼，檢查錯誤、警告與程式碼風格
+
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  # 排除不需要分析的檔案
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.mocks.dart"
+    - "build/**"
+    - ".dart_tool/**"
+
+  # 將某些問題提升為錯誤，強制修正
+  errors:
+    # 未使用的變數、import、參數視為警告
+    unused_local_variable: warning
+    unused_import: warning
+    unused_element: warning
+    # 缺少 return 視為錯誤
+    missing_return: error
+    # 遺漏的必要參數視為錯誤
+    missing_required_param: error
+    # 型別推斷問題
+    inference_failure_on_function_invocation: ignore
+
+  language:
+    # 啟用嚴格模式，強化型別安全
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+
+linter:
+  rules:
+    # ===== 錯誤預防 =====
+    avoid_print: true                          # 避免使用 print，用 debugPrint 或 logger
+    avoid_empty_else: true                     # 避免空的 else 區塊
+    cancel_subscriptions: true                 # 確保取消 StreamSubscription
+    close_sinks: true                          # 確保關閉 Sink
+    empty_catches: true                        # 避免空的 catch 區塊
+    no_duplicate_case_values: true             # switch 不重複 case 值
+    throw_in_finally: true                     # 避免在 finally 中 throw
+    unnecessary_statements: true               # 移除無效的語句
+    
+    # ===== 程式碼風格 =====
+    prefer_single_quotes: true                 # 統一使用單引號
+    prefer_const_constructors: true            # 優先使用 const 建構子
+    prefer_const_declarations: true            # 優先使用 const 宣告
+    prefer_const_literals_to_create_immutables: true
+    prefer_final_fields: true                  # 優先使用 final 欄位
+    prefer_final_locals: true                  # 優先使用 final 區域變數
+    prefer_final_in_for_each: true             # for-each 中使用 final
+    unnecessary_late: true                     # 移除不必要的 late
+    unnecessary_this: true                     # 移除不必要的 this
+    unnecessary_const: true                    # 移除不必要的 const
+    unnecessary_new: true                      # 移除不必要的 new
+    unnecessary_null_checks: true              # 移除不必要的 null 檢查
+    unnecessary_nullable_for_final_variable_declarations: true
+    
+    # ===== 命名慣例 =====
+    camel_case_types: true                     # 類別使用 PascalCase
+    constant_identifier_names: true            # 常數命名規範
+    file_names: true                           # 檔名使用 snake_case
+    library_names: true                        # 函式庫命名規範
+    non_constant_identifier_names: true        # 變數使用 camelCase
+    
+    # ===== Widget 與 Flutter 專屬 =====
+    avoid_unnecessary_containers: true         # 避免不必要的 Container
+    prefer_const_constructors_in_immutables: true
+    sized_box_for_whitespace: true             # 用 SizedBox 取代空白 Container
+    use_key_in_widget_constructors: true       # Widget 建構子要有 key
+    sort_child_properties_last: true           # child 參數放最後
+    use_build_context_synchronously: true      # BuildContext 同步使用檢查
+    
+    # ===== 集合與迭代 =====
+    prefer_collection_literals: true           # 優先使用集合字面值
+    prefer_for_elements_to_map_fromIterable: true
+    prefer_if_elements_to_conditional_expressions: true
+    prefer_spread_collections: true            # 優先使用 spread 運算子
+    prefer_iterable_whereType: true            # 使用 whereType 取代 where + cast
+    
+    # ===== 其他最佳實踐 =====
+    always_declare_return_types: true          # 總是宣告回傳型別
+    always_put_required_named_parameters_first: true
+    annotate_overrides: true                   # 標註 @override
+    avoid_function_literals_in_foreach_calls: true
+    avoid_init_to_null: true                   # 避免初始化為 null
+    avoid_null_checks_in_equality_operators: true
+    avoid_renaming_method_parameters: true     # 避免重新命名方法參數
+    avoid_return_types_on_setters: true        # setter 不需要回傳型別
+    avoid_shadowing_type_parameters: true      # 避免遮蔽型別參數
+    avoid_single_cascade_in_expression_statements: true
+    avoid_types_as_parameter_names: true       # 避免用型別當參數名
+    await_only_futures: true                   # 只 await Future
+    curly_braces_in_flow_control_structures: true  # 流程控制使用大括號
+    directives_ordering: true                  # import/export 排序
+    empty_constructor_bodies: true             # 空建構子用 ; 而非 {}
+    exhaustive_cases: true                     # switch 要窮盡所有 case
+    implementation_imports: true               # 避免 import implementation
+    library_prefixes: true                     # 函式庫前綴規範
+    null_closures: true                        # 避免 null closure
+    omit_local_variable_types: true            # 省略可推斷的區域變數型別
+    prefer_adjacent_string_concatenation: true # 相鄰字串連接
+    prefer_conditional_assignment: true        # 使用 ??=
+    prefer_contains: true                      # 使用 contains
+    prefer_function_declarations_over_variables: true
+    prefer_initializing_formals: true          # 優先使用初始化形式參數
+    prefer_inlined_adds: true                  # 優先使用內聯 add
+    prefer_interpolation_to_compose_strings: true  # 優先使用字串插值
+    prefer_is_empty: true                      # 使用 isEmpty
+    prefer_is_not_empty: true                  # 使用 isNotEmpty
+    prefer_is_not_operator: true               # 使用 is! 運算子
+    prefer_null_aware_operators: true          # 使用 null-aware 運算子
+    prefer_typing_uninitialized_variables: true # 未初始化變數要宣告型別
+    provide_deprecation_message: true          # @deprecated 要有訊息
+    recursive_getters: true                    # 避免遞迴 getter
+    slash_for_doc_comments: true               # 文件註解用 ///
+    type_init_formals: true                    # 初始化形式參數型別
+    unawaited_futures: true                    # 提醒未 await 的 Future
+    unnecessary_brace_in_string_interps: true  # 移除不必要的大括號
+    unnecessary_getters_setters: true          # 移除不必要的 getter/setter
+    unnecessary_lambdas: true                  # 移除不必要的 lambda
+    unnecessary_null_aware_assignments: true   # 移除不必要的 null-aware 賦值
+    unnecessary_null_in_if_null_operators: true
+    unnecessary_overrides: true                # 移除不必要的 override
+    unnecessary_parenthesis: true              # 移除不必要的括號
+    unnecessary_string_escapes: true           # 移除不必要的跳脫字元
+    unnecessary_string_interpolations: true    # 移除不必要的字串插值
+    use_full_hex_values_for_flutter_colors: true  # Flutter 顏色用完整 hex
+    use_function_type_syntax_for_parameters: true
+    use_rethrow_when_possible: true            # 使用 rethrow
+    void_checks: true                          # void 檢查

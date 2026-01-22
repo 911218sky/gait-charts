@@ -1,0 +1,43 @@
+name: (reusable) Build - Web
+
+on:
+  workflow_call:
+
+jobs:
+  web:
+    name: Web (release)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: 911218sky/flutter-action@v1
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build web
+        run: flutter build web --release -O4 --no-wasm-dry-run --no-tree-shake-icons --wasm
+
+      - name: Package web
+        run: |
+          # Extract version from pubspec.yaml (format: 1.0.12)
+          app_version=$(grep '^version:' pubspec.yaml | sed -E 's/^version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
+          
+          echo "Extracted version: ${app_version}"
+          
+          mkdir -p dist
+          (cd build/web && zip -r ../../dist/GaitCharts-Web-v${app_version}.zip .)
+
+      - name: Upload artifact (web dist)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-web
+          path: dist/GaitCharts-Web-v*.zip
+          if-no-files-found: error
+
+

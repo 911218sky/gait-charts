@@ -1,0 +1,72 @@
+name: 📚 Documentation
+description: Report documentation errors or suggest improvements
+title: "[Docs]: "
+labels: ["documentation"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Good documentation benefits everyone! Thanks for helping improve it 📖
+
+  - type: dropdown
+    id: doc-type
+    attributes:
+      label: 📄 Documentation Type
+      description: What type of documentation is this about?
+      options:
+        - README
+        - API Documentation
+        - Code Comments
+        - Tutorials / Guides
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: 🔍 Issue Type
+      description: What type of issue is this?
+      options:
+        - ❌ Error - Content is incorrect
+        - 🕳️ Missing - Important information is missing
+        - 😕 Unclear - Description is not clear enough
+        - 📅 Outdated - Content is outdated
+        - ✨ Suggestion - New content suggestion
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: 📍 Location
+      description: Location or link to the documentation
+      placeholder: "e.g., README.md line 50 / docs/api.md"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: 📝 Current Content
+      description: The current documentation content (if applicable)
+      placeholder: Paste the current content here...
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: ✏️ Suggested Change
+      description: How would you suggest changing it?
+      placeholder: Describe your suggested changes...
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 🤝 Contribution
+      options:
+        - label: I'm willing to submit a PR to fix this
+          required: false
