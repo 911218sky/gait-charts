@@ -1,0 +1,202 @@
+---
+inclusion: always
+---
+
+# Git Commit Conventions
+
+> Standardized commit message format for consistent and readable git history.
+
+## Commit Message Format
+
+```
+<emoji> <type>(<scope>): <subject>
+
+<body>
+```
+
+## Commit Types & Emojis
+
+| Emoji | Type | Description |
+|-------|------|-------------|
+| ✨ | `feat` | New feature |
+| 🐛 | `fix` | Bug fix |
+| ♻️ | `refactor` | Code refactoring (no feature/fix) |
+| 💄 | `style` | UI/styling changes |
+| 📝 | `docs` | Documentation only |
+| ✅ | `test` | Adding or updating tests |
+| 👷 | `ci` | CI/CD configuration |
+| 🔧 | `chore` | Maintenance tasks, configs |
+| ⚡ | `perf` | Performance improvements |
+| 🔀 | `merge` | Merge commits |
+| 🗑️ | `remove` | Removing code/files |
+| 🚀 | `release` | Release/deployment |
+
+## Scope Examples
+
+| Scope | Usage |
+|-------|-------|
+| `dashboard` | Dashboard feature changes |
+| `auth` | Authentication related |
+| `users` | User management |
+| `cohort-benchmark` | Cohort benchmark feature |
+| `video-playback` | Video playback feature |
+| `widgets` | Shared widget components |
+| `domain` | Domain models/logic |
+| `core` | Core utilities |
+| `ci` | CI/CD workflows |
+| `ui` | General UI changes |
+
+## Subject Rules
+
+- Use imperative mood: "Add feature" not "Added feature"
+- No period at the end
+- Max 50 characters
+- Capitalize first letter
+
+## Body Rules (Optional)
+
+- Wrap at 72 characters
+- Explain what and why, not how
+- Use bullet points for multiple changes
+
+## Examples
+
+### Simple commit
+```
+✨ feat(dashboard): Add session filter dropdown
+```
+
+### With scope and body
+```
+♻️ refactor(widgets): Extract large widget files into modular components
+
+- Split user_profile.dart into separate user models
+- Extract session_overview_chart into sub-components
+- Add shared layout components
+```
+
+### Merge commit
+```
+🔀 merge(develop): Widget modularization and dark theme unification
+
+Summary of changes since v1.3.0:
+- ♻️ Modularize domain models and extract large widget components
+- 💄 Unify dark theme styling and improve core UI components
+- ✨ Sync session/cohort selection state across pages
+```
+
+### Bug fix
+```
+🐛 fix(video-playback): Fix video player state management
+```
+
+### CI changes
+```
+👷 ci: Optimize GitHub Actions workflows
+
+- Add Pub cache to Linux/macOS/Web workflows
+- Remove duplicate Pub cache config
+```
+
+## Branch Strategy
+
+| Branch | Purpose |
+|--------|---------|
+| `main` | Release-only branch (merge target only) |
+| `develop` | Daily development and integration |
+
+## Merge Strategy
+
+1. Always commit to `develop` during development
+2. `main` only receives merges from `develop`
+3. Squash multiple related commits into **one** before merging to `main`
+4. Use `--no-ff` merge to preserve branch history
+5. Tag releases on `main` with semantic versioning (e.g., `v1.3.0`)
+
+## Version Tagging
+
+Follow [Semantic Versioning](https://semver.org/) (SemVer) for release tags.
+
+### Version Format
+
+```
+vMAJOR.MINOR.PATCH
+```
+
+| Version | When to Increment |
+|---------|-------------------|
+| **MAJOR** (v2.0.0) | Breaking changes, incompatible API changes |
+| **MINOR** (v1.1.0) | New features, backward-compatible |
+| **PATCH** (v1.0.1) | Bug fixes, backward-compatible |
+
+### Tag Format
+
+```bash
+git tag -a v1.0.0 -m "🚀 release: Version 1.0.0 - Description"
+```
+
+### Tag Message Format
+
+```
+🚀 release: Version X.Y.Z - Brief description
+
+Major changes:
+- Feature 1
+- Feature 2
+- Bug fix 3
+```
+
+### Examples
+
+**Major Release (Breaking Changes)**
+```bash
+git tag -a v2.0.0 -m "🚀 release: Version 2.0.0 - Major architecture refactor
+
+Breaking changes:
+- Redesigned API endpoints
+- Updated authentication flow
+- Removed deprecated features"
+```
+
+**Minor Release (New Features)**
+```bash
+git tag -a v1.1.0 -m "🚀 release: Version 1.1.0 - Add cohort benchmark feature
+
+New features:
+- Cohort benchmark analysis
+- User cohort management
+- Trajectory heatmap visualization"
+```
+
+**Patch Release (Bug Fixes)**
+```bash
+git tag -a v1.0.1 -m "🚀 release: Version 1.0.1 - Bug fixes
+
+Fixes:
+- Fix video player state management
+- Fix session filter dropdown
+- Fix CI/CD workflow issues"
+```
+
+### Release Workflow
+
+1. Merge all changes to `main` from `develop`
+2. Create annotated tag on `main` branch
+3. Push tag to remote: `git push origin v1.0.0`
+4. GitHub Actions will automatically build and deploy
+
+## Pre-Commit Checklist
+
+- [ ] Commit message follows format
+- [ ] Subject is clear and concise
+- [ ] Scope accurately reflects changed area
+- [ ] Body explains significant changes (if needed)
+- [ ] All commits in English
+
+## Pre-Release Checklist
+
+- [ ] All tests passing
+- [ ] Version number follows SemVer
+- [ ] Tag message describes changes clearly
+- [ ] CHANGELOG updated (if applicable)
+- [ ] Documentation updated
