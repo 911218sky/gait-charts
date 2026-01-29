@@ -1,263 +1,217 @@
 <#
 .SYNOPSIS
-  Install Flutter SDK and set environment variables (PowerShell)
+Fast Flutter SDK installation with progress bar
 
 .DESCRIPTION
-  - Download latest stable Flutter SDK
-  - Extract to specified directory (default C:\flutter)
-  - Add Flutter bin to user PATH
-  - Run flutter doctor to verify installation
+Downloads official Flutter SDK package with Dart SDK included
 
 .EXAMPLE
-  powershell -NoProfile -ExecutionPolicy Bypass -File scripts\env\install_flutter.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\env\install_flutter.ps1
 
 .EXAMPLE
-  powershell -NoProfile -ExecutionPolicy Bypass -File scripts\env\install_flutter.ps1 -InstallPath "D:\dev\flutter"
-
-.EXAMPLE
-  powershell -NoProfile -ExecutionPolicy Bypass -File scripts\env\install_flutter.ps1 -SkipDoctor
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\env\install_flutter.ps1 -InstallPath "D:\dev\flutter"
 #>
 
 [CmdletBinding()]
 param(
-  [string]$InstallPath = "C:\flutter",
-  [switch]$SkipDoctor
+    [string]$InstallPath = "C:\flutter",
+    [switch]$SkipDoctor
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 function Write-Section([string]$Title) {
-  Write-Host ("=" * 60)
-  Write-Host " [Flutter Install] $Title"
-  Write-Host ("=" * 60)
-  Write-Host ""
-}
-
-function Get-LatestFlutterUrl {
-  $releasesUrl = "https://storage.googleapis.com/flutter_infra_release/releases/releases_windows.json"
-  
-  Write-Host "Fetching Flutter version info..."
-  $releases = Invoke-RestMethod -Uri $releasesUrl -UseBasicParsing
-  
-  $stableHash = $releases.current_release.stable
-  $stableRelease = $releases.releases | Where-Object { $_.hash -eq $stableHash } | Select-Object -First 1
-  
-  if (-not $stableRelease) {
-    throw "[ERROR] Cannot get latest stable Flutter info"
-  }
-  
-  $version = $stableRelease.version
-  $downloadUrl = $releases.base_url + "/" + $stableRelease.archive
-  
-  return @{
-    Version = $version
-    Url = $downloadUrl
-    FileName = [System.IO.Path]::GetFileName($stableRelease.archive)
-  }
-}
-
-function Add-ToUserPath {
-  param([string]$NewPath)
-  
-  $currentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
-  
-  # 檢查路徑是否已存在（忽略大小寫和結尾斜線）
-  $normalizedNewPath = $NewPath.TrimEnd('\', '/')
-  $pathExists = $currentPath -split ";" | Where-Object { 
-    $_.TrimEnd('\', '/') -ieq $normalizedNewPath 
-  }
-  
-  if ($pathExists) {
-    Write-Host "PATH already contains: $NewPath (skip)"
-    return $false
-  }
-  
-  # 設定用戶環境變數
-  $newPathValue = if ($currentPath) { "$currentPath;$NewPath" } else { $NewPath }
-  [Environment]::SetEnvironmentVariable("PATH", $newPathValue, "User")
-  
-  # 立即更新當前會話的環境變數
-  $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
-  $machinePath = [Environment]::GetEnvironmentVariable("PATH", "Machine")
-  $env:PATH = "$userPath;$machinePath"
-  
-  Write-Host "Added to PATH: $NewPath"
-  Write-Host "Current session PATH updated"
-  return $true
-}
-
-function Test-EnvironmentSetup {
-  param([string]$FlutterBin)
-  
-  Write-Host "Verifying environment setup..."
-  
-  # 檢查用戶 PATH
-  $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
-  $hasFlutterInUserPath = $userPath -split ";" | Where-Object { $_.TrimEnd('\', '/') -ieq $FlutterBin.TrimEnd('\', '/') }
-  
-  Write-Host "User PATH contains Flutter: $(if ($hasFlutterInUserPath) { '✓ Yes' } else { '✗ No' })"
-  
-  # 檢查當前會話 PATH
-  $hasFlutterInCurrentPath = $env:PATH -split ";" | Where-Object { $_.TrimEnd('\', '/') -ieq $FlutterBin.TrimEnd('\', '/') }
-  Write-Host "Current session PATH contains Flutter: $(if ($hasFlutterInCurrentPath) { '✓ Yes' } else { '✗ No' })"
-  
-  # 檢查 Flutter 可執行檔
-  $flutterExe = Join-Path $FlutterBin "flutter.bat"
-  $flutterExists = Test-Path $flutterExe
-  Write-Host "Flutter executable exists: $(if ($flutterExists) { '✓ Yes' } else { '✗ No' }) ($flutterExe)"
-  
-  return $hasFlutterInUserPath -and $hasFlutterInCurrentPath -and $flutterExists
+    Write-Host "`n$("=" * 60)" -ForegroundColor Cyan
+    Write-Host " $Title" -ForegroundColor Cyan
+    Write-Host "$("=" * 60)`n" -ForegroundColor Cyan
 }
 
 # ============================================================
 # Main
 # ============================================================
 
-Write-Section "Check existing installation"
+Write-Host "`nFlutter Quick Installation Script" -ForegroundColor Cyan
+Write-Host "==================================`n" -ForegroundColor Cyan
 
-$existingFlutter = Get-Command flutter.bat -ErrorAction SilentlyContinue
-if ($existingFlutter) {
-  Write-Host "Detected existing Flutter: $($existingFlutter.Source)"
-  $response = Read-Host "Continue installing new version? (y/N)"
-  if ($response -notmatch "^[yY]") {
-    Write-Host "Installation cancelled."
-    exit 0
-  }
+# Check existing installation
+$existing = Get-Command flutter -ErrorAction SilentlyContinue
+if ($existing) {
+    Write-Host "Detected existing Flutter: $($existing.Source)" -ForegroundColor Green
+    $response = Read-Host "Continue installation? (y/N)"
+    if ($response -notmatch "^[yY]") {
+        exit 0
+    }
 }
 
-Write-Section "Get Flutter version"
+Write-Section "Downloading Flutter SDK"
 
-$flutterInfo = Get-LatestFlutterUrl
-Write-Host "Latest stable: $($flutterInfo.Version)"
-Write-Host "Download URL: $($flutterInfo.Url)"
-Write-Host ""
+# Get latest version info
+Write-Host "Fetching latest version info..." -ForegroundColor Yellow
+$releases = Invoke-RestMethod -Uri "https://storage.googleapis.com/flutter_infra_release/releases/releases_windows.json"
+$stable = $releases.releases | Where-Object { $_.hash -eq $releases.current_release.stable } | Select-Object -First 1
+$version = $stable.version
+$url = $releases.base_url + "/" + $stable.archive
 
-Write-Section "Download Flutter SDK"
+Write-Host "Latest stable: $version" -ForegroundColor Green
+Write-Host "Package size: ~1GB (includes Dart SDK)" -ForegroundColor Gray
 
-$tempDir = Join-Path $env:TEMP "flutter_install"
-$zipPath = Join-Path $tempDir $flutterInfo.FileName
+# Download
+$zipPath = Join-Path $env:TEMP "flutter_sdk.zip"
 
-if (-not (Test-Path $tempDir)) {
-  New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-}
-
+# Check if already downloaded
 if (Test-Path $zipPath) {
-  Write-Host "Using cached file: $zipPath"
-} else {
-  Write-Host "Downloading (this may take a few minutes)..."
-  Write-Host "Target: $zipPath"
-  
-  $ProgressPreference = 'SilentlyContinue'
-  Invoke-WebRequest -Uri $flutterInfo.Url -OutFile $zipPath -UseBasicParsing
-  $ProgressPreference = 'Continue'
-  
-  Write-Host "Download complete!"
+    $response = Read-Host "`nFound cached download. Use it? (Y/n)"
+    if ($response -match "^[nN]") {
+        Remove-Item $zipPath -Force
+    }
 }
-Write-Host ""
 
-Write-Section "Extract Flutter SDK"
+if (-not (Test-Path $zipPath)) {
+    Write-Host "`nDownloading Flutter SDK..." -ForegroundColor Yellow
+    Write-Host "Source: $url" -ForegroundColor Gray
+    Write-Host "This will take a few minutes...`n" -ForegroundColor Gray
+    
+    # Use BITS for download (with progress bar)
+    try {
+        Import-Module BitsTransfer
+        Start-BitsTransfer -Source $url -Destination $zipPath -Description "Downloading Flutter SDK" -DisplayName "Flutter SDK"
+        Write-Host "`nDownload complete" -ForegroundColor Green
+    } catch {
+        # Fallback to Invoke-WebRequest with progress
+        Write-Host "Using fallback download method..." -ForegroundColor Yellow
+        
+        $webClient = New-Object System.Net.WebClient
+        $webClient.DownloadFile($url, $zipPath)
+        
+        Write-Host "Download complete" -ForegroundColor Green
+    }
+} else {
+    Write-Host "Using cached download" -ForegroundColor Green
+}
+
+# Extract
+Write-Section "Extracting Flutter SDK"
 
 $parentDir = Split-Path $InstallPath -Parent
 if (-not (Test-Path $parentDir)) {
-  New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
+    New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
 }
 
 if (Test-Path $InstallPath) {
-  Write-Host "Target directory exists: $InstallPath"
-  $response = Read-Host "Delete and reinstall? (y/N)"
-  if ($response -match "^[yY]") {
-    Write-Host "Removing old version..."
-    Remove-Item $InstallPath -Recurse -Force
-  } else {
-    Write-Host "Installation cancelled."
-    exit 0
-  }
+    $response = Read-Host "Target directory exists, delete and reinstall? (y/N)"
+    if ($response -match "^[yY]") {
+        Write-Host "Removing old installation..." -ForegroundColor Yellow
+        Remove-Item $InstallPath -Recurse -Force
+    } else {
+        Write-Host "Installation cancelled" -ForegroundColor Yellow
+        exit 0
+    }
 }
 
-Write-Host "Extracting to: $parentDir"
-Write-Host "This may take a few minutes..."
+Write-Host "Extracting to: $InstallPath" -ForegroundColor Yellow
 
-Expand-Archive -Path $zipPath -DestinationPath $parentDir -Force
+# Try 7z first (fastest)
+$7z = Get-Command 7z -ErrorAction SilentlyContinue
+if (-not $7z) {
+    # Try to install 7z with winget
+    $winget = Get-Command winget -ErrorAction SilentlyContinue
+    if ($winget) {
+        Write-Host "7-Zip not found, installing with winget..." -ForegroundColor Yellow
+        winget install --id 7zip.7zip --exact --silent --accept-source-agreements --accept-package-agreements 2>$null
+        
+        # Refresh PATH and check common install locations
+        $env:PATH = [Environment]::GetEnvironmentVariable("PATH", "User") + ";" + [Environment]::GetEnvironmentVariable("PATH", "Machine")
+        
+        # Check common 7z locations
+        $7zPaths = @(
+            "C:\Program Files\7-Zip\7z.exe",
+            "C:\Program Files (x86)\7-Zip\7z.exe",
+            "$env:ProgramFiles\7-Zip\7z.exe",
+            "${env:ProgramFiles(x86)}\7-Zip\7z.exe"
+        )
+        
+        foreach ($path in $7zPaths) {
+            if (Test-Path $path) {
+                $7z = $path
+                Write-Host "Found 7-Zip at: $path" -ForegroundColor Green
+                break
+            }
+        }
+        
+        if (-not $7z) {
+            $7z = Get-Command 7z -ErrorAction SilentlyContinue
+        }
+    }
+}
 
-Write-Host "Extraction complete!"
-Write-Host ""
+if ($7z) {
+    Write-Host "Using 7-Zip for fast extraction (30-60 seconds)...`n" -ForegroundColor Green
+    $7zPath = if ($7z -is [string]) { $7z } else { $7z.Source }
+    & $7zPath x $zipPath -o"$parentDir" -y | Out-Null
+    Write-Host "Extraction complete" -ForegroundColor Green
+} else {
+    # Fallback to .NET
+    Write-Host "Using built-in extraction (2-3 minutes)...`n" -ForegroundColor Gray
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    try {
+        [System.IO.Compression.ZipFile]::ExtractToDirectory($zipPath, $parentDir, $true)
+        Write-Host "Extraction complete" -ForegroundColor Green
+    } catch {
+        # Final fallback to Expand-Archive
+        Write-Host "Using fallback extraction method..." -ForegroundColor Yellow
+        Expand-Archive -Path $zipPath -DestinationPath $parentDir -Force
+        Write-Host "Extraction complete" -ForegroundColor Green
+    }
+}
 
-Write-Section "Set environment variables"
+# Setup PATH
+Write-Section "Setting up environment variables"
 
 $flutterBin = Join-Path $InstallPath "bin"
+$currentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
 
-if (-not (Test-Path $flutterBin)) {
-  throw "[ERROR] Flutter bin directory not found: $flutterBin"
-}
-
-$pathAdded = Add-ToUserPath -NewPath $flutterBin
-
-# 驗證環境設定
-Write-Host ""
-$envSetupOk = Test-EnvironmentSetup -FlutterBin $flutterBin
-
-if ($pathAdded) {
-  Write-Host ""
-  Write-Host "[IMPORTANT] PATH updated successfully!"
-  Write-Host "            Current session: Environment updated"
-  Write-Host "            New terminals: Will automatically have Flutter in PATH"
-  Write-Host ""
-  Write-Host "If Flutter commands don't work in current terminal, run:"
-  Write-Host '  $env:PATH = [Environment]::GetEnvironmentVariable("PATH", "User") + ";" + [Environment]::GetEnvironmentVariable("PATH", "Machine")'
+if ($currentPath -notlike "*$flutterBin*") {
+    $newPath = if ($currentPath) { "$currentPath;$flutterBin" } else { $flutterBin }
+    [Environment]::SetEnvironmentVariable("PATH", $newPath, "User")
+    $env:PATH = [Environment]::GetEnvironmentVariable("PATH", "User") + ";" + [Environment]::GetEnvironmentVariable("PATH", "Machine")
+    Write-Host "PATH updated" -ForegroundColor Green
 } else {
-  Write-Host "PATH was already configured correctly."
+    Write-Host "PATH already contains Flutter" -ForegroundColor Green
 }
 
-if (-not $envSetupOk) {
-  Write-Host ""
-  Write-Host "[WARNING] Environment setup verification failed. Manual check may be needed."
-}
-Write-Host ""
-
-Write-Section "Verify installation"
+# Verify
+Write-Section "Verifying installation"
 
 $flutterExe = Join-Path $flutterBin "flutter.bat"
+Write-Host "Testing Flutter installation...`n" -ForegroundColor Yellow
 
-Write-Host "Flutter path: $flutterExe"
-Write-Host "Testing Flutter command..."
-
-# 測試 Flutter 命令是否可用
 try {
-  $flutterVersion = & $flutterExe --version 2>&1
-  Write-Host "✓ Flutter command works!"
-  Write-Host $flutterVersion
+    & $flutterExe --version
+    Write-Host "`nFlutter is ready!" -ForegroundColor Green
 } catch {
-  Write-Host "✗ Flutter command failed. Trying to fix PATH..."
-  
-  # 強制重新載入環境變數
-  $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
-  $machinePath = [Environment]::GetEnvironmentVariable("PATH", "Machine")
-  $env:PATH = "$userPath;$machinePath"
-  
-  try {
-    $flutterVersion = & $flutterExe --version 2>&1
-    Write-Host "✓ Flutter command works after PATH reload!"
-    Write-Host $flutterVersion
-  } catch {
-    Write-Host "✗ Flutter command still not working. Manual intervention may be needed."
-    Write-Host "Try restarting your terminal or IDE."
-  }
+    Write-Host "Warning: Flutter command not available yet, please restart terminal" -ForegroundColor Yellow
 }
 
+# Ask about cleanup
+$response = Read-Host "`nDelete downloaded zip file to save space? (Y/n)"
+if ($response -notmatch "^[nN]") {
+    Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
+    Write-Host "Cleaned up temporary files" -ForegroundColor Green
+}
+
+# Run flutter doctor
 if (-not $SkipDoctor) {
-  Write-Host ""
-  Write-Section "Run Flutter Doctor"
-  & $flutterExe doctor
+    Write-Section "Running Flutter Doctor"
+    flutter doctor
 }
 
-Write-Host ""
-Write-Section "Installation complete"
-
-Write-Host "Flutter $($flutterInfo.Version) installed to: $InstallPath"
-Write-Host ""
-Write-Host "Next steps:"
-Write-Host "  1. Restart terminal (for PATH to take effect)"
-Write-Host "  2. Run 'flutter doctor' to check other dependencies"
-Write-Host "  3. Install Android Studio for Android development"
+Write-Section "Installation Complete"
+Write-Host "Flutter $version installed to: $InstallPath" -ForegroundColor Green
+Write-Host "`nNext steps:" -ForegroundColor Yellow
+Write-Host "  1. Restart terminal (for PATH to take effect)" -ForegroundColor White
+Write-Host "  2. Run 'flutter doctor' to check dependencies" -ForegroundColor White
+Write-Host "  3. Install Android Studio (for Android development)" -ForegroundColor White
+Write-Host "`nTo update Flutter later, run:" -ForegroundColor Cyan
+Write-Host "  flutter upgrade" -ForegroundColor White
 Write-Host ""
