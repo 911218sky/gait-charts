@@ -62,18 +62,52 @@ function Add-ToUserPath {
   
   $currentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
   
-  if ($currentPath -split ";" | Where-Object { $_ -ieq $NewPath }) {
+  # 檢查路徑是否已存在（忽略大小寫和結尾斜線）
+  $normalizedNewPath = $NewPath.TrimEnd('\', '/')
+  $pathExists = $currentPath -split ";" | Where-Object { 
+    $_.TrimEnd('\', '/') -ieq $normalizedNewPath 
+  }
+  
+  if ($pathExists) {
     Write-Host "PATH already contains: $NewPath (skip)"
     return $false
   }
   
+  # 設定用戶環境變數
   $newPathValue = if ($currentPath) { "$currentPath;$NewPath" } else { $NewPath }
   [Environment]::SetEnvironmentVariable("PATH", $newPathValue, "User")
   
-  $env:PATH = "$env:PATH;$NewPath"
+  # 立即更新當前會話的環境變數
+  $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+  $machinePath = [Environment]::GetEnvironmentVariable("PATH", "Machine")
+  $env:PATH = "$userPath;$machinePath"
   
   Write-Host "Added to PATH: $NewPath"
+  Write-Host "Current session PATH updated"
   return $true
+}
+
+function Test-EnvironmentSetup {
+  param([string]$FlutterBin)
+  
+  Write-Host "Verifying environment setup..."
+  
+  # 檢查用戶 PATH
+  $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+  $hasFlutterInUserPath = $userPath -split ";" | Where-Object { $_.TrimEnd('\', '/') -ieq $FlutterBin.TrimEnd('\', '/') }
+  
+  Write-Host "User PATH contains Flutter: $(if ($hasFlutterInUserPath) { '✓ Yes' } else { '✗ No' })"
+  
+  # 檢查當前會話 PATH
+  $hasFlutterInCurrentPath = $env:PATH -split ";" | Where-Object { $_.TrimEnd('\', '/') -ieq $FlutterBin.TrimEnd('\', '/') }
+  Write-Host "Current session PATH contains Flutter: $(if ($hasFlutterInCurrentPath) { '✓ Yes' } else { '✗ No' })"
+  
+  # 檢查 Flutter 可執行檔
+  $flutterExe = Join-Path $FlutterBin "flutter.bat"
+  $flutterExists = Test-Path $flutterExe
+  Write-Host "Flutter executable exists: $(if ($flutterExists) { '✓ Yes' } else { '✗ No' }) ($flutterExe)"
+  
+  return $hasFlutterInUserPath -and $hasFlutterInCurrentPath -and $flutterExists
 }
 
 # ============================================================
@@ -159,11 +193,25 @@ if (-not (Test-Path $flutterBin)) {
 
 $pathAdded = Add-ToUserPath -NewPath $flutterBin
 
+# 驗證環境設定
+Write-Host ""
+$envSetupOk = Test-EnvironmentSetup -FlutterBin $flutterBin
+
 if ($pathAdded) {
   Write-Host ""
-  Write-Host "[IMPORTANT] PATH updated. Please restart terminal for changes to take effect."
-  Write-Host "            Or run this command to reload:"
-  Write-Host '            $env:PATH = [Environment]::GetEnvironmentVariable("PATH", "User") + ";" + [Environment]::GetEnvironmentVariable("PATH", "Machine")'
+  Write-Host "[IMPORTANT] PATH updated successfully!"
+  Write-Host "            Current session: Environment updated"
+  Write-Host "            New terminals: Will automatically have Flutter in PATH"
+  Write-Host ""
+  Write-Host "If Flutter commands don't work in current terminal, run:"
+  Write-Host '  $env:PATH = [Environment]::GetEnvironmentVariable("PATH", "User") + ";" + [Environment]::GetEnvironmentVariable("PATH", "Machine")'
+} else {
+  Write-Host "PATH was already configured correctly."
+}
+
+if (-not $envSetupOk) {
+  Write-Host ""
+  Write-Host "[WARNING] Environment setup verification failed. Manual check may be needed."
 }
 Write-Host ""
 
@@ -172,9 +220,30 @@ Write-Section "Verify installation"
 $flutterExe = Join-Path $flutterBin "flutter.bat"
 
 Write-Host "Flutter path: $flutterExe"
-Write-Host ""
+Write-Host "Testing Flutter command..."
 
-& $flutterExe --version
+# 測試 Flutter 命令是否可用
+try {
+  $flutterVersion = & $flutterExe --version 2>&1
+  Write-Host "✓ Flutter command works!"
+  Write-Host $flutterVersion
+} catch {
+  Write-Host "✗ Flutter command failed. Trying to fix PATH..."
+  
+  # 強制重新載入環境變數
+  $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+  $machinePath = [Environment]::GetEnvironmentVariable("PATH", "Machine")
+  $env:PATH = "$userPath;$machinePath"
+  
+  try {
+    $flutterVersion = & $flutterExe --version 2>&1
+    Write-Host "✓ Flutter command works after PATH reload!"
+    Write-Host $flutterVersion
+  } catch {
+    Write-Host "✗ Flutter command still not working. Manual intervention may be needed."
+    Write-Host "Try restarting your terminal or IDE."
+  }
+}
 
 if (-not $SkipDoctor) {
   Write-Host ""
